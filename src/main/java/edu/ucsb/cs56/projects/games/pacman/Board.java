@@ -29,7 +29,7 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
  * @author Kekoa Sato
  * @version CS56 F16
  */
-public class Board implements Runnable, EventTrackable{
+public class Board implements Runnable, EventTrackable {
 	/**
 	 * 
 	 */
@@ -43,11 +43,10 @@ public class Board implements Runnable, EventTrackable{
 	private Random random = null;
 	private int gameID = 0;
 	private int gameStep = 0;
-	
+
 	private PrintStream characterStateOut;
 	private PrintStream eventOut;
 	private PrintStream gridOut;
-
 
 	public static int score;
 	private Grid grid;
@@ -65,10 +64,8 @@ public class Board implements Runnable, EventTrackable{
 	private int loopDelay;
 
 	private Audio beginningAudio;
-	private boolean oneTime;
 	public BoardRenderer bg = null;
 	private DataInterface dataInterface;
-
 
 	/**
 	 * Constructor for Board object
@@ -76,13 +73,13 @@ public class Board implements Runnable, EventTrackable{
 	public Board() {
 
 		random = new Random();
-		
+
 		dataInterface = new DataInterface();
 
 		openOutputs();
 
 		grid = new Grid();
-		
+
 		gt = GameType.INTRO;
 		grid.levelInit(0);
 
@@ -109,11 +106,7 @@ public class Board implements Runnable, EventTrackable{
 		this.loopDelay = loopDelay;
 	}
 
-	public void setOneTime(boolean oneTime) {
-		this.oneTime = oneTime;
-	}
-	
-	public DataInterface getDataInterface(){
+	public DataInterface getDataInterface() {
 		return dataInterface;
 	}
 
@@ -208,17 +201,11 @@ public class Board implements Runnable, EventTrackable{
 	public void gameOver() {
 
 		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this));
-		if (oneTime) {
-			System.exit(0);
-		}
-		bg.drawGameOver(gt, score);
-		if (!oneTime) {
 
-			gt = GameType.INTRO;
-		} else {
-			gameInit();
-			gt = GameType.SINGLEPLAYER;
-		}
+		bg.drawGameOver(gt, score);
+
+		gt = GameType.INTRO;
+
 		numBoardsCleared = 0;
 		grid.levelInit(0);
 	}
@@ -233,7 +220,8 @@ public class Board implements Runnable, EventTrackable{
 		for (Character pacman : pacmen) {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {
-					dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this));;
+					dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this));
+					;
 					pacman.death();
 				}
 
@@ -466,7 +454,7 @@ public class Board implements Runnable, EventTrackable{
 	@Override
 	public int getGameID() {
 		return gameID;
-		
+
 	}
 
 	@Override

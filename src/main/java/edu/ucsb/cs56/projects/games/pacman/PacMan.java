@@ -28,11 +28,10 @@ public class PacMan {
 	 * 
 	 */
 
-	public void runIt(String leaderBoard, int loopDelay, boolean headLess, boolean oneTime, boolean autoPlay) throws InterruptedException {
+	public void runIt(String leaderBoard, int loopDelay, boolean headLess,  boolean autoPlay) throws InterruptedException {
 		
 		Board board = new Board();
 		board.setLoopDelay(loopDelay);		
-		board.setOneTime(oneTime);
 
 		if (!headLess) {
 			BoardRenderer bg = new BoardRenderer(board, loopDelay);
@@ -86,7 +85,6 @@ public class PacMan {
 		int loopDelay = 40;
 		String leaderBoard = "";
 		boolean headLess = false;
-		boolean oneTime = false;
 		boolean autoPlay = false;
 
 		while (argi.hasNext()) {
@@ -101,9 +99,6 @@ public class PacMan {
 			case "-headLess":
 				headLess = true;
 				break;
-			case "-oneTime":
-				oneTime = true;
-				break;
 			case "-autoPlay":
 				autoPlay = true;
 				break;
@@ -115,7 +110,7 @@ public class PacMan {
 		}
 		PacMan pacman = new PacMan();
 		try {
-			pacman.runIt(leaderBoard, loopDelay, headLess, oneTime, autoPlay);
+			pacman.runIt(leaderBoard, loopDelay, headLess, autoPlay);
 		} catch (InterruptedException e) {
 	
 			e.printStackTrace();
