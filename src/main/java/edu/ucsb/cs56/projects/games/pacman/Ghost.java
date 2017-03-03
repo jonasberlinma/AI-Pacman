@@ -177,7 +177,9 @@ public class Ghost extends Character {
 
 	@Override
 	public void keyReleased(int key) {
-		move(this.grid);
+		// Not sure why this call was needed so I commented it out
+		// It doesn't seem to have affected the game
+		//move(this.grid);
 		if (playerNum == GHOST1) {
 			switch (key) {
 				case KeyEvent.VK_A:
@@ -223,7 +225,7 @@ public class Ghost extends Character {
 	 * @param grid The Grid to be used for collision
 	 */
 	@Override
-	public void move(Grid grid) {
+	public void move(Grid grid, Board board) {
 		short ch;
 		if(edible) {
 			edibleTimer--;	

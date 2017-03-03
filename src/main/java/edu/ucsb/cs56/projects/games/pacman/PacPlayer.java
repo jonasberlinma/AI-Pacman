@@ -107,7 +107,7 @@ public class PacPlayer extends Character {
 	 * @param grid
 	 *            The Grid to be used for collision
 	 */
-	public void move(Grid grid) {
+	public void move(Grid grid, Board board) {
 		if (deathTimer > 0)
 			deathTimer--;
 		short ch;
@@ -131,7 +131,7 @@ public class PacPlayer extends Character {
 			// if pellet, eat and increase score
 			if ((ch & 16) != 0) {
 				// Toggles pellet bit
-				dataInterface.setData(new DataEvent(DataEventType.EAT_PELLET));
+				dataInterface.setData(new DataEvent(DataEventType.EAT_PELLET, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 16);
 				playAudio(0);
 				Board.score++;
@@ -140,14 +140,14 @@ public class PacPlayer extends Character {
 			// if fruit, eat and increase score
 			else if ((ch & 32) != 0) {
 				// Toggles fruit bit
-				dataInterface.setData(new DataEvent(DataEventType.EAT_FRUIT));
+				dataInterface.setData(new DataEvent(DataEventType.EAT_FRUIT, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
 				Board.score += 10;
 				playAudio(1);
 				speed = 3;
 			} else if ((ch & 64) != 0) {
 				// Toggles pill bit
-				dataInterface.setData(new DataEvent(DataEventType.EAT_PILL));
+				dataInterface.setData(new DataEvent(DataEventType.EAT_PILL, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 64);
 				playAudio(1);
 				Board.score += 5;

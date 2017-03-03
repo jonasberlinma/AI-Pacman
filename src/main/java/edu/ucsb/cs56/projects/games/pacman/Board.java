@@ -29,7 +29,7 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
  * @author Kekoa Sato
  * @version CS56 F16
  */
-public class Board implements Runnable {
+public class Board implements Runnable, EventTrackable{
 	/**
 	 * 
 	 */
@@ -101,7 +101,7 @@ public class Board implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		dataInterface.setData(new DataEvent(DataEventType.INTRO));
+		dataInterface.setData(new DataEvent(DataEventType.INTRO, this));
 
 	}
 
@@ -138,7 +138,7 @@ public class Board implements Runnable {
 				gameOver();
 			} else {
 				if (pacman.alive) {
-					pacman.move(grid);
+					pacman.move(grid, this);
 					if (grid.getPillNum() != numPills) {
 						for (Ghost g : ghosts) {
 							g.edible = true;
@@ -158,7 +158,7 @@ public class Board implements Runnable {
 				break;
 			case COOPERATIVE:
 				if (msPacman.alive) {
-					msPacman.move(grid);
+					msPacman.move(grid, this);
 				}
 				for (Ghost g : ghosts) {
 					g.moveAI(grid, pacmen);
@@ -168,7 +168,7 @@ public class Board implements Runnable {
 				break;
 			case VERSUS:
 				for (Ghost g : ghosts) {
-					g.move(grid);
+					g.move(grid, this);
 				}
 
 				if (score >= numPellet) {
@@ -207,7 +207,7 @@ public class Board implements Runnable {
 	 */
 	public void gameOver() {
 
-		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER));
+		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this));
 		if (oneTime) {
 			System.exit(0);
 		}
@@ -233,12 +233,12 @@ public class Board implements Runnable {
 		for (Character pacman : pacmen) {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {
-					dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH));;
+					dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this));;
 					pacman.death();
 				}
 
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == true) {
-					dataInterface.setData(new DataEvent(DataEventType.EAT_GHOST));
+					dataInterface.setData(new DataEvent(DataEventType.EAT_GHOST, this));
 					ghost.death();
 					score += 40;
 				}
@@ -370,7 +370,7 @@ public class Board implements Runnable {
 				break;
 			}
 		} else {
-			dataInterface.setData(new DataEvent(DataEventType.KEY_PRESS));
+			dataInterface.setData(new DataEvent(DataEventType.KEY_PRESS, this));
 			switch (gt) {
 			case SINGLEPLAYER:
 				pacman.keyPressed(key);
@@ -392,7 +392,7 @@ public class Board implements Runnable {
 	}
 
 	public void keyReleased(int key) {
-		dataInterface.setData(new DataEvent(DataEventType.KEY_RELEASE));
+		dataInterface.setData(new DataEvent(DataEventType.KEY_RELEASE, this));
 		switch (gt) {
 		case SINGLEPLAYER:
 			pacman.keyReleased(key);
@@ -419,7 +419,7 @@ public class Board implements Runnable {
 				gameStep++;
 				Thread.sleep(loopDelay);
 				if (gt == GameType.SINGLEPLAYER || gt == GameType.VERSUS || gt == GameType.COOPERATIVE) {
-					dataInterface.setData(new DataEvent(DataEventType.MOVE));
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this));
 					this.playGame();
 				}
 			}
@@ -461,5 +461,16 @@ public class Board implements Runnable {
 	void writeEventfoo(String evenType) {
 
 		eventOut.println(gameID + "," + gameStep + "," + evenType);
+	}
+
+	@Override
+	public int getGameID() {
+		return gameID;
+		
+	}
+
+	@Override
+	public int getGameStep() {
+		return gameStep;
 	}
 }

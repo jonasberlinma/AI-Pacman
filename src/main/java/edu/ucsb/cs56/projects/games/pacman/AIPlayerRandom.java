@@ -1,9 +1,8 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
 import java.util.Random;
-
-import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 
 public class AIPlayerRandom extends AIPlayer {
 
@@ -11,8 +10,7 @@ public class AIPlayerRandom extends AIPlayer {
 
 	int numSteps = 1;
 
-	public AIPlayerRandom(Board board, int delay, DataInterface dataInterface) {
-		super(board, delay, dataInterface);
+	public AIPlayerRandom() throws FileNotFoundException {
 	}
 
 	@Override

@@ -133,7 +133,7 @@ public abstract class Character {
 	 * @param grid
 	 *            The Grid to be used for collision
 	 */
-	public abstract void move(Grid grid);
+	public abstract void move(Grid grid, Board board);
 
 	/**
 	 * Moves character's current position with the board's collision

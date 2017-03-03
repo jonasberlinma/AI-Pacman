@@ -1,5 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
@@ -23,10 +24,11 @@ import java.util.Vector;
 
 public class PacMan {
 	/**
+	 * @throws InterruptedException 
 	 * 
 	 */
 
-	public void runIt(String leaderBoard, int loopDelay, boolean headLess, boolean oneTime, boolean autoPlay) {
+	public void runIt(String leaderBoard, int loopDelay, boolean headLess, boolean oneTime, boolean autoPlay) throws InterruptedException {
 		
 		Board board = new Board();
 		board.setLoopDelay(loopDelay);		
@@ -46,11 +48,19 @@ public class PacMan {
 		}
 
 		Thread boardThread = new Thread(board);
-		Thread aiPlayerThread = new Thread(new AIPlayerRandom(board, 40, board.getDataInterface()));
+		Thread aiPlayerThread = null;
+		try {
+			AIPlayer aiPlayer = new AIPlayerRandom();
+			aiPlayer.setBoardAndDataInterface(board, board.getDataInterface());
+			aiPlayerThread = new Thread(aiPlayer);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		boardThread.start();
+		Thread.sleep(100);
 		if(autoPlay){
 			aiPlayerThread.start();
 		}
-		boardThread.start();
 		try {
 			boardThread.join();
 			if(aiPlayerThread != null){
@@ -104,7 +114,12 @@ public class PacMan {
 
 		}
 		PacMan pacman = new PacMan();
-		pacman.runIt(leaderBoard, loopDelay, headLess, oneTime, autoPlay);
+		try {
+			pacman.runIt(leaderBoard, loopDelay, headLess, oneTime, autoPlay);
+		} catch (InterruptedException e) {
+	
+			e.printStackTrace();
+		}
 
 		return;
 
