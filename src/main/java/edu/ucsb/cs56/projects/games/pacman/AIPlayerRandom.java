@@ -24,6 +24,8 @@ public class AIPlayerRandom extends AIPlayer {
 			pressKey(KeyEvent.VK_DOWN);
 			break;
 		case GAME_OVER:
+			// Press ESCAPE to quit the game and then stop
+			pressKey(KeyEvent.VK_ESCAPE);
 			stop();
 			break;
 		case KEY_PRESS:

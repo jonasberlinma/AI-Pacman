@@ -1,6 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
@@ -36,7 +37,7 @@ public class Board implements Runnable, EventTrackable {
 
 	private final int MAX_GHOSTS = 12;
 	private final int MAX_SPEED = 6;
-	
+
 	private long gameID = 0;
 	private int gameStep = 0;
 
@@ -59,10 +60,13 @@ public class Board implements Runnable, EventTrackable {
 	public BoardRenderer bg = null;
 	private DataInterface dataInterface;
 
+	private boolean doRun = false;
+
 	/**
 	 * Constructor for Board object
+	 * @throws FileNotFoundException 
 	 */
-	public Board() {
+	public Board() throws FileNotFoundException {
 
 		dataInterface = new DataInterface();
 
@@ -360,24 +364,30 @@ public class Board implements Runnable, EventTrackable {
 				break;
 			}
 		} else {
-			dataInterface.setData(new DataEvent(DataEventType.KEY_PRESS, this));
-			switch (gt) {
-			case SINGLEPLAYER:
-				pacman.keyPressed(key);
-				break;
-			case COOPERATIVE:
-				pacman.keyPressed(key);
-				msPacman.keyPressed(key);
-				break;
-			case VERSUS:
-				pacman.keyPressed(key);
-				ghost1.keyPressed(key);
-				ghost2.keyPressed(key);
+			switch (key) {
+			case KeyEvent.VK_ESCAPE:
+				doRun = false;
 				break;
 			default:
-				break;
+				// Normal play mode
+				dataInterface.setData(new DataEvent(DataEventType.KEY_PRESS, this));
+				switch (gt) {
+				case SINGLEPLAYER:
+					pacman.keyPressed(key);
+					break;
+				case COOPERATIVE:
+					pacman.keyPressed(key);
+					msPacman.keyPressed(key);
+					break;
+				case VERSUS:
+					pacman.keyPressed(key);
+					ghost1.keyPressed(key);
+					ghost2.keyPressed(key);
+					break;
+				default:
+					break;
+				}
 			}
-
 		}
 	}
 
@@ -404,8 +414,9 @@ public class Board implements Runnable, EventTrackable {
 	@Override
 	public void run() {
 		try {
+			doRun = true;
 			Thread.sleep(1000);
-			while (true) {
+			while (doRun) {
 				gameStep++;
 				Thread.sleep(loopDelay);
 				if (gt == GameType.SINGLEPLAYER || gt == GameType.VERSUS || gt == GameType.COOPERATIVE) {
@@ -413,11 +424,9 @@ public class Board implements Runnable, EventTrackable {
 					this.playGame();
 				}
 			}
+			System.out.println("Board thread done");
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
 	}
 
 	/*

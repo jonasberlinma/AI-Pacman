@@ -24,21 +24,24 @@ import java.util.Vector;
 
 public class PacMan {
 	/**
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
+	 * @throws FileNotFoundException 
 	 * 
 	 */
 
-	public void runIt(String leaderBoard, int loopDelay, boolean headLess,  boolean autoPlay) throws InterruptedException {
-		
-		Board board = new Board();
-		board.setLoopDelay(loopDelay);		
+	public void runIt(String leaderBoard, int loopDelay, boolean headLess, boolean autoPlay)
+			throws InterruptedException, FileNotFoundException {
 
+		Board board = new Board();
+		board.setLoopDelay(loopDelay);
+		BoardRenderer bg = null;
+		BoardFrame bf = null;
 		if (!headLess) {
-			BoardRenderer bg = new BoardRenderer(board, loopDelay);
+			bg = new BoardRenderer(board, loopDelay);
 
 			board.addBoardGraphics(bg);
 
-			BoardFrame bf = new BoardFrame();
+			bf = new BoardFrame();
 
 			bf.add(board.bg);
 			bg.callLeaderboardMain(leaderBoard);
@@ -46,30 +49,40 @@ public class PacMan {
 			bg.start();
 		}
 
-		Thread boardThread = new Thread(board);
+		Thread boardThread = new Thread(board, "Game Board");
 		Thread aiPlayerThread = null;
 		try {
-			AIPlayer aiPlayer = new AIPlayerRandom();
-			aiPlayer.setBoardAndDataInterface(board);
-			aiPlayerThread = new Thread(aiPlayer);
+			if (autoPlay) {
+				AIPlayer aiPlayer = new AIPlayerRandom();
+				aiPlayer.setBoard(board);
+				aiPlayerThread = new Thread(aiPlayer, "AI Player");
+			}
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
 		boardThread.start();
 		Thread.sleep(100);
-		if(autoPlay){
+		if (autoPlay) {
 			aiPlayerThread.start();
 		}
+
+		boardThread.join();
 		try {
-			if(aiPlayerThread != null){
+			if (aiPlayerThread != null) {
 				aiPlayerThread.join();
+				System.out.println("Player done");
+				// If in auto mode kill the main board thread
+				boardThread.interrupt();
 			}
-			boardThread.interrupt();
-			boardThread.join();
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+		// Turn off the renderer there is one
+		if(bg != null){
+			bg.timer.stop();
+			bf.dispose();
+		}
 	}
 
 	/**
@@ -113,7 +126,9 @@ public class PacMan {
 		try {
 			pacman.runIt(leaderBoard, loopDelay, headLess, autoPlay);
 		} catch (InterruptedException e) {
-	
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

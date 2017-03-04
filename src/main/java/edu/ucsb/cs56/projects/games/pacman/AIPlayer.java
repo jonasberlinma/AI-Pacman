@@ -1,29 +1,29 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-
 public abstract class AIPlayer implements Runnable {
 
 	private Board board = null;
 	private int lastKey;
-	private PrintStream eventOutputStream = null;
 
-	AIPlayer() throws FileNotFoundException {
-		eventOutputStream = new PrintStream(new FileOutputStream("EventStream.csv"));
-	}
-	public void setBoardAndDataInterface(Board board){
+	private boolean doRun = false;
+
+	public void setBoard(Board board) {
 		this.board = board;
 	}
+
 	@Override
 	public void run() {
+		doRun = true;
+		try {
+			Thread.sleep(500);
+		} catch (Exception e) {
 
-		while (true) {
+		}
+		while (doRun) {
 			try {
 				DataEvent dataEvent = board.getDataInterface().getData();
 				dataEvent(dataEvent);
-				writeEvent(dataEvent);
+
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -31,9 +31,10 @@ public abstract class AIPlayer implements Runnable {
 		}
 
 	}
-	
-	protected void stop(){
+
+	protected void stop() {
 		// Figure out how to cleanly stop the thread
+		doRun = false;
 	}
 
 	protected abstract void dataEvent(DataEvent dataEvent);
@@ -46,7 +47,5 @@ public abstract class AIPlayer implements Runnable {
 		board.keyPressed(key);
 	}
 
-	private void writeEvent(DataEvent dataEvent) {
-		eventOutputStream.println(dataEvent.toCSV());
-	}
+
 }
