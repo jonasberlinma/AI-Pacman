@@ -8,22 +8,20 @@ public abstract class AIPlayer implements Runnable {
 
 	private Board board = null;
 	private int lastKey;
-	private DataInterface dataInterface = null;
 	private PrintStream eventOutputStream = null;
 
 	AIPlayer() throws FileNotFoundException {
 		eventOutputStream = new PrintStream(new FileOutputStream("EventStream.csv"));
 	}
-	public void setBoardAndDataInterface(Board board, DataInterface dataInterface){
+	public void setBoardAndDataInterface(Board board){
 		this.board = board;
-		this.dataInterface = dataInterface;
 	}
 	@Override
 	public void run() {
 
 		while (true) {
 			try {
-				DataEvent dataEvent = dataInterface.getData();
+				DataEvent dataEvent = board.getDataInterface().getData();
 				dataEvent(dataEvent);
 				writeEvent(dataEvent);
 
@@ -33,8 +31,12 @@ public abstract class AIPlayer implements Runnable {
 		}
 
 	}
+	
+	protected void stop(){
+		// Figure out how to cleanly stop the thread
+	}
 
-	public abstract void dataEvent(DataEvent dataEvent);
+	protected abstract void dataEvent(DataEvent dataEvent);
 
 	protected void pressKey(int key) {
 		if (lastKey != key) {

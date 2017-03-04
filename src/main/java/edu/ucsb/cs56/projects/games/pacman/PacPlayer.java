@@ -134,7 +134,7 @@ public class PacPlayer extends Character {
 				dataInterface.setData(new DataEvent(DataEventType.EAT_PELLET, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 16);
 				playAudio(0);
-				Board.score++;
+				board.addScore(1);
 				speed = 3;
 			}
 			// if fruit, eat and increase score
@@ -142,7 +142,7 @@ public class PacPlayer extends Character {
 				// Toggles fruit bit
 				dataInterface.setData(new DataEvent(DataEventType.EAT_FRUIT, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
-				Board.score += 10;
+				board.addScore(10);
 				playAudio(1);
 				speed = 3;
 			} else if ((ch & 64) != 0) {
@@ -150,7 +150,7 @@ public class PacPlayer extends Character {
 				dataInterface.setData(new DataEvent(DataEventType.EAT_PILL, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 64);
 				playAudio(1);
-				Board.score += 5;
+				board.addScore(5);
 				speed = 3;
 			} else
 				speed = 4;

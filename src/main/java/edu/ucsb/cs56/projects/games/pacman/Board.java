@@ -1,11 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Random;
 
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 
@@ -40,17 +36,13 @@ public class Board implements Runnable, EventTrackable {
 
 	private final int MAX_GHOSTS = 12;
 	private final int MAX_SPEED = 6;
-	private Random random = null;
-	private int gameID = 0;
+	
+	private long gameID = 0;
 	private int gameStep = 0;
 
-	private PrintStream characterStateOut;
-	private PrintStream eventOut;
-	private PrintStream gridOut;
-
-	public static int score;
+	private int score;
 	private Grid grid;
-	GameType gt;
+	private GameType gt;
 	PacPlayer pacman;
 	PacPlayer msPacman;
 	Ghost ghost1, ghost2;
@@ -72,18 +64,16 @@ public class Board implements Runnable, EventTrackable {
 	 */
 	public Board() {
 
-		random = new Random();
-
 		dataInterface = new DataInterface();
 
-		openOutputs();
+		// openOutputs();
 
 		grid = new Grid();
 
 		gt = GameType.INTRO;
 		grid.levelInit(0);
 
-		grid.writeGrid(gridOut);
+		// grid.writeGrid(gridOut);
 
 		pacman = new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PacPlayer.PACMAN, grid);
 		msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 * BLOCKSIZE, PacPlayer.MSPACMAN, grid);
@@ -112,6 +102,18 @@ public class Board implements Runnable, EventTrackable {
 
 	public Grid getGrid() {
 		return grid;
+	}
+
+	public GameType getGameType() {
+		return gt;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void addScore(int addScore) {
+		score = score + addScore;
 	}
 
 	public void addBoardGraphics(BoardRenderer boardGraphics) {
@@ -201,8 +203,8 @@ public class Board implements Runnable, EventTrackable {
 	public void gameOver() {
 
 		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this));
-
-		bg.drawGameOver(gt, score);
+		if (bg != null)
+			bg.drawGameOver();
 
 		gt = GameType.INTRO;
 
@@ -290,7 +292,7 @@ public class Board implements Runnable, EventTrackable {
 		default:
 			break;
 		}
-		gameID = random.nextInt(Integer.MAX_VALUE);
+		gameID = System.currentTimeMillis();
 		gameStep = 0;
 	}
 
@@ -418,41 +420,32 @@ public class Board implements Runnable, EventTrackable {
 
 	}
 
-	void openOutputs() {
-		try {
-			characterStateOut = new PrintStream(new FileOutputStream("character.dat"));
-			Character.writeHeader(characterStateOut);
-			eventOut = new PrintStream(new FileOutputStream("event.dat"));
-			writeEventHeader();
-			gridOut = new PrintStream(new FileOutputStream("grid.dat"));
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-			System.exit(1);
-		}
-	}
-
-	void writeState() {
-		if (characterStateOut != null) {
-			pacman.writeState(characterStateOut, gameID, gameStep, score, "P" + 1, false);
-			int ghostID = 1;
-			for (Ghost ghost : ghosts) {
-				ghost.writeState(characterStateOut, gameID, gameStep, score, "G" + ghostID, ghost.edible);
-				ghostID++;
-			}
-		}
-	}
-
-	public void writeEventHeader() {
-		eventOut.println("GameID, GameStep, EventType");
-	}
-
-	void writeEventfoo(String evenType) {
-
-		eventOut.println(gameID + "," + gameStep + "," + evenType);
-	}
-
+	/*
+	 * void openOutputs() { try { characterStateOut = new PrintStream(new
+	 * FileOutputStream("character.dat"));
+	 * Character.writeHeader(characterStateOut); eventOut = new PrintStream(new
+	 * FileOutputStream("event.dat")); writeEventHeader(); gridOut = new
+	 * PrintStream(new FileOutputStream("grid.dat")); } catch
+	 * (FileNotFoundException e1) { e1.printStackTrace(); System.exit(1); } }
+	 */
+	/*
+	 * void writeState() { if (characterStateOut != null) {
+	 * pacman.writeState(characterStateOut, gameID, gameStep, score, "P" + 1,
+	 * false); int ghostID = 1; for (Ghost ghost : ghosts) {
+	 * ghost.writeState(characterStateOut, gameID, gameStep, score, "G" +
+	 * ghostID, ghost.edible); ghostID++; } } }
+	 */
+	/*
+	 * public void writeEventHeader() { eventOut.println(
+	 * "GameID, GameStep, EventType"); }
+	 */
+	/*
+	 * void writeEventfoo(String evenType) {
+	 * 
+	 * eventOut.println(gameID + "," + gameStep + "," + evenType); }
+	 */
 	@Override
-	public int getGameID() {
+	public long getGameID() {
 		return gameID;
 
 	}

@@ -6,8 +6,8 @@ import java.util.Random;
 
 public class AIPlayerRandom extends AIPlayer {
 
-	Random random = new Random(System.currentTimeMillis());
-
+//	Random random = new Random(System.currentTimeMillis());
+	Random random = new Random();
 	int numSteps = 1;
 
 	public AIPlayerRandom() throws FileNotFoundException {
@@ -24,7 +24,7 @@ public class AIPlayerRandom extends AIPlayer {
 			pressKey(KeyEvent.VK_DOWN);
 			break;
 		case GAME_OVER:
-			
+			stop();
 			break;
 		case KEY_PRESS:
 		case KEY_RELEASE:

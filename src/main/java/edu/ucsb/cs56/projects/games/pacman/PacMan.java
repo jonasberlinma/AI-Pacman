@@ -50,7 +50,7 @@ public class PacMan {
 		Thread aiPlayerThread = null;
 		try {
 			AIPlayer aiPlayer = new AIPlayerRandom();
-			aiPlayer.setBoardAndDataInterface(board, board.getDataInterface());
+			aiPlayer.setBoardAndDataInterface(board);
 			aiPlayerThread = new Thread(aiPlayer);
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
@@ -61,10 +61,11 @@ public class PacMan {
 			aiPlayerThread.start();
 		}
 		try {
-			boardThread.join();
 			if(aiPlayerThread != null){
 				aiPlayerThread.join();
 			}
+			boardThread.interrupt();
+			boardThread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

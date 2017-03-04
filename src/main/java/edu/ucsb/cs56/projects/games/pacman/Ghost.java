@@ -245,7 +245,7 @@ public class Ghost extends Character {
 
 			if((ch & 32) != 0) {
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
-				Board.score -= 5;
+				board.addScore(-5);
 			}
 
 			if (reqdx != 0 || reqdy != 0) {

@@ -58,8 +58,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		Graphics2D g2d = (Graphics2D) g;
 
 		drawMaze(g2d);
-		drawScore(g, board.gt, board);
-		switch (board.gt) {
+		GameType gt = board.getGameType();
+		drawScore(g, board);
+		switch (gt) {
 		case INTRO:
 			showIntroScreen(g);
 			break;
@@ -69,7 +70,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		default:
 			drawPacman(g2d, this, board.pacman);
 
-			if (board.gt == GameType.COOPERATIVE)
+			if (gt == GameType.COOPERATIVE)
 				drawPacman(g2d, this, board.msPacman);
 			for (Ghost ghost : board.ghosts) {
 				drawGhost(g2d, this, ghost);
@@ -189,7 +190,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
 			board.keyPressed(key);
-			if (board.gt != GameType.INTRO && board.gt != GameType.HELP) {
+			GameType gt = board.getGameType();
+			if (gt != GameType.INTRO && gt != GameType.HELP) {
 				switch (key) {
 				case KeyEvent.VK_PAUSE:
 				case KeyEvent.VK_P:
@@ -284,14 +286,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 * @param g
 	 *            a Graphics object
 	 */
-	public void drawScore(Graphics g, GameType gt, Board board) {
+	public void drawScore(Graphics g, Board board) {
 		g.setFont(smallFont);
 		g.setColor(new Color(96, 128, 255));
+		int score = board.getScore();
+		GameType gt = board.getGameType();
 		if (gt == GameType.VERSUS) {
-			String p = "Pellets left: " + (board.numPellet - Board.score);
+			String p = "Pellets left: " + (board.numPellet - score);
 			g.drawString(p, Board.SCRSIZE / 2 + 96, Board.SCRSIZE + 16);
 		} else {
-			String s = "Score: " + Board.score;
+			String s = "Score: " + score;
 			g.drawString(s, Board.SCRSIZE / 2 + 136, Board.SCRSIZE + 16);
 		}
 
@@ -367,19 +371,21 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		leaderBoardGui.setLeaderBoardFileName(files);
 	}
 
-	public void drawGameOver(GameType gt, int score) {
+	public void drawGameOver() {
+		GameType gt = board.getGameType();
+		int score = board.getScore();
 		if (gt != GameType.VERSUS) {
 			if (score > 1)
 				sl.writeScore(score);
 		}
 		Date d = new Date();
 		if (gt == GameType.SINGLEPLAYER)
-			leaderBoardGui.showEndGameScreen(Board.score, d, 1);
+			leaderBoardGui.showEndGameScreen(score, d, 1);
 		else if (gt == GameType.COOPERATIVE)
-			leaderBoardGui.showEndGameScreen(Board.score, d, 2);
+			leaderBoardGui.showEndGameScreen(score, d, 2);
 		else if (gt == GameType.VERSUS)
-			leaderBoardGui.showEndGameScreen(Board.score, d, 3);
-		gt = GameType.INTRO;
+			leaderBoardGui.showEndGameScreen(score, d, 3);
+		//gt = GameType.INTRO;
 
 	}
 
