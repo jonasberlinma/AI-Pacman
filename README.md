@@ -24,7 +24,7 @@ Runs the AIPayerRandom implementation of AIPlayer. Next step is to add dynamic c
 
 Runs the program without the graphical display. Only output is the event log file.
 
-To implement your own AIPlayer, just subclass AIPlayer and implement the dataEvent method. Call keyPress to press keys, and get current game events and data from the input DataEvent. You will get a callback for each game tick, 25 per second if you set loopDelay to 40, plus one for each major game event (INTRO, EAT_PILL, etc.). Look at the event log or the DataEventType enum for event types. Take a peek at the AIPlayer to understand how you can do a simple implementation.
+To implement your own AIPlayer, just subclass AIPlayer and implement the dataEvent method. Call keyPress to press keys, and get current game events and data from the input DataEvent. You will get a callback for each game tick, 25 per second if you set loopDelay to 40, plus one for each major game event (INTRO, EAT_PILL, etc.). Look at the event log or the DataEventType enum for event types. Take a peek at the AIPlayerRandom to understand how you can do a simple implementation. This AIPlayer just performs a randow walk through the grid.
 
 Basic bug fixes to-do:
 
