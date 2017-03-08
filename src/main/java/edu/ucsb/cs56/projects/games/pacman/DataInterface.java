@@ -8,8 +8,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class DataInterface extends ArrayBlockingQueue<DataEvent> {
 
 	private PrintStream eventOutputStream = null;
+	private boolean doWrite = false;
 
-	public DataInterface() throws FileNotFoundException {
+	public DataInterface(boolean doWrite) throws FileNotFoundException {
 		super(1000);
 		eventOutputStream = new PrintStream(new FileOutputStream("EventStream.csv"));
 	}
@@ -28,6 +29,7 @@ public class DataInterface extends ArrayBlockingQueue<DataEvent> {
 	}
 
 	private void writeEvent(DataEvent dataEvent) {
-		eventOutputStream.println(dataEvent.toCSV());
+		if (doWrite)
+			eventOutputStream.println(dataEvent.toCSV());
 	}
 }

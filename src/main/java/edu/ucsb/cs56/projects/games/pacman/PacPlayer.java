@@ -34,10 +34,11 @@ public class PacPlayer extends Character {
 	// he keeps facing wall instead of facing default position
 	public int direction;
 
-	Image[] pacmanUp, pacmanDown, pacmanLeft, pacmanRight;
-	private Audio[] pacmanAudio;
+	public static Image[] pacmanUp, pacmanDown, pacmanLeft, pacmanRight;
+	public static Audio[] pacmanAudio;
+	private boolean isLoadedImages = false;
+	private boolean isLoadedAudio = false;
 	private String assetAudioPath;
-	private Grid grid;
 
 	/**
 	 * Constructor for PacPlayer class
@@ -73,7 +74,6 @@ public class PacPlayer extends Character {
 	public PacPlayer(DataInterface dataInterface, int x, int y, int playerNum, Grid grid) {
 		super(dataInterface, x, y, playerNum);
 		speed = pacmanspeed;
-		this.grid = grid;
 		lives = 3;
 		direction = 3;
 		if (playerNum == PACMAN)
@@ -133,7 +133,7 @@ public class PacPlayer extends Character {
 				// Toggles pellet bit
 				dataInterface.setData(new DataEvent(DataEventType.EAT_PELLET, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 16);
-				playAudio(0);
+				// playAudio(0);
 				board.addScore(1);
 				speed = 3;
 			}
@@ -143,13 +143,13 @@ public class PacPlayer extends Character {
 				dataInterface.setData(new DataEvent(DataEventType.EAT_FRUIT, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
 				board.addScore(10);
-				playAudio(1);
+				// playAudio(1);
 				speed = 3;
 			} else if ((ch & 64) != 0) {
 				// Toggles pill bit
 				dataInterface.setData(new DataEvent(DataEventType.EAT_PILL, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 64);
-				playAudio(1);
+				// playAudio(1);
 				board.addScore(5);
 				speed = 3;
 			} else
@@ -291,30 +291,33 @@ public class PacPlayer extends Character {
 	 */
 	@Override
 	public void loadImages() {
-		pacmanUp = new Image[4];
-		pacmanDown = new Image[4];
-		pacmanLeft = new Image[4];
-		pacmanRight = new Image[4];
+		if (!isLoadedImages) {
+			pacmanUp = new Image[4];
+			pacmanDown = new Image[4];
+			pacmanLeft = new Image[4];
+			pacmanRight = new Image[4];
 
-		try {
-			pacmanUp[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmanup.png"));
-			pacmanUp[1] = ImageIO.read(getClass().getResource(assetImagePath + "up1.png"));
-			pacmanUp[2] = ImageIO.read(getClass().getResource(assetImagePath + "up2.png"));
-			pacmanUp[3] = ImageIO.read(getClass().getResource(assetImagePath + "up3.png"));
-			pacmanDown[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmandown.png"));
-			pacmanDown[1] = ImageIO.read(getClass().getResource(assetImagePath + "down1.png"));
-			pacmanDown[2] = ImageIO.read(getClass().getResource(assetImagePath + "down2.png"));
-			pacmanDown[3] = ImageIO.read(getClass().getResource(assetImagePath + "down3.png"));
-			pacmanLeft[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmanleft.png"));
-			pacmanLeft[1] = ImageIO.read(getClass().getResource(assetImagePath + "left1.png"));
-			pacmanLeft[2] = ImageIO.read(getClass().getResource(assetImagePath + "left2.png"));
-			pacmanLeft[3] = ImageIO.read(getClass().getResource(assetImagePath + "left3.png"));
-			pacmanRight[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmanright.png"));
-			pacmanRight[1] = ImageIO.read(getClass().getResource(assetImagePath + "right1.png"));
-			pacmanRight[2] = ImageIO.read(getClass().getResource(assetImagePath + "right2.png"));
-			pacmanRight[3] = ImageIO.read(getClass().getResource(assetImagePath + "right3.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
+			try {
+				pacmanUp[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmanup.png"));
+				pacmanUp[1] = ImageIO.read(getClass().getResource(assetImagePath + "up1.png"));
+				pacmanUp[2] = ImageIO.read(getClass().getResource(assetImagePath + "up2.png"));
+				pacmanUp[3] = ImageIO.read(getClass().getResource(assetImagePath + "up3.png"));
+				pacmanDown[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmandown.png"));
+				pacmanDown[1] = ImageIO.read(getClass().getResource(assetImagePath + "down1.png"));
+				pacmanDown[2] = ImageIO.read(getClass().getResource(assetImagePath + "down2.png"));
+				pacmanDown[3] = ImageIO.read(getClass().getResource(assetImagePath + "down3.png"));
+				pacmanLeft[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmanleft.png"));
+				pacmanLeft[1] = ImageIO.read(getClass().getResource(assetImagePath + "left1.png"));
+				pacmanLeft[2] = ImageIO.read(getClass().getResource(assetImagePath + "left2.png"));
+				pacmanLeft[3] = ImageIO.read(getClass().getResource(assetImagePath + "left3.png"));
+				pacmanRight[0] = ImageIO.read(getClass().getResource(assetImagePath + "pacmanright.png"));
+				pacmanRight[1] = ImageIO.read(getClass().getResource(assetImagePath + "right1.png"));
+				pacmanRight[2] = ImageIO.read(getClass().getResource(assetImagePath + "right2.png"));
+				pacmanRight[3] = ImageIO.read(getClass().getResource(assetImagePath + "right3.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			isLoadedImages = true;
 		}
 	}
 
@@ -322,14 +325,17 @@ public class PacPlayer extends Character {
 	 * Load game audio from audio folder
 	 */
 	public void loadAudio() {
-		try {
-			String[] sounds = { "chomp.wav", "eatfruit.wav" };
-			pacmanAudio = new Audio[sounds.length];
-			for (int i = 0; i < sounds.length; i++) {
-				pacmanAudio[i] = new Audio(getClass().getResourceAsStream(assetAudioPath + sounds[i]));
+		if (!isLoadedAudio) {
+			try {
+				String[] sounds = { "chomp.wav", "eatfruit.wav" };
+				pacmanAudio = new Audio[sounds.length];
+				for (int i = 0; i < sounds.length; i++) {
+					pacmanAudio[i] = new Audio(getClass().getResourceAsStream(assetAudioPath + sounds[i]));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			isLoadedAudio = true;
 		}
 	}
 

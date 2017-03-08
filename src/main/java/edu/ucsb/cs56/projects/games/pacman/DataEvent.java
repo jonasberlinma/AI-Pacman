@@ -24,8 +24,7 @@ public class DataEvent {
 	public String toCSV(){
 		StringBuffer out = new StringBuffer();
 		
-//		out.append("" + gameID + "," + gameStep + "," + eventType);
-		out.append(gameStep + "," + eventType);
+		out.append("" + gameID + "," + gameStep + "," + System.currentTimeMillis() + "," + eventType);
 		
 		Iterator<String> i = keyValues.keySet().iterator();
 		

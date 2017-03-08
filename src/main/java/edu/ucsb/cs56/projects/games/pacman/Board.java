@@ -56,19 +56,21 @@ public class Board implements Runnable, EventTrackable {
 	private int numPills;
 	private int loopDelay;
 
-	private Audio beginningAudio;
-	public BoardRenderer bg = null;
+
+	public BoardRenderer boardRenderer = null;
 	private DataInterface dataInterface;
+	private Thread boardThread;
 
 	private boolean doRun = false;
 
 	/**
 	 * Constructor for Board object
-	 * @throws FileNotFoundException 
+	 * 
+	 * @throws FileNotFoundException
 	 */
-	public Board() throws FileNotFoundException {
+	public Board(boolean doWrite) throws FileNotFoundException {
 
-		dataInterface = new DataInterface();
+		dataInterface = new DataInterface(doWrite);
 
 		// openOutputs();
 
@@ -80,20 +82,38 @@ public class Board implements Runnable, EventTrackable {
 		// grid.writeGrid(gridOut);
 
 		pacman = new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PacPlayer.PACMAN, grid);
-		msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 * BLOCKSIZE, PacPlayer.MSPACMAN, grid);
+		//msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 * BLOCKSIZE, PacPlayer.MSPACMAN, grid);
 		ghost1 = new Ghost(dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, Ghost.GHOST1, grid);
 		ghost2 = new Ghost(dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, Ghost.GHOST2, grid);
 
 		ghosts = new ArrayList<Ghost>();
 		numPills = 4;
 
-		try {
-			this.beginningAudio = new Audio(getClass().getResourceAsStream("assets/audio/beginning.wav"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	
 		dataInterface.setData(new DataEvent(DataEventType.INTRO, this));
 
+		boardThread = new Thread(this, "Game Board");
+
+	}
+
+	/**
+	 * Start the board
+	 */
+	public void start() {
+		boardThread.start();
+	}
+	
+	public void stop(){
+		doRun = false;
+	}
+
+	/**
+	 * Wait for the board thread to exit an join it. Called by IAGame
+	 * 
+	 * @throws InterruptedException
+	 */
+	public void join() throws InterruptedException {
+		boardThread.join();
 	}
 
 	public void setLoopDelay(int loopDelay) {
@@ -120,8 +140,8 @@ public class Board implements Runnable, EventTrackable {
 		score = score + addScore;
 	}
 
-	public void addBoardGraphics(BoardRenderer boardGraphics) {
-		bg = boardGraphics;
+	public void addBoardRenderer(BoardRenderer boardRenderer) {
+		this.boardRenderer = boardRenderer;
 	}
 
 	/**
@@ -207,8 +227,8 @@ public class Board implements Runnable, EventTrackable {
 	public void gameOver() {
 
 		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this));
-		if (bg != null)
-			bg.drawGameOver();
+		if (boardRenderer != null)
+			boardRenderer.drawGameOver();
 
 		gt = GameType.INTRO;
 
@@ -226,7 +246,9 @@ public class Board implements Runnable, EventTrackable {
 		for (Character pacman : pacmen) {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {
-					dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this));
+					if (pacman.deathTimer <= 0) {
+						dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this));
+					}
 					;
 					pacman.death();
 				}
@@ -269,11 +291,7 @@ public class Board implements Runnable, EventTrackable {
 		curSpeed = 3;
 		numPills = 4;
 
-		try {
-			this.beginningAudio.play();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 
 		switch (gt) {
 		case SINGLEPLAYER:
@@ -424,7 +442,6 @@ public class Board implements Runnable, EventTrackable {
 					this.playGame();
 				}
 			}
-			System.out.println("Board thread done");
 		} catch (InterruptedException e) {
 		}
 	}

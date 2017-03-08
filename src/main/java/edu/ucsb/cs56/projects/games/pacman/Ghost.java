@@ -26,7 +26,8 @@ public class Ghost extends Character {
 
 	Image ghostImage;
 	Image scaredGhostImage;
-	private Grid grid;
+	static boolean isLoadedImages = false;
+
 	public boolean edible;
 	public int prev_speed;
 	public int edibleTimer;
@@ -46,7 +47,6 @@ public class Ghost extends Character {
 	public Ghost(DataInterface dataInterface, int x, int y, int speed, int playerNum, Grid grid) {
 		super(dataInterface, x, y, playerNum);
 		this.speed = speed;
-		this.grid = grid;
 		assetImagePath = "assets/";
 		loadImages();
 		edible = false;

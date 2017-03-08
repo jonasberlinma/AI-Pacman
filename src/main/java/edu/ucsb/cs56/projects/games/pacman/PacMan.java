@@ -25,64 +25,47 @@ import java.util.Vector;
 public class PacMan {
 	/**
 	 * @throws InterruptedException
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws ClassNotFoundException
 	 * 
 	 */
 
-	public void runIt(String leaderBoard, int loopDelay, boolean headLess, boolean autoPlay)
-			throws InterruptedException, FileNotFoundException {
+	public void runIt(String aiPlayerClassName, String leaderBoard, int loopDelay, boolean headLess, boolean autoPlay,
+			int nBackgroundPlayers) throws InterruptedException, FileNotFoundException, ClassNotFoundException,
+			InstantiationException, IllegalAccessException {
 
-		Board board = new Board();
-		board.setLoopDelay(loopDelay);
-		BoardRenderer bg = null;
+		BoardRenderer boardRenderer = null;
 		BoardFrame bf = null;
-		if (!headLess) {
-			bg = new BoardRenderer(board, loopDelay);
 
-			board.addBoardGraphics(bg);
+		AIGame aiGame = new AIGame(aiPlayerClassName, loopDelay, false);
+
+		BackgroundGameController bgc = new BackgroundGameController(aiPlayerClassName, nBackgroundPlayers);
+
+		if (!headLess) {
+			// This circular dependency can be removed by removing the the
+			// leaderboard call in Board
+			boardRenderer = new BoardRenderer(aiGame.getBoard(), bgc);
+			aiGame.addBoardRendered(boardRenderer, leaderBoard);
 
 			bf = new BoardFrame();
 
-			bf.add(board.bg);
-			bg.callLeaderboardMain(leaderBoard);
+			bf.add(boardRenderer);
+			boardRenderer.callLeaderboardMain(leaderBoard);
 
-			bg.start();
+			boardRenderer.start();
 		}
 
-		Thread boardThread = new Thread(board, "Game Board");
-		Thread aiPlayerThread = null;
-		try {
-			if (autoPlay) {
-				AIPlayer aiPlayer = new AIPlayerRandom();
-				aiPlayer.setBoard(board);
-				aiPlayerThread = new Thread(aiPlayer, "AI Player");
-			}
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		boardThread.start();
-		Thread.sleep(100);
-		if (autoPlay) {
-			aiPlayerThread.start();
-		}
-
-		boardThread.join();
-		try {
-			if (aiPlayerThread != null) {
-				aiPlayerThread.join();
-				System.out.println("Player done");
-				// If in auto mode kill the main board thread
-				boardThread.interrupt();
-			}
-
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		// Turn off the renderer there is one
-		if(bg != null){
-			bg.timer.stop();
+		bgc.start();
+		aiGame.start();
+		aiGame.join();
+		// Turn off the renderer if there is one
+		if (boardRenderer != null) {
+			boardRenderer.stop();
 			bf.dispose();
 		}
+		System.exit(0);
 	}
 
 	/**
@@ -100,6 +83,8 @@ public class PacMan {
 		String leaderBoard = "";
 		boolean headLess = false;
 		boolean autoPlay = false;
+		String aiPlayerClassName = null;
+		int nBackgroundPlayers = 0;
 
 		while (argi.hasNext()) {
 			String theArg = argi.next();
@@ -116,18 +101,41 @@ public class PacMan {
 			case "-autoPlay":
 				autoPlay = true;
 				break;
+			case "-nBackgroundPlayers":
+				nBackgroundPlayers = new Integer(argi.next()).intValue();
+				break;
+			case "-aiPlayerClassName":
+				aiPlayerClassName = argi.next();
+				break;
+
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
 				System.exit(1);
 			}
 
 		}
+		if (!autoPlay) {
+			aiPlayerClassName = "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull";
+
+		} else if (aiPlayerClassName == null) {
+			System.err.println("In auto play a player class name has to be specified");
+			System.exit(1);
+		}
 		PacMan pacman = new PacMan();
 		try {
-			pacman.runIt(leaderBoard, loopDelay, headLess, autoPlay);
+			pacman.runIt(aiPlayerClassName, leaderBoard, loopDelay, headLess, autoPlay, nBackgroundPlayers);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

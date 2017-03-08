@@ -21,27 +21,38 @@ import javax.swing.Timer;
 public class BoardRenderer extends JPanel implements ActionListener {
 
 	private Board board = null;
+	private BackgroundGameController bgc = null;
 
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
 
 	ScoreLoader sl = new ScoreLoader("highScores.txt");
 	private LeaderboardGUI leaderBoardGui = new LeaderboardGUI();
+	private Audio beginningAudio;
 
-	int loopDelay = 0;
-	Timer timer = null;
+	private Timer timer = null;
+	private boolean introAudioPlayed = false;
+	
+	public void stop(){
+		timer.stop();
+	}
 
-	BoardRenderer(Board board, int loopDelay) {
+	BoardRenderer(Board board, BackgroundGameController bgc) {
 		this.board = board;
-		this.loopDelay = loopDelay;
+		this.bgc = bgc;
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
 		setDoubleBuffered(true);
+		try {
+			this.beginningAudio = new Audio(getClass().getResourceAsStream("assets/audio/beginning.wav"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
 	public void start() {
-		timer = new Timer(loopDelay, this);
+		timer = new Timer(40, this);
 		timer.start();
 	}
 
@@ -63,11 +74,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		switch (gt) {
 		case INTRO:
 			showIntroScreen(g);
+			if(!introAudioPlayed){
+				playIntroAudio();
+				introAudioPlayed = true;
+			}
 			break;
 		case HELP:
 			showHelpScreen(g);
 			break;
 		default:
+			introAudioPlayed = false;
 			drawPacman(g2d, this, board.pacman);
 
 			if (gt == GameType.COOPERATIVE)
@@ -297,6 +313,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		} else {
 			String s = "Score: " + score;
 			g.drawString(s, Board.SCRSIZE / 2 + 136, Board.SCRSIZE + 16);
+			g.drawString("Bacground Games: " + bgc.getNCompletedGames(), Board.SCRSIZE / 2 - 75, Board.SCRSIZE + 16);
 		}
 
 		for (int i = 0; i < board.pacman.lives; i++) {
@@ -433,6 +450,13 @@ public class BoardRenderer extends JPanel implements ActionListener {
 																				// fruit
 					g2d.fillRect(x + 10, y + 10, 4, 4);
 			}
+		}
+	}
+	public void playIntroAudio(){
+		try {
+			this.beginningAudio.play();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

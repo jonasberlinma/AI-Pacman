@@ -6,7 +6,17 @@ public abstract class AIPlayer implements Runnable {
 	private int lastKey;
 
 	private boolean doRun = false;
+	Thread aiPlayerThread;
 
+	public AIPlayer(){
+		aiPlayerThread = new Thread(this, "AI Player");
+	}
+	public void start(){
+		aiPlayerThread.start();
+	}
+	public void join() throws InterruptedException{
+		aiPlayerThread.join();
+	}
 	public void setBoard(Board board) {
 		this.board = board;
 	}
@@ -29,7 +39,6 @@ public abstract class AIPlayer implements Runnable {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 	protected void stop() {
