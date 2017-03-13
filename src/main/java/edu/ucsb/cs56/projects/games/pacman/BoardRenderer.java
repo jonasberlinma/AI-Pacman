@@ -22,12 +22,14 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	private Board board = null;
 	private BackgroundGameController bgc = null;
+	
+	private boolean firstAction = true;
 
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
 
 	ScoreLoader sl = new ScoreLoader("highScores.txt");
 	private LeaderboardGUI leaderBoardGui = new LeaderboardGUI();
-	private Audio beginningAudio;
+
 
 	private Timer timer = null;
 	private boolean introAudioPlayed = false;
@@ -43,11 +45,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		setFocusable(true);
 		setBackground(Color.black);
 		setDoubleBuffered(true);
-		try {
-			this.beginningAudio = new Audio(getClass().getResourceAsStream("assets/audio/beginning.wav"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 
 	}
 
@@ -58,14 +56,21 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		//System.out.println("action");
+		if(firstAction){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			firstAction = false;
+		}
 		this.repaint();
 	}
 
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		//System.out.println("paint");
 		Graphics2D g2d = (Graphics2D) g;
 
 		drawMaze(g2d);
@@ -75,7 +80,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		case INTRO:
 			showIntroScreen(g);
 			if(!introAudioPlayed){
-				playIntroAudio();
+				AssetController.getInstance().playIntroAudio();
 				introAudioPlayed = true;
 			}
 			break;
@@ -108,7 +113,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 *            a Graphics object
 	 */
 	public void showIntroScreen(Graphics g) {
-		// System.out.println("Intro");
 		g.setColor(new Color(0, 32, 48));
 		g.fillRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
 		g.setColor(Color.white);
@@ -335,10 +339,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 *            A Jcomponent object to be drawn on
 	 */
 	public void drawGhost(Graphics2D g, JComponent canvas, Ghost ghost) {
+		AssetController ac = AssetController.getInstance();
 		if (ghost.edible)
-			g.drawImage(ghost.scaredGhostImage, ghost.x + 4, ghost.y + 4, canvas);
+			g.drawImage(ac.scaredGhostImage, ghost.x + 4, ghost.y + 4, canvas);
 		else
-			g.drawImage(ghost.ghostImage, ghost.x + 4, ghost.y + 4, canvas);
+			g.drawImage(ac.ghostImage[ghost.type], ghost.x + 4, ghost.y + 4, canvas);
 	}
 
 	/**
@@ -353,14 +358,15 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		if (pacman.deathTimer % 5 > 3)
 			return; // Flicker while invincibile
 		doAnimPacman(pacman);
+		AssetController ac = AssetController.getInstance();
 		if (pacman.direction == 1)
-			g2d.drawImage(pacman.pacmanLeft[pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanLeft[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
 		else if (pacman.direction == 2)
-			g2d.drawImage(pacman.pacmanUp[pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanUp[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
 		else if (pacman.direction == 4)
-			g2d.drawImage(pacman.pacmanDown[pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanDown[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
 		else
-			g2d.drawImage(pacman.pacmanRight[pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanRight[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
 	}
 
 	/**
@@ -452,11 +458,5 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			}
 		}
 	}
-	public void playIntroAudio(){
-		try {
-			this.beginningAudio.play();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+
 }

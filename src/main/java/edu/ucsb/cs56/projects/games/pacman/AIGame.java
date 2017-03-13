@@ -26,10 +26,6 @@ public class AIGame implements Runnable {
 		this.boardRenderer = boardRenderer;
 		this.leaderBoard = leaderBoard;
 		board.addBoardRenderer(boardRenderer);
-
-		// BoardFrame bf = new BoardFrame();
-
-		// bf.add(boardRenderer);
 	}
 
 	public Board getBoard() {

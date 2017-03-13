@@ -13,9 +13,12 @@ import java.io.PrintStream;
  * @version CS56, W15
  */
 public abstract class Character {
+	
+	public enum PlayerType {PACMAN, MSPACMAN, GHOST1, GHOST2};
 	public boolean alive;
-	public String assetImagePath;
-	public int playerNum, lives;
+
+	public PlayerType playerType;
+	public int lives;
 	public int deathTimer; // Used for invincibility after reviving
 	public int startX, startY, speed;
 	public int x, y; // x, y coordinates
@@ -36,8 +39,8 @@ public abstract class Character {
 		this.dataInterface = dataInterface;
 		startX = x;
 		startY = y;
-		playerNum = 1;
-		deathTimer = PacPlayer.PACMAN;
+		playerType = PlayerType.PACMAN;
+		deathTimer = 1;
 		alive = true;
 		reset();
 	}
@@ -52,11 +55,11 @@ public abstract class Character {
 	 * @param playerNum
 	 *            int representing who the player is controlling
 	 */
-	public Character(DataInterface dataInterface, int x, int y, int playerNum) {
+	public Character(DataInterface dataInterface, int x, int y, PlayerType playerType) {
 		this.dataInterface = dataInterface;
 		startX = x;
 		startY = y;
-		this.playerNum = playerNum;
+		this.playerType = playerType;
 		deathTimer = 0;
 		alive = true;
 		reset();
@@ -93,11 +96,6 @@ public abstract class Character {
 	 *            A JComponent object to be drawn on
 	 */
 	// public abstract void draw(Graphics2D g, JComponent canvas);
-
-	/**
-	 * Load game sprites from images folder
-	 */
-	public abstract void loadImages();
 
 	/**
 	 * Handles character's death

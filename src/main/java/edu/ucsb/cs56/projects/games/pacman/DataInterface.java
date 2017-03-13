@@ -15,7 +15,7 @@ public class DataInterface extends ArrayBlockingQueue<DataEvent> {
 		eventOutputStream = new PrintStream(new FileOutputStream("EventStream.csv"));
 	}
 
-	public void setData(DataEvent dataEvent) {
+	public synchronized void setData(DataEvent dataEvent) {
 		// If we have no player to pull off the events it fills up
 		// Gross implementation should be fixed
 		if (this.remainingCapacity() > 0) {

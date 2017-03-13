@@ -1,10 +1,8 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -21,12 +19,6 @@ import java.util.PriorityQueue;
  * @version CS56 F16
  */
 public class Ghost extends Character {
-	public static final int GHOST1 = 1;
-	public static final int GHOST2 = 2;
-
-	Image ghostImage;
-	Image scaredGhostImage;
-	static boolean isLoadedImages = false;
 
 	public boolean edible;
 	public int prev_speed;
@@ -37,18 +29,14 @@ public class Ghost extends Character {
 		super(dataInterface, x, y);
 		this.speed = speed;
 		this.type = type;
-		assetImagePath = "assets/";
-		loadImages();
 		edible = false;
 		prev_speed = speed;
 		edibleTimer = 1;
 	}
 
-	public Ghost(DataInterface dataInterface, int x, int y, int speed, int playerNum, Grid grid) {
+	public Ghost(DataInterface dataInterface, int x, int y, int speed, PlayerType playerNum, Grid grid) {
 		super(dataInterface, x, y, playerNum);
 		this.speed = speed;
-		assetImagePath = "assets/";
-		loadImages();
 		edible = false;
 		prev_speed = speed;
 		edibleTimer = 1;
@@ -89,29 +77,7 @@ public class Ghost extends Character {
 //			g.drawImage(ghost, x + 4, y + 4, canvas);
 //	}
 
-	/**
-	 * Load game sprites from images folder
-	 */
-	@Override
-	public void loadImages() {
-		try {
-			if (type == 0) {
-				ghostImage = ImageIO.read(getClass().getResource(assetImagePath + "ghostred.png"));
-			}
-			else if (type == 1)
-				ghostImage = ImageIO.read(getClass().getResource(assetImagePath + "ghostpink.png"));
-			else {
-				if (playerNum == GHOST1) {
-					ghostImage = ImageIO.read(getClass().getResource(assetImagePath + "ghostred.png"));
-				} else if (playerNum == GHOST2) { 
-					ghostImage = ImageIO.read(getClass().getResource(assetImagePath + "ghostpink.png"));
-				}
-			} 
-			scaredGhostImage = ImageIO.read(getClass().getResource(assetImagePath + "ghostblue.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+
 
 	/**
 	 * Returns the image used for displaying remaining lives
@@ -120,7 +86,7 @@ public class Ghost extends Character {
 	 */
 	@Override
 	public Image getLifeImage() {
-		return ghostImage;
+		return AssetController.getInstance().ghostImage[PlayerType.GHOST1.ordinal()];
 	}
 
 	/**
@@ -130,7 +96,7 @@ public class Ghost extends Character {
 	 */
 	@Override
 	public void keyPressed(int key) {
-		if (playerNum == GHOST1) {
+		if (playerType == PlayerType.GHOST1) {
 			switch (key) {
 				case KeyEvent.VK_A:
 					reqdx = -1;
@@ -151,7 +117,7 @@ public class Ghost extends Character {
 				default:
 					break;
 			}
-		} else if (playerNum == GHOST2) {
+		} else if (playerType == PlayerType.GHOST2) {
 			switch (key) {
 				case KeyEvent.VK_J:
 					reqdx = -1;
@@ -180,7 +146,7 @@ public class Ghost extends Character {
 		// Not sure why this call was needed so I commented it out
 		// It doesn't seem to have affected the game
 		//move(this.grid);
-		if (playerNum == GHOST1) {
+		if (playerType == PlayerType.GHOST1) {
 			switch (key) {
 				case KeyEvent.VK_A:
 					reqdx = 0;
@@ -197,7 +163,7 @@ public class Ghost extends Character {
 				default:
 					break;
 			}
-		} else if (playerNum == GHOST2) {
+		} else if (playerType == PlayerType.GHOST2) {
 			switch (key) {
 				case KeyEvent.VK_J:
 					reqdx = 0;
@@ -479,7 +445,7 @@ public class Ghost extends Character {
 		return false;
 	}
 	public String getCharacterID(){
-		return "G" + playerNum;
+		return "G" + playerType;
 	}
 	public String getCharacterType(){
 		return "" + type;
