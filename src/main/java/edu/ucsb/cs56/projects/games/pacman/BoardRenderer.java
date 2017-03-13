@@ -100,6 +100,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		if (!timer.isRunning())
 			showPauseScreen(g);
+		
+		if(board.doPlayAudio()){
+			AssetController.getInstance().playAudio(board.getAudioClipID());
+		}
 
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();

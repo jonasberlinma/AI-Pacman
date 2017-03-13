@@ -120,7 +120,7 @@ public class PacPlayer extends Character {
 				// Toggles pellet bit
 				dataInterface.setData(new DataEvent(DataEventType.EAT_PELLET, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 16);
-				// playAudio(0);
+				board.playAudio(0);
 				board.addScore(1);
 				speed = 3;
 			}
@@ -130,13 +130,13 @@ public class PacPlayer extends Character {
 				dataInterface.setData(new DataEvent(DataEventType.EAT_FRUIT, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
 				board.addScore(10);
-				// playAudio(1);
+				board.playAudio(1);
 				speed = 3;
 			} else if ((ch & 64) != 0) {
 				// Toggles pill bit
 				dataInterface.setData(new DataEvent(DataEventType.EAT_PILL, board));
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 64);
-				// playAudio(1);
+				board.playAudio(1);
 				board.addScore(5);
 				speed = 3;
 			} else
@@ -170,6 +170,7 @@ public class PacPlayer extends Character {
 		move();
 	}
 
+	
 	/**
 	 * Moves character's current position with the board's collision
 	 *

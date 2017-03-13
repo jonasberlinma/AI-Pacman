@@ -63,6 +63,7 @@ public class Board implements Runnable, EventTrackable {
 	private Thread boardThread;
 
 	private boolean doRun = false;
+	private int audioClipID = -1;
 
 	/**
 	 * Constructor for Board object
@@ -480,5 +481,17 @@ public class Board implements Runnable, EventTrackable {
 	@Override
 	public int getGameStep() {
 		return gameStep;
+	}
+
+	public void playAudio(int audioClipID) {
+		this.audioClipID  = audioClipID;	
+	}
+	public boolean doPlayAudio(){
+		return audioClipID != -1;
+	}
+	public int getAudioClipID(){
+		int clipID = this.audioClipID;
+		this.audioClipID = -1;
+		return clipID;
 	}
 }
