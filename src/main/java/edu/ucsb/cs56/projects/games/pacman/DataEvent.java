@@ -17,6 +17,7 @@ public class DataEvent {
 		this.eventType = eventType;
 		this.gameID = trackable.getGameID();
 		this.gameStep = trackable.getGameStep();
+		this.keyValues.putAll(trackable.getData());
 	}
 	public void setKeyValuePair(String key, String value){
 		keyValues.put(key, value);
@@ -30,9 +31,12 @@ public class DataEvent {
 		
 		while(i.hasNext()){
 			String key = i.next();
-			out.append(key + "," + keyValues.get(key));
+			out.append("," + key + "," + keyValues.get(key));
 		}
 		
 		return out.toString();
+	}
+	public void setGameID(long gameID) {
+		this.gameID = gameID;
 	}
 }
