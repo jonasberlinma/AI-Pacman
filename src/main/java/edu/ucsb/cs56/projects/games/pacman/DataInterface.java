@@ -9,7 +9,7 @@ public class DataInterface extends ArrayBlockingQueue<DataEvent> {
 
 	private PrintStream eventOutputStream = null;
 	private boolean doWrite = false;
-
+	
 	public DataInterface(boolean doWrite) throws FileNotFoundException {
 		super(1000);
 		eventOutputStream = new PrintStream(new FileOutputStream("EventStream.csv"));
