@@ -1,6 +1,8 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -12,11 +14,18 @@ public class BackgroundGameController implements Runnable {
 	private Vector<AIGame> gameList = new Vector<AIGame>();
 	private String aiPlayerClassName = null;
 	private int nCompletedGames = 0;
+	private PrintWriter out = null;
 
 	BackgroundGameController(String aiPlayerClassName, int backgroundGameThreads) {
 		this.nThreads = backgroundGameThreads;
 		this.aiPlayerClassName = aiPlayerClassName;
 		controllerThread = new Thread(this, "BackgroundGameController");
+		try {
+			out = new PrintWriter(new FileOutputStream("eventlog.csv"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void start() {
@@ -41,6 +50,7 @@ public class BackgroundGameController implements Runnable {
 						aiGame.join();
 						i.remove();
 						nCompletedGames++;
+						aiGame.report(out);
 					}
 				}
 			} catch (InterruptedException e) {
@@ -66,8 +76,6 @@ public class BackgroundGameController implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-
 			}
 		}
 	}

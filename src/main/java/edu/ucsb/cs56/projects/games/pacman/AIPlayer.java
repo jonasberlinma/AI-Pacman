@@ -1,22 +1,30 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.util.Vector;
+
 public abstract class AIPlayer implements Runnable {
 
 	private Board board = null;
 	private int lastKey;
 
 	private boolean doRun = false;
-	Thread aiPlayerThread;
+	private Thread aiPlayerThread;
 
-	public AIPlayer(){
+	private Vector<DataEvent> eventCollection;
+
+	public AIPlayer() {
 		aiPlayerThread = new Thread(this, "AI Player");
+		eventCollection = new Vector<DataEvent>(10000);
 	}
-	public void start(){
+
+	public void start() {
 		aiPlayerThread.start();
 	}
-	public void join() throws InterruptedException{
+
+	public void join() throws InterruptedException {
 		aiPlayerThread.join();
 	}
+
 	public void setBoard(Board board) {
 		this.board = board;
 	}
@@ -32,9 +40,10 @@ public abstract class AIPlayer implements Runnable {
 		while (doRun) {
 			try {
 				DataEvent dataEvent = board.getDataInterface().getData();
+				// Log the raw event
+				logEvent(dataEvent);
+				// Pass data event to subclass
 				dataEvent(dataEvent);
-
-
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -42,10 +51,16 @@ public abstract class AIPlayer implements Runnable {
 	}
 
 	protected void stop() {
-		// Figure out how to cleanly stop the thread
+		// Tell the thread to exit at its earliest convenience
 		doRun = false;
 	}
 
+	/**
+	 * Subclasses implement this method to deal with game events whatever way
+	 * they desire
+	 * 
+	 * @param dataEvent
+	 */
 	protected abstract void dataEvent(DataEvent dataEvent);
 
 	protected void pressKey(int key) {
@@ -56,5 +71,11 @@ public abstract class AIPlayer implements Runnable {
 		board.keyPressed(key);
 	}
 
+	private void logEvent(DataEvent dataEvent) {
+		eventCollection.add(dataEvent);
+	}
+	protected Vector<DataEvent> getEventLog(){
+		return eventCollection;
+	}
 
 }

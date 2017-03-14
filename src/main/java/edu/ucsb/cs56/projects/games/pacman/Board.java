@@ -44,7 +44,7 @@ public class Board implements Runnable, EventTrackable {
 
 	private int score;
 	private Grid grid;
-	private GameType gt;
+	private GameType gt = GameType.INTRO;
 	PacPlayer pacman;
 	PacPlayer msPacman;
 	Ghost ghost1, ghost2;
@@ -56,7 +56,6 @@ public class Board implements Runnable, EventTrackable {
 	int numPellet;
 	private int numPills;
 	private int loopDelay;
-
 
 	public BoardRenderer boardRenderer = null;
 	private DataInterface dataInterface;
@@ -84,14 +83,14 @@ public class Board implements Runnable, EventTrackable {
 		// grid.writeGrid(gridOut);
 
 		pacman = new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PlayerType.PACMAN, grid);
-		//msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 * BLOCKSIZE, PacPlayer.MSPACMAN, grid);
+		// msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 *
+		// BLOCKSIZE, PacPlayer.MSPACMAN, grid);
 		ghost1 = new Ghost(dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
 		ghost2 = new Ghost(dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST2, grid);
 
 		ghosts = new ArrayList<Ghost>();
 		numPills = 4;
 
-	
 		dataInterface.setData(new DataEvent(DataEventType.INTRO, this));
 
 		boardThread = new Thread(this, "Game Board");
@@ -104,8 +103,8 @@ public class Board implements Runnable, EventTrackable {
 	public void start() {
 		boardThread.start();
 	}
-	
-	public void stop(){
+
+	public void stop() {
 		doRun = false;
 	}
 
@@ -293,8 +292,6 @@ public class Board implements Runnable, EventTrackable {
 		curSpeed = 3;
 		numPills = 4;
 
-
-
 		switch (gt) {
 		case SINGLEPLAYER:
 			pacmen = new Character[1];
@@ -435,6 +432,9 @@ public class Board implements Runnable, EventTrackable {
 	public void run() {
 		try {
 			doRun = true;
+			// Required due to heisenbug. Somehow the game type changes to
+			// single, versus, or cooperative before the characters are
+			// fully initialized
 			Thread.sleep(1000);
 			while (doRun) {
 				gameStep++;
@@ -484,12 +484,14 @@ public class Board implements Runnable, EventTrackable {
 	}
 
 	public void playAudio(int audioClipID) {
-		this.audioClipID  = audioClipID;	
+		this.audioClipID = audioClipID;
 	}
-	public boolean doPlayAudio(){
+
+	public boolean doPlayAudio() {
 		return audioClipID != -1;
 	}
-	public int getAudioClipID(){
+
+	public int getAudioClipID() {
 		int clipID = this.audioClipID;
 		this.audioClipID = -1;
 		return clipID;
