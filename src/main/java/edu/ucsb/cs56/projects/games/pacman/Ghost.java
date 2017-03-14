@@ -23,12 +23,11 @@ public class Ghost extends Character {
 	public boolean edible;
 	public int prev_speed;
 	public int edibleTimer;
-	public int type;
+	//public int type;
 
-	public Ghost(DataInterface dataInterface, int x, int y, int speed, int type) {
-		super(dataInterface, x, y);
+	public Ghost(DataInterface dataInterface, int x, int y, int speed, PlayerType playerType) {
+		super(dataInterface, x, y, playerType);
 		this.speed = speed;
-		this.type = type;
 		edible = false;
 		prev_speed = speed;
 		edibleTimer = 1;
@@ -63,22 +62,6 @@ public class Ghost extends Character {
 		edibleTimer = 0;
 	}
 
-//	/**
-//	 * Draws the ghost
-//	 *
-//	 * @param g a Graphics2D object
-//	 * @param canvas A Jcomponent object to be drawn on
-//	 */
-//	@Override
-//	public void draw(Graphics2D g, JComponent canvas) {
-//		if(edible)
-//			g.drawImage(scared_ghost, x + 4, y + 4, canvas);
-//		else
-//			g.drawImage(ghost, x + 4, y + 4, canvas);
-//	}
-
-
-
 	/**
 	 * Returns the image used for displaying remaining lives
 	 *
@@ -86,7 +69,7 @@ public class Ghost extends Character {
 	 */
 	@Override
 	public Image getLifeImage() {
-		return AssetController.getInstance().ghostImage[PlayerType.GHOST1.ordinal()];
+		return AssetController.getInstance().getGhostImage(PlayerType.GHOST1);
 	}
 
 	/**
@@ -258,9 +241,9 @@ public class Ghost extends Character {
 			for(Character p : c)
 			{
 				double distance = 0;
-				if (type == 0) {
+				if (playerType == PlayerType.GHOST1) {
 					distance = Math.sqrt(Math.pow(this.x - p.x, 2.0) + Math.pow(this.y - p.y, 2.0));
-				} else if (type == 1) {
+				} else if (playerType == PlayerType.GHOST2) {
 					int aheadX = p.x;
 					int aheadY = p.y;
 					PacPlayer pacman = (PacPlayer)p;
@@ -447,7 +430,7 @@ public class Ghost extends Character {
 	public String getCharacterID(){
 		return "G" + playerType;
 	}
-	public String getCharacterType(){
-		return "" + type;
-	}
+/*	public String getCharacterType(){
+		return playerType.name();
+	}*/
 }

@@ -17,10 +17,6 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
  */
 public class PacPlayer extends Character {
 	
-	
-	
-	//public final static int PACMAN = 1;
-	//public final static int MSPACMAN = 2;
 
 	final int pacanimdelay = 2;
 	final int pacmananimcount = 4;
@@ -45,8 +41,8 @@ public class PacPlayer extends Character {
 	 * @param y
 	 *            the starting y coordinate of pacman
 	 */
-	public PacPlayer(DataInterface dataInterface, int x, int y) {
-		super(dataInterface, x, y);
+	public PacPlayer(DataInterface dataInterface, int x, int y, PlayerType playerType) {
+		super(dataInterface, x, y, playerType);
 		speed = pacmanspeed;
 		lives = 3;
 		direction = 3;
@@ -118,7 +114,9 @@ public class PacPlayer extends Character {
 			// if pellet, eat and increase score
 			if ((ch & 16) != 0) {
 				// Toggles pellet bit
-				dataInterface.setData(new DataEvent(DataEventType.EAT_PELLET, board));
+				DataEvent dataEvent = new DataEvent(DataEventType.EAT_PELLET, board, board);
+				dataEvent.setKeyValuePair("score", "" + board.getScore());
+				dataInterface.setData(dataEvent);
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 16);
 				board.playAudio(0);
 				board.addScore(1);
@@ -127,14 +125,18 @@ public class PacPlayer extends Character {
 			// if fruit, eat and increase score
 			else if ((ch & 32) != 0) {
 				// Toggles fruit bit
-				dataInterface.setData(new DataEvent(DataEventType.EAT_FRUIT, board));
+				DataEvent dataEvent = new DataEvent(DataEventType.EAT_FRUIT, board, board);
+				dataEvent.setKeyValuePair("score", "" + board.getScore());
+				dataInterface.setData(dataEvent);
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
 				board.addScore(10);
 				board.playAudio(1);
 				speed = 3;
 			} else if ((ch & 64) != 0) {
 				// Toggles pill bit
-				dataInterface.setData(new DataEvent(DataEventType.EAT_PILL, board));
+				DataEvent dataEvent = new DataEvent(DataEventType.EAT_PILL, board, board);
+				dataEvent.setKeyValuePair("score", "" + board.getScore());
+				dataInterface.setData(dataEvent);
 				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 64);
 				board.playAudio(1);
 				board.addScore(5);
@@ -279,13 +281,6 @@ public class PacPlayer extends Character {
 	 *
 	 * @return image of pacman facing left
 	 */
-
-	@Override
-	public String getCharacterType() {
-		// TODO Auto-generated method stub
-		return "";
-	}
-
 	@Override
 	public Image getLifeImage() {
 		return AssetController.getInstance().getLifeImage(playerType);

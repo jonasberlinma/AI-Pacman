@@ -13,11 +13,11 @@ public class DataEvent {
 	private int gameStep = 0;
 	HashMap<String, String> keyValues = new HashMap<String, String>(); 
 
-	public DataEvent(DataEventType eventType, EventTrackable trackable) {
+	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
 		this.eventType = eventType;
-		this.gameID = trackable.getGameID();
-		this.gameStep = trackable.getGameStep();
-		this.keyValues.putAll(trackable.getData());
+		this.gameID = board.getGameID();
+		this.gameStep = board.getGameStep();
+		this.keyValues.putAll(trackable.getData(eventType));
 	}
 	public void setKeyValuePair(String key, String value){
 		keyValues.put(key, value);
@@ -25,13 +25,13 @@ public class DataEvent {
 	public String toCSV(){
 		StringBuffer out = new StringBuffer();
 		
-		out.append("" + gameID + "," + gameStep + "," + System.currentTimeMillis() + "," + eventType);
+		out.append("gameID=" + gameID + ",gameStep=" + gameStep + ",time=" + System.currentTimeMillis() + ",eventType=" + eventType);
 		
 		Iterator<String> i = keyValues.keySet().iterator();
 		
 		while(i.hasNext()){
 			String key = i.next();
-			out.append("," + key + "," + keyValues.get(key));
+			out.append("," + key + "=" + keyValues.get(key));
 		}
 		
 		return out.toString();

@@ -20,8 +20,8 @@ public class AssetController {
 
 	private Audio beginningAudio;
 	
-	Image ghostImage[];
-	Image scaredGhostImage;
+	private Image ghostImage[];
+	private Image scaredGhostImage;
 
 	private AssetController() {
 		assetImagePath = "assets/pacman/";
@@ -141,5 +141,16 @@ public class AssetController {
 			e.printStackTrace();
 		}
 	}
-
+	public Image getScaredGhostImage(){
+		return this.scaredGhostImage;
+	}
+	public Image getGhostImage(PlayerType playerType){
+		Image ret = null;
+		if(playerType == PlayerType.GHOST1){
+			ret = ghostImage[0];
+		} else if (playerType == PlayerType.GHOST2){
+			ret = ghostImage[1];
+		}
+		return ret;
+	}
 }

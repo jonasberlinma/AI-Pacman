@@ -6,5 +6,5 @@ public interface EventTrackable {
 
 	public long getGameID();
 	public int getGameStep();
-	public Map<String, String> getData();
+	public Map<String, String> getData(DataEvent.DataEventType dataEvent);
 }

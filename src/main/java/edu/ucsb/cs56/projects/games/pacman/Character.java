@@ -2,6 +2,8 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.Image;
 import java.io.PrintStream;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Class that every character inherits from, including players and AI-controlled
@@ -12,12 +14,12 @@ import java.io.PrintStream;
  * @author Kelvin Yang
  * @version CS56, W15
  */
-public abstract class Character {
+public abstract class Character implements EventTrackable {
 	
 	public enum PlayerType {PACMAN, MSPACMAN, GHOST1, GHOST2};
 	public boolean alive;
 
-	public PlayerType playerType;
+	PlayerType playerType;
 	public int lives;
 	public int deathTimer; // Used for invincibility after reviving
 	public int startX, startY, speed;
@@ -25,25 +27,11 @@ public abstract class Character {
 	public int dx, dy; // change in x/y per move (eg left = -1, 0)
 	public int reqdx, reqdy; // requested change input by keys, gets passed to
 								// dx, dy when in grid
+	private static int nextCharacterID = 0;
+	private int characterID;
 
 	protected DataInterface dataInterface;
-	/**
-	 * Constructor for Character class
-	 *
-	 * @param x
-	 *            the starting x coordinate of pacman
-	 * @param y
-	 *            the starting y coordinate of pacman
-	 */
-	public Character(DataInterface dataInterface, int x, int y) {
-		this.dataInterface = dataInterface;
-		startX = x;
-		startY = y;
-		playerType = PlayerType.PACMAN;
-		deathTimer = 1;
-		alive = true;
-		reset();
-	}
+
 
 	/**
 	 * Constructor for Character class
@@ -57,6 +45,7 @@ public abstract class Character {
 	 */
 	public Character(DataInterface dataInterface, int x, int y, PlayerType playerType) {
 		this.dataInterface = dataInterface;
+		characterID = nextCharacterID();
 		startX = x;
 		startY = y;
 		this.playerType = playerType;
@@ -159,12 +148,33 @@ public abstract class Character {
 	public static void writeHeader(PrintStream out) {
 		out.println("GameID,GameStep,CharacterID,CharacterType,x,y,dx,dy,reqdx,reqdy,speed,edible,score");
 	}
-
-	public void writeState(PrintStream out, long gameID, long gameStep, int score, String characterID, boolean edible) {
-		out.println("" + gameID + "," + gameStep + "," + characterID + "," + getCharacterType() + ","
-				+ x / Board.BLOCKSIZE + "," + y / Board.BLOCKSIZE + "," + dx + "," + dy + "," + reqdx + "," + reqdy
-				+ "," + speed + "," + edible + "," + score);
+	
+	@Override
+	public long getGameID(){
+		return 0;
 	}
+	@Override
+	public int getGameStep(){
+		return 0;
+	}
+	public Map<String, String> getData(DataEvent.DataEventType eventType){
+		Hashtable<String, String> hashtable = new Hashtable<String,String>();
+		hashtable.put("playerType", playerType.name());
+		hashtable.put("characterID", "" + characterID);
+		hashtable.put("x", "" + x);
+		hashtable.put("y", "" + y);
+		hashtable.put("dx", "" + dx);
+		hashtable.put("dy", "" + dy);
+		hashtable.put("reqdx", "" + reqdx);
+		hashtable.put("reqdy", "" + reqdy);
+		hashtable.put("speed", "" + speed);
 
-	public abstract String getCharacterType();
+		return hashtable;
+	}
+	PlayerType getPlayerType(){
+		return playerType;
+	}
+	public static synchronized int nextCharacterID(){
+		return ++nextCharacterID;
+	}
 }

@@ -3,6 +3,8 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
@@ -73,8 +75,6 @@ public class Board implements Runnable, EventTrackable {
 
 		dataInterface = new DataInterface(doWrite);
 
-		// openOutputs();
-
 		grid = new Grid();
 
 		gt = GameType.INTRO;
@@ -91,7 +91,7 @@ public class Board implements Runnable, EventTrackable {
 		ghosts = new ArrayList<Ghost>();
 		numPills = 4;
 
-		dataInterface.setData(new DataEvent(DataEventType.INTRO, this));
+		dataInterface.setData(new DataEvent(DataEventType.INTRO, this, this));
 
 		boardThread = new Thread(this, "Game Board");
 
@@ -159,6 +159,7 @@ public class Board implements Runnable, EventTrackable {
 			} else {
 				if (pacman.alive) {
 					pacman.move(grid, this);
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, pacman));
 					if (grid.getPillNum() != numPills) {
 						for (Ghost g : ghosts) {
 							g.edible = true;
@@ -172,6 +173,7 @@ public class Board implements Runnable, EventTrackable {
 			case SINGLEPLAYER:
 				for (Ghost g : ghosts) {
 					g.moveAI(grid, pacmen);
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, g));
 				}
 				grid.incrementFruit(numBoardsCleared);
 				detectCollision(ghosts);
@@ -179,9 +181,11 @@ public class Board implements Runnable, EventTrackable {
 			case COOPERATIVE:
 				if (msPacman.alive) {
 					msPacman.move(grid, this);
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, msPacman));
 				}
 				for (Ghost g : ghosts) {
 					g.moveAI(grid, pacmen);
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, g));
 				}
 				grid.incrementFruit(numBoardsCleared);
 				detectCollision(ghosts);
@@ -189,6 +193,7 @@ public class Board implements Runnable, EventTrackable {
 			case VERSUS:
 				for (Ghost g : ghosts) {
 					g.move(grid, this);
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, g));
 				}
 
 				if (score >= numPellet) {
@@ -227,7 +232,7 @@ public class Board implements Runnable, EventTrackable {
 	 */
 	public void gameOver() {
 
-		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this));
+		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this, this));
 		if (boardRenderer != null)
 			boardRenderer.drawGameOver();
 
@@ -248,14 +253,14 @@ public class Board implements Runnable, EventTrackable {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {
 					if (pacman.deathTimer <= 0) {
-						dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this));
+						dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this, this));
 					}
 					;
 					pacman.death();
 				}
 
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == true) {
-					dataInterface.setData(new DataEvent(DataEventType.EAT_GHOST, this));
+					dataInterface.setData(new DataEvent(DataEventType.EAT_GHOST, this, this));
 					ghost.death();
 					score += 40;
 				}
@@ -330,7 +335,15 @@ public class Board implements Runnable, EventTrackable {
 		} else {
 			for (int i = 0; i < numGhosts; i++) {
 				int random = (int) (Math.random() * curSpeed) + 1;
-				ghosts.add(new Ghost(dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, i % 2));
+				int the_type = i % 2;
+				switch (the_type) {
+				case 0:
+					ghosts.add(new Ghost(dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST1));
+					break;
+				case 1:
+					ghosts.add(new Ghost(dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST2));
+				}
+
 			}
 		}
 		switch (gt) {
@@ -387,7 +400,9 @@ public class Board implements Runnable, EventTrackable {
 				break;
 			default:
 				// Normal play mode
-				dataInterface.setData(new DataEvent(DataEventType.KEY_PRESS, this));
+				DataEvent dataEvent = new DataEvent(DataEventType.KEY_PRESS, this, this);
+				dataEvent.setKeyValuePair("key", KeyEvent.getKeyText(key));
+				dataInterface.setData(dataEvent);
 				switch (gt) {
 				case SINGLEPLAYER:
 					pacman.keyPressed(key);
@@ -409,7 +424,9 @@ public class Board implements Runnable, EventTrackable {
 	}
 
 	public void keyReleased(int key) {
-		dataInterface.setData(new DataEvent(DataEventType.KEY_RELEASE, this));
+		DataEvent dataEvent = new DataEvent(DataEventType.KEY_RELEASE, this, this);
+		dataEvent.setKeyValuePair("key", KeyEvent.getKeyText(key));
+		dataInterface.setData(dataEvent);
 		switch (gt) {
 		case SINGLEPLAYER:
 			pacman.keyReleased(key);
@@ -440,7 +457,7 @@ public class Board implements Runnable, EventTrackable {
 				gameStep++;
 				Thread.sleep(loopDelay);
 				if (gt == GameType.SINGLEPLAYER || gt == GameType.VERSUS || gt == GameType.COOPERATIVE) {
-					dataInterface.setData(new DataEvent(DataEventType.MOVE, this));
+
 					this.playGame();
 				}
 			}
@@ -448,30 +465,7 @@ public class Board implements Runnable, EventTrackable {
 		}
 	}
 
-	/*
-	 * void openOutputs() { try { characterStateOut = new PrintStream(new
-	 * FileOutputStream("character.dat"));
-	 * Character.writeHeader(characterStateOut); eventOut = new PrintStream(new
-	 * FileOutputStream("event.dat")); writeEventHeader(); gridOut = new
-	 * PrintStream(new FileOutputStream("grid.dat")); } catch
-	 * (FileNotFoundException e1) { e1.printStackTrace(); System.exit(1); } }
-	 */
-	/*
-	 * void writeState() { if (characterStateOut != null) {
-	 * pacman.writeState(characterStateOut, gameID, gameStep, score, "P" + 1,
-	 * false); int ghostID = 1; for (Ghost ghost : ghosts) {
-	 * ghost.writeState(characterStateOut, gameID, gameStep, score, "G" +
-	 * ghostID, ghost.edible); ghostID++; } } }
-	 */
-	/*
-	 * public void writeEventHeader() { eventOut.println(
-	 * "GameID, GameStep, EventType"); }
-	 */
-	/*
-	 * void writeEventfoo(String evenType) {
-	 * 
-	 * eventOut.println(gameID + "," + gameStep + "," + evenType); }
-	 */
+
 	@Override
 	public long getGameID() {
 		return gameID;
@@ -483,17 +477,46 @@ public class Board implements Runnable, EventTrackable {
 		return gameStep;
 	}
 
+	/**
+	 * Called by Board to signal that a sound should be played if there is a
+	 * renderer
+	 * 
+	 * @param audioClipID
+	 */
 	public void playAudio(int audioClipID) {
 		this.audioClipID = audioClipID;
 	}
 
+	/**
+	 * Called by renderer to figure if there is a game sound to play
+	 * 
+	 * @return
+	 */
 	public boolean doPlayAudio() {
 		return audioClipID != -1;
 	}
 
+	/**
+	 * Called by renderer to figure out what game sound to play
+	 * 
+	 * @return
+	 */
 	public int getAudioClipID() {
 		int clipID = this.audioClipID;
 		this.audioClipID = -1;
 		return clipID;
+	}
+
+	@Override
+	public Map<String, String> getData(DataEvent.DataEventType dataEvent) {
+		Hashtable<String, String> hashtable = new Hashtable<String, String>();
+
+		switch (dataEvent) {
+		case MOVE:
+			break;
+		default:
+		}
+		return hashtable;
+
 	}
 }

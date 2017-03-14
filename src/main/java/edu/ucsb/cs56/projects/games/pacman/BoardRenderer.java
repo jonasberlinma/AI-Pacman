@@ -345,9 +345,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	public void drawGhost(Graphics2D g, JComponent canvas, Ghost ghost) {
 		AssetController ac = AssetController.getInstance();
 		if (ghost.edible)
-			g.drawImage(ac.scaredGhostImage, ghost.x + 4, ghost.y + 4, canvas);
+			g.drawImage(ac.getScaredGhostImage(), ghost.x + 4, ghost.y + 4, canvas);
 		else
-			g.drawImage(ac.ghostImage[ghost.type], ghost.x + 4, ghost.y + 4, canvas);
+			g.drawImage(ac.getGhostImage(ghost.getPlayerType()), ghost.x + 4, ghost.y + 4, canvas);
 	}
 
 	/**
