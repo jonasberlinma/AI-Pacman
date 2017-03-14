@@ -260,7 +260,9 @@ public class Board implements Runnable, EventTrackable {
 				}
 
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == true) {
-					dataInterface.setData(new DataEvent(DataEventType.EAT_GHOST, this, this));
+					DataEvent dataEvent = new DataEvent(DataEventType.EAT_GHOST, this, this);
+					dataEvent.setKeyValuePair("score", "" + score);
+					dataInterface.setData(dataEvent);
 					ghost.death();
 					score += 40;
 				}
