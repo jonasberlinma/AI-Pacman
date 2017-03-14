@@ -24,6 +24,14 @@ Runs the AIPayerRandom implementation of AIPlayer. Next step is to add dynamic c
 
 Runs the program without the graphical display. Only output is the event log file.
 
+-aiPlayerClassName
+
+The complete class name for the auto player class, for example "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull" a player that does nothing, or "edu.ucsb.cs56.projects.games.pacman.AIPlayerRandom" a player that does a random walk.
+
+-nBackgroundPlayers
+
+The number of concurrent players (threads) that play in the background collecting game experience. Once a game is finished the bacground player reports the experience and starts a new game.
+
 To implement your own AIPlayer, just subclass AIPlayer and implement the dataEvent method. Call keyPress to press keys, and get current game events and data from the input DataEvent. You will get a callback for each game tick, 25 per second if you set loopDelay to 40, plus one for each major game event (INTRO, EAT_PILL, etc.). Look at the event log or the DataEventType enum for event types. Take a peek at the AIPlayerRandom to understand how you can do a simple implementation. This AIPlayer just performs a randow walk through the grid.
 
 Basic bug fixes to-do:
@@ -33,8 +41,6 @@ Basic bug fixes to-do:
 Needed for true AI play:
 
 - Add more data elements to DataEvents to cover Character positions etc.
-- Add dynamic class loading to allow users to run their own AIPlayers
-- Add a MultiGame controller to allow many concurrent -headLess games to run for testing
 - Add an online training framework AITrainer which takes completed games from MultiGame controller and presents them to the AITrainer for realtime learning
 
 New nice to have features:
