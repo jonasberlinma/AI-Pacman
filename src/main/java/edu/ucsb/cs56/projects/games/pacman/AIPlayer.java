@@ -43,7 +43,7 @@ public abstract class AIPlayer implements Runnable {
 				// Log the raw event
 				logEvent(dataEvent);
 				// Pass data event to subclass
-				dataEvent(dataEvent);
+				dataEvent(board.getGrid(), dataEvent);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -61,7 +61,7 @@ public abstract class AIPlayer implements Runnable {
 	 * 
 	 * @param dataEvent
 	 */
-	protected abstract void dataEvent(DataEvent dataEvent);
+	protected abstract void dataEvent(Grid grid,DataEvent dataEvent);
 
 	protected void pressKey(int key) {
 		if (lastKey != key) {

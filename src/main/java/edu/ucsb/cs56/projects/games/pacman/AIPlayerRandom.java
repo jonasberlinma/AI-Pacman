@@ -13,7 +13,7 @@ public class AIPlayerRandom extends AIPlayer {
 	}
 
 	@Override
-	public void dataEvent(DataEvent dataEvent) {
+	public void dataEvent(Grid grid, DataEvent dataEvent) {
 
 		switch (dataEvent.eventType) {
 

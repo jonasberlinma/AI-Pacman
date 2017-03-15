@@ -32,7 +32,7 @@ public class Grid {
 	short[][][] levelsData;
 	Color mazeColor, dotColor, fruitColor;
 	
-	private Hashtable<Pair, Integer> distanceMap = new Hashtable<Pair,Integer >();
+	private Hashtable<Pair, Integer> distanceMap = null;
 	
 	class Pair{
 		int from;
@@ -52,6 +52,8 @@ public class Grid {
 		this.levelsData = new short[loadableLevels.length][1][1];
 		for (int i = 0; i < loadableLevels.length; i++) {
 			GridData level = loadLevel("assets/levels/" + loadableLevels[i]);
+			GridWalker gridWalker = new GridWalker(level);
+			distanceMap = gridWalker.computeDistanceMap();
 			levelsData[i] = level.get2DGridData();
 		}
 	}
@@ -221,12 +223,5 @@ public class Grid {
 			gridOut.println("");
 		}
 	}
-	public void computeDistanceMap(){
-		// Pick a starting point
-		// Walk the grid and for each choice create another node in a distance tree
-		// Use a starting point and end point to assemble the shortest path
-		// Store all pairs with the distance
-		//distanceMap.put(new Pair(1,2), 1);
-	}
-	
+
 }
