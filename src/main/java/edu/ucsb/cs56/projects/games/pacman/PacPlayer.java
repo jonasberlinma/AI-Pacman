@@ -2,6 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.Image;
 import java.awt.event.KeyEvent;
+import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 
@@ -180,7 +181,7 @@ public class PacPlayer extends Character {
 	 *            The Grid to be used for collision
 	 */
 	@Override
-	public void moveAI(Grid grid, Character[] c) {
+	public void moveAI(Grid grid, Vector<Character> c) {
 
 	}
 

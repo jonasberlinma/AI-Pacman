@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
+import java.util.Vector;
 
 /**
  * Class representing enemy ghosts in single player mode
@@ -223,10 +224,10 @@ public class Ghost extends Character {
 	 * @param c    Array of pacmen to chase
 	 */
 	@Override
-	public void moveAI(Grid grid, Character[] c)
+	public void moveAI(Grid grid, Vector<Character>c)
 	{
 		move();
-		if(c.length == 0) //Nothing to chase.  Should never happen
+		if(c.size() == 0) //Nothing to chase.  Should never happen
 			return;
 		if(edible) {
 			edibleTimer--;	
@@ -235,7 +236,7 @@ public class Ghost extends Character {
 			moveRandom(grid);
 		}
 		else {
-			int[][] coord = new int[c.length][2];
+			int[][] coord = new int[c.size()][2];
 			int count = 0;
 	
 			for(Character p : c)

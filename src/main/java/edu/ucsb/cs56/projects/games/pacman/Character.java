@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.io.PrintStream;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * Class that every character inherits from, including players and AI-controlled
@@ -130,7 +131,7 @@ public abstract class Character implements EventTrackable {
 	 * @param c
 	 *            Array of target Characters
 	 */
-	public abstract void moveAI(Grid grid, Character[] c);
+	public abstract void moveAI(Grid grid, Vector<Character> c);
 
 	/**
 	 * Moves character's current position

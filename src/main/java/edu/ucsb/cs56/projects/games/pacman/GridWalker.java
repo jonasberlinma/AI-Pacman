@@ -186,8 +186,7 @@ public class GridWalker {
 	}
 
 	private Hashtable<Pair, Integer> assemblePaths() {
-		// This is a brute force algorithm. It should use Yen's algorithm:
-		// https://en.wikipedia.org/wiki/Yen%27s_algorithm
+		// This is a brute force algorithm. 
 
 		Hashtable<Pair, Integer> distanceMap = new Hashtable<Pair, Integer>();
 
@@ -204,6 +203,7 @@ public class GridWalker {
 							Point toPoint = new Point(k, l);
 							if (!(i == k && j == l)) {
 								if (pathSectionHashtable.containsKey(toPoint)) {
+									// This should use Dijkstra's algorithm or something similar
 
 									Vector<PathSection> fromPaths = pathSectionHashtable.get(fromPoint);
 									Vector<PathSection> toPaths = pathSectionHashtable.get(toPoint);

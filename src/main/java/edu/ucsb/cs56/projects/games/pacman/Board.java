@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
@@ -50,7 +51,7 @@ public class Board implements Runnable, EventTrackable {
 	PacPlayer pacman;
 	PacPlayer msPacman;
 	Ghost ghost1, ghost2;
-	Character[] pacmen;
+	Vector<Character> pacmen;
 	ArrayList<Ghost> ghosts;
 	private int numGhosts = 6;
 	int numBoardsCleared = 0;
@@ -81,6 +82,8 @@ public class Board implements Runnable, EventTrackable {
 		grid.levelInit(0);
 
 		// grid.writeGrid(gridOut);
+
+		pacmen = new Vector<Character>();
 
 		pacman = new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PlayerType.PACMAN, grid);
 		// msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 *
@@ -277,10 +280,7 @@ public class Board implements Runnable, EventTrackable {
 	 * @return true if any surviving, false if all dead
 	 */
 	public boolean checkAlive() {
-		for (Character pacman : pacmen)
-			if (pacman.alive)
-				return true;
-		return false;
+		return pacmen.stream().anyMatch(x -> x.alive);
 	}
 
 	public void resetGame() {
@@ -302,20 +302,17 @@ public class Board implements Runnable, EventTrackable {
 
 		switch (gt) {
 		case SINGLEPLAYER:
-			pacmen = new Character[1];
-			pacmen[0] = pacman;
+			pacmen.add(pacman);
 			pacman.reset();
 			break;
 		case COOPERATIVE:
-			pacmen = new Character[2];
-			pacmen[0] = pacman;
-			pacmen[1] = msPacman;
+			pacmen.add(pacman);
+			pacmen.add(msPacman);
 			pacman.reset();
 			msPacman.reset();
 			break;
 		case VERSUS:
-			pacmen = new Character[1];
-			pacmen[0] = pacman;
+			pacmen.add(pacman);
 			pacman.reset();
 			break;
 		default:
@@ -467,7 +464,6 @@ public class Board implements Runnable, EventTrackable {
 		} catch (InterruptedException e) {
 		}
 	}
-
 
 	@Override
 	public long getGameID() {
