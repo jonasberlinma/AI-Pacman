@@ -52,7 +52,7 @@ public class Board implements Runnable, EventTrackable {
 	PacPlayer msPacman;
 	Ghost ghost1, ghost2;
 	Vector<Character> pacmen;
-	ArrayList<Ghost> ghosts;
+	Vector<Ghost> ghosts;
 	private int numGhosts = 6;
 	int numBoardsCleared = 0;
 	private int curSpeed = 3;
@@ -91,7 +91,7 @@ public class Board implements Runnable, EventTrackable {
 		ghost1 = new Ghost(dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
 		ghost2 = new Ghost(dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST2, grid);
 
-		ghosts = new ArrayList<Ghost>();
+		ghosts = new Vector<Ghost>();
 		numPills = 4;
 
 		dataInterface.setData(new DataEvent(DataEventType.INTRO, this, this));
@@ -251,7 +251,7 @@ public class Board implements Runnable, EventTrackable {
 	 * @param ghosts
 	 *            An array of Ghost
 	 */
-	public void detectCollision(ArrayList<Ghost> ghosts) {
+	public void detectCollision(Vector<Ghost> ghosts) {
 		for (Character pacman : pacmen) {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {

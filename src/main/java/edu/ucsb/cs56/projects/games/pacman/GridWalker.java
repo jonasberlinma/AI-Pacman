@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
@@ -16,13 +17,8 @@ public class GridWalker {
 	short[][] visited = null;
 	GridData level = null;
 
-	// Point lastPoint = null;
-
-	private int stepNumber = 0;
-	private int lastStepNumber = 0;
-
-	Hashtable<Point, Vector<PathSection>> pathSectionHashtable = new Hashtable<Point, Vector<PathSection>>();
-	Vector<PathSection> pathSections = new Vector<PathSection>();
+	Hashtable<Point, HashSet<PathSection>> pathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
+	HashSet<PathSection> pathSections = new HashSet<PathSection>();
 
 	GridWalker(GridData level) {
 		this.level = level;
@@ -35,9 +31,11 @@ public class GridWalker {
 			}
 		}
 	}
-	public Vector<PathSection> getPathSections(){
+
+	public HashSet<PathSection> getPathSections() {
 		return pathSections;
 	}
+
 	protected class PathSection {
 		Point fromPoint, toPoint;
 		int length;
@@ -48,6 +46,17 @@ public class GridWalker {
 			this.length = length;
 		}
 
+		@Override
+		public boolean equals(Object other) {
+			PathSection ps = (PathSection) other;
+			return this.fromPoint.equals(ps.fromPoint) && this.toPoint.equals(ps.toPoint);
+		}
+
+		@Override
+		public int hashCode() {
+			return fromPoint.hashCode() * 31 * toPoint.hashCode();
+		}
+
 		void print(PrintStream out) {
 			out.println("" + fromPoint.nodeNumber + "," + toPoint.nodeNumber + "," + length);
 		}
@@ -55,26 +64,28 @@ public class GridWalker {
 
 	protected class Point {
 		int x, y;
-		int nodeNumber = 0;
+		String nodeNumber = "";
 
 		Point(int x, int y) {
 			this.x = x;
 			this.y = y;
 			nodeNumber = getNodeNumber();
 		}
-		private int getNodeNumber(){
-			return x * 1000 + y;
+
+		private String getNodeNumber() {
+			return x + "-" + y;
 		}
+
 		@Override
 		public boolean equals(Object point) {
 			Point p = (Point) point;
-			return (this.x == p.x && this.y == p.y && this.nodeNumber == p.nodeNumber);
+			return (this.x == p.x && this.y == p.y);
 		}
 
 		@Override
 		public int hashCode() {
 			int hash = 1;
-			hash = hash * 31 + nodeNumber * 4 + x * 8 + y * 16;
+			hash = hash * 31 + nodeNumber.hashCode() * 4 + x * 8 + y * 16;
 			return hash;
 		}
 
@@ -97,7 +108,7 @@ public class GridWalker {
 		}
 
 		private void setVisited() {
-			if(visited[x][y] == 0)
+			if (visited[x][y] == 0)
 				visited[x][y] = 1;
 		}
 
@@ -126,9 +137,10 @@ public class GridWalker {
 		Point point = new Point(0, 3);
 		point.setIsChoice();
 		// Walk the maze
-		walk(point, point);
+		walk(point, point, 0);
 		// printWalkOrder();
 		printGraph();
+		System.exit(0);
 		return assemblePaths();
 	}
 
@@ -186,7 +198,7 @@ public class GridWalker {
 	}
 
 	private Hashtable<Pair, Integer> assemblePaths() {
-		// This is a brute force algorithm. 
+		// This is a brute force algorithm.
 
 		Hashtable<Pair, Integer> distanceMap = new Hashtable<Pair, Integer>();
 
@@ -203,10 +215,11 @@ public class GridWalker {
 							Point toPoint = new Point(k, l);
 							if (!(i == k && j == l)) {
 								if (pathSectionHashtable.containsKey(toPoint)) {
-									// This should use Dijkstra's algorithm or something similar
+									// This should use Dijkstra's algorithm or
+									// something similar
 
-									Vector<PathSection> fromPaths = pathSectionHashtable.get(fromPoint);
-									Vector<PathSection> toPaths = pathSectionHashtable.get(toPoint);
+									HashSet<PathSection> fromPaths = pathSectionHashtable.get(fromPoint);
+									HashSet<PathSection> toPaths = pathSectionHashtable.get(toPoint);
 									System.out.println("Options from " + fromPaths.size());
 									System.out.println("Options to   " + toPaths.size());
 
@@ -220,36 +233,40 @@ public class GridWalker {
 		return distanceMap;
 	}
 
-	private PathSection addPathSection(Point point, Point lastPoint) {
+	private void addPathSection(Point point, Point lastPoint, int stepNumber) {
 		PathSection p1 = null;
 		if (lastPoint != null && !point.equals(lastPoint)) {
-			p1 = new PathSection(lastPoint, point, stepNumber - lastStepNumber);
+			p1 = new PathSection(lastPoint, point, stepNumber);
 			if (!pathSectionHashtable.containsKey(lastPoint)) {
-				pathSectionHashtable.put(lastPoint, new Vector<PathSection>());
+				pathSectionHashtable.put(lastPoint, new HashSet<PathSection>());
 			}
+
 			pathSectionHashtable.get(lastPoint).add(p1);
-			PathSection p2 = new PathSection(point, lastPoint, stepNumber - lastStepNumber);
+
+			PathSection p2 = new PathSection(point, lastPoint, stepNumber);
 			if (!pathSectionHashtable.containsKey(point)) {
-				pathSectionHashtable.put(point, new Vector<PathSection>());
+				pathSectionHashtable.put(point, new HashSet<PathSection>());
 			}
+
 			pathSectionHashtable.get(point).add(p2);
+
 			pathSections.add(p1);
 			pathSections.add(p2);
 		}
-		lastStepNumber = stepNumber;
-		return p1;
 	}
 
-	private void walk(Point point, Point lastPoint) {
+	private void walk(Point point, Point lastPoint, int stepNumber) {
 		// First figure out what directions we can walk
 		stepNumber++;
 		point.setInspecting();
 		Point newLastPoint = lastPoint;
 		Vector<Direction> walkableDirections = getWalkableDirections(point);
 		if (getWalkableDirectionCount(point) > 2 && !point.isChoice()) {
-			// We hit a choice point add the section if we haven't been here already
-			addPathSection(point, lastPoint);
+			// We hit a choice point add the section if we haven't been here
+			// already
+			addPathSection(point, lastPoint, stepNumber);
 			newLastPoint = point;
+			stepNumber = 0;
 			point.setIsChoice();
 		}
 
@@ -260,12 +277,12 @@ public class GridWalker {
 			Point newPoint = point.copy();
 			Direction dir = i.next();
 			newPoint.step(dir);
-			
+
 			if (newPoint.isChoice()) {
 				// We ran into our tail we have been here before
-				addPathSection(newPoint, newLastPoint);
+				addPathSection(newPoint, newLastPoint, stepNumber + 1);
 			} else {
-				walk(newPoint, newLastPoint);
+				walk(newPoint, newLastPoint, stepNumber);
 			}
 		}
 		point.setVisited();
