@@ -50,11 +50,9 @@ public class Grid {
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
 		gridWalkers = new GridWalker[loadableLevels.length];
-		for (int i = 0; i < 1; i++) {
-			// for (int i = 0; i < loadableLevels.length; i++) {
+			for (int i = 0; i < loadableLevels.length; i++) {
 			GridData level = loadLevel("assets/levels/" + loadableLevels[i]);
 			gridWalkers[i] = new GridWalker(level);
-			gridWalkers[i].computeDistanceMap();
 			levelsData[i] = level.get2DGridData();
 		}
 	}

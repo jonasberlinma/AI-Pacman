@@ -20,6 +20,7 @@ public class GridWalker {
 	GridWalker(GridData level) {
 		grid = level.get2DGridData();
 		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
+		buildGraph();
 	}
 
 	protected class PathSection {
@@ -96,18 +97,6 @@ public class GridWalker {
 		}
 	}
 
-	public void computeDistanceMap() {
-
-		// printGrid(System.out);
-		// Pick a starting point
-		// Walk the maze
-		//printGrid(System.out);
-		buildGraph();
-		printGraph();
-		
-		getShortestPath(2, 0, 13, 15);
-	}
-
 	public void printGrid(PrintStream out) {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
@@ -178,11 +167,11 @@ public class GridWalker {
 		Point endPoint = allPoints.get(new Point(endX, endY).nodeNumber);
 
 		if (!reachablePoints.contains(startPoint)) {
-			System.out.println("Start point not found " + startX + "-" + startY);
+			System.err.println("Start point not found " + startX + "-" + startY);
 			return 0;
 		}
 		if (!reachablePoints.contains(endPoint)) {
-			System.out.println("End point not found " + endX + "-" + endY);
+			System.err.println("End point not found " + endX + "-" + endY);
 			return 0;
 		}
 		visitedPoints.clear();
@@ -205,17 +194,7 @@ public class GridWalker {
 			visitedPoints.add(currentPoint);
 			unvisitedPoints.remove(currentPoint);
 			updateDistances(currentPoint);
-			Point nextPoint = findNext(currentPoint);
-			if (nextPoint == null) {
-				System.out.print("Puking ");
-				currentPoint.print(System.out);
-				System.out.print(" Working from ");
-				startPoint.print(System.out);
-				System.out.print(" to ");
-				endPoint.print(System.out);
-				System.out.println("Size of unvisited " + unvisitedPoints.size());
-			}
-			currentPoint = nextPoint;
+			currentPoint = findNext(currentPoint);;
 		}
 		return (currentPoint == null) ? 0 : currentPoint.distance;
 	}
@@ -306,9 +285,6 @@ public class GridWalker {
 				}
 			}
 		}
-		System.out.println("Have " + reachablePoints.size() + " reachabe");
-		System.out.println("and " + allPoints.size() + " total.");
-
 	}
 
 	private boolean canWalkRight(Point point) {
