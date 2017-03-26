@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.Hashtable;
 
 /**
  * Class representing the map layout
@@ -30,15 +29,15 @@ public class Grid {
 
 	short[][] screenData;
 	short[][][] levelsData;
+	private GridWalker[] gridWalkers = null;
 	Color mazeColor, dotColor, fruitColor;
-	
-	private Hashtable<Pair, Integer> distanceMap = null;
-	
-	class Pair{
+	private int currentLevel;
+
+	class Pair {
 		int from;
 		int to;
 	}
-	
+
 	/**
 	 * Constructor for Board object
 	 */
@@ -50,10 +49,12 @@ public class Grid {
 
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
-		for (int i = 0; i < loadableLevels.length; i++) {
+		gridWalkers = new GridWalker[loadableLevels.length];
+		for (int i = 0; i < 1; i++) {
+			// for (int i = 0; i < loadableLevels.length; i++) {
 			GridData level = loadLevel("assets/levels/" + loadableLevels[i]);
-			GridWalker gridWalker = new GridWalker(level);
-			distanceMap = gridWalker.computeDistanceMap();
+			gridWalkers[i] = new GridWalker(level);
+			gridWalkers[i].computeDistanceMap();
 			levelsData[i] = level.get2DGridData();
 		}
 	}
@@ -149,6 +150,7 @@ public class Grid {
 	 *            the number of levels that have been cleared
 	 */
 	public void levelInit(int numBoardsCleared) {
+		this.currentLevel = numBoardsCleared;
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			screenData[i] = Arrays.copyOf(this.levelsData[numBoardsCleared % this.levelsData.length][i],
 					Board.NUMBLOCKS);
@@ -223,5 +225,7 @@ public class Grid {
 			gridOut.println("");
 		}
 	}
-
+	public GridWalker getGridWalker(){
+		return gridWalkers[currentLevel];
+	}
 }

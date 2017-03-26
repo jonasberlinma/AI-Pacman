@@ -2,7 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;

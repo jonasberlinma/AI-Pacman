@@ -7,33 +7,19 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
-
-import edu.ucsb.cs56.projects.games.pacman.Grid.Pair;
 
 public class GridWalker {
 
-	short[][] grid = null;
-	short[][] visited = null;
-	GridData level = null;
+	private short[][] grid = null;
+	private short[][] connectionCheck = null;
 
-	Hashtable<Point, HashSet<PathSection>> pathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
-	HashSet<PathSection> pathSections = new HashSet<PathSection>();
+	private HashSet<Point> reachablePoints = new HashSet<Point>();
+	private Hashtable<String, Point> allPoints = new Hashtable<String, Point>();
+	private Hashtable<Point, HashSet<PathSection>> pathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
 
 	GridWalker(GridData level) {
-		this.level = level;
 		grid = level.get2DGridData();
-		visited = level.get2DGridData();
-
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
-				visited[i][j] = 0;
-			}
-		}
-	}
-
-	public HashSet<PathSection> getPathSections() {
-		return pathSections;
+		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 	}
 
 	protected class PathSection {
@@ -63,13 +49,25 @@ public class GridWalker {
 	}
 
 	protected class Point {
+
 		int x, y;
 		String nodeNumber = "";
+		private int distance;
 
 		Point(int x, int y) {
 			this.x = x;
 			this.y = y;
 			nodeNumber = getNodeNumber();
+		}
+
+		Point stepRight() {
+			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y );
+			return newPoint;
+		}
+
+		Point stepDown() {
+			Point newPoint = new Point(x , (y+ 1) % Board.NUMBLOCKS);
+			return newPoint;
 		}
 
 		private String getNodeNumber() {
@@ -89,67 +87,32 @@ public class GridWalker {
 			return hash;
 		}
 
-		void step(Direction direction) {
-			x = (x + direction.dx + Board.NUMBLOCKS) % Board.NUMBLOCKS;
-			y = (y + direction.dy + Board.NUMBLOCKS) % Board.NUMBLOCKS;
-			nodeNumber = getNodeNumber();
-		}
-
-		Point copy() {
-			return new Point(this.x, this.y);
-		}
-
 		void print(PrintStream out) {
 			out.print("" + nodeNumber + "," + nodeNumber);
 		}
 
-		private void setInspecting() {
-			visited[x][y] = -1;
-		}
-
-		private void setVisited() {
-			if (visited[x][y] == 0)
-				visited[x][y] = 1;
-		}
-
-		private void setIsChoice() {
-			visited[x][y] = 2;
-		}
-
-		private boolean isChoice() {
-			return visited[x][y] == 2;
+		private void setDistance(int distance) {
+			this.distance = distance;
 		}
 	}
 
-	class Direction {
-		int dx, dy;
+	public void computeDistanceMap() {
 
-		Direction(int dx, int dy) {
-			this.dx = dx;
-			this.dy = dy;
-		}
-	}
-
-	public Hashtable<Pair, Integer> computeDistanceMap() {
-
-		// printGrid();
+		// printGrid(System.out);
 		// Pick a starting point
-		Point point = new Point(0, 3);
-		point.setIsChoice();
 		// Walk the maze
-		walk(point, point, 0);
-		// printWalkOrder();
+		//printGrid(System.out);
+		buildGraph();
 		printGraph();
-		System.exit(0);
-		return assemblePaths();
+		
+		getShortestPath(2, 0, 13, 15);
 	}
 
 	public void printGrid(PrintStream out) {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
-				short ch = (short) (grid[i][j] & (short) 15);
-				String b = "   " + ch + "-" + getWalkableDirections(new Point(i, j)).size();
-				b = b.substring(b.length() - 5, b.length());
+				short ch = (short) (grid[j][i] & (short) 15);
+				String b = i + "-" + j + "->" + ch + ";";
 				out.print(b);
 				if ((ch & 8) == 0)
 					out.print("Down ");
@@ -172,7 +135,7 @@ public class GridWalker {
 			nodeOut = new PrintStream(new FileOutputStream("nodes.csv"));
 			edgeOut = new PrintStream(new FileOutputStream("edges.csv"));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Unable to open output files \"nodes.csv\" and \"edges.csv\"");
 			e.printStackTrace();
 		}
 
@@ -180,10 +143,14 @@ public class GridWalker {
 		edgeOut.println("Source,Target,Length");
 
 		// Write the edges (PathSections)
-		Iterator<PathSection> i = pathSections.iterator();
-		while (i.hasNext()) {
-			PathSection ps = i.next();
-			ps.print(edgeOut);
+
+		Enumeration<HashSet<PathSection>> i = pathSectionHashtable.elements();
+		while (i.hasMoreElements()) {
+			HashSet<PathSection> psh = i.nextElement();
+			Iterator<PathSection> j = psh.iterator();
+			while (j.hasNext()) {
+				j.next().print(edgeOut);
+			}
 		}
 		// Write the nodes (Points with path choices)
 		Enumeration<Point> ip = pathSectionHashtable.keys();
@@ -197,134 +164,186 @@ public class GridWalker {
 		edgeOut.close();
 	}
 
-	private Hashtable<Pair, Integer> assemblePaths() {
-		// This is a brute force algorithm.
+	private HashSet<Point> visitedPoints;
+	private HashSet<Point> unvisitedPoints;
 
-		Hashtable<Pair, Integer> distanceMap = new Hashtable<Pair, Integer>();
+	public int getShortestPath(int fromX, int fromY, int toX, int toY) {
+		int startX = fromX / Board.BLOCKSIZE;
+		int startY = fromY / Board.BLOCKSIZE;
+		int endX = toX / Board.BLOCKSIZE;
+		int endY = toY / Board.BLOCKSIZE;
+		visitedPoints = new HashSet<Point>();
+		unvisitedPoints = new HashSet<Point>();
+		Point startPoint = allPoints.get(new Point(startX, startY).nodeNumber);
+		Point endPoint = allPoints.get(new Point(endX, endY).nodeNumber);
 
-		System.out.println("Assembling paths");
-		System.out.println("Using " + pathSectionHashtable.size() + " points");
-		System.out.println("and " + pathSections.size() + " path sections");
+		if (!reachablePoints.contains(startPoint)) {
+			System.out.println("Start point not found " + startX + "-" + startY);
+			return 0;
+		}
+		if (!reachablePoints.contains(endPoint)) {
+			System.out.println("End point not found " + endX + "-" + endY);
+			return 0;
+		}
+		visitedPoints.clear();
+		unvisitedPoints.clear();
+		Enumeration<Point> p = pathSectionHashtable.keys();
+		while (p.hasMoreElements()) {
+			Point point = p.nextElement();
+			if (reachablePoints.contains(point)) {
+				unvisitedPoints.add(point);
+			}
+		}
+		unvisitedPoints.forEach((x) -> x.setDistance(Integer.MAX_VALUE));
+		startPoint.setDistance(0);
 
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
-				Point fromPoint = new Point(i, j);
-				if (pathSectionHashtable.containsKey(fromPoint)) {
-					for (int k = 0; k < Board.NUMBLOCKS; k++) {
-						for (int l = 0; l < Board.NUMBLOCKS; l++) {
-							Point toPoint = new Point(k, l);
-							if (!(i == k && j == l)) {
-								if (pathSectionHashtable.containsKey(toPoint)) {
-									// This should use Dijkstra's algorithm or
-									// something similar
+		visitedPoints.add(startPoint);
+		unvisitedPoints.remove(startPoint);
+		Point currentPoint = startPoint;
 
-									HashSet<PathSection> fromPaths = pathSectionHashtable.get(fromPoint);
-									HashSet<PathSection> toPaths = pathSectionHashtable.get(toPoint);
-									System.out.println("Options from " + fromPaths.size());
-									System.out.println("Options to   " + toPaths.size());
+		while (currentPoint != null && !currentPoint.equals(endPoint)) {
+			visitedPoints.add(currentPoint);
+			unvisitedPoints.remove(currentPoint);
+			updateDistances(currentPoint);
+			Point nextPoint = findNext(currentPoint);
+			if (nextPoint == null) {
+				System.out.print("Puking ");
+				currentPoint.print(System.out);
+				System.out.print(" Working from ");
+				startPoint.print(System.out);
+				System.out.print(" to ");
+				endPoint.print(System.out);
+				System.out.println("Size of unvisited " + unvisitedPoints.size());
+			}
+			currentPoint = nextPoint;
+		}
+		return (currentPoint == null) ? 0 : currentPoint.distance;
+	}
 
-								}
-							}
-						}
-					}
+	private void updateDistances(Point thisPoint) {
+		HashSet<PathSection> p = pathSectionHashtable.get(thisPoint);
+		for (PathSection i : p) {
+			if (!visitedPoints.contains(i.toPoint)) {
+				if (i.toPoint.distance > (thisPoint.distance + i.length)) {
+					i.toPoint.distance = thisPoint.distance + i.length;
 				}
 			}
 		}
-		return distanceMap;
 	}
 
-	private void addPathSection(Point point, Point lastPoint, int stepNumber) {
-		PathSection p1 = null;
-		if (lastPoint != null && !point.equals(lastPoint)) {
-			p1 = new PathSection(lastPoint, point, stepNumber);
-			if (!pathSectionHashtable.containsKey(lastPoint)) {
-				pathSectionHashtable.put(lastPoint, new HashSet<PathSection>());
+	private Point findNext(Point thisPoint) {
+		Point nextPoint = null;
+		int minDistance = Integer.MAX_VALUE;
+		for (Point i : unvisitedPoints) {
+			if (i.distance < minDistance) {
+				nextPoint = i;
+				minDistance = i.distance;
 			}
+		}
+		return nextPoint;
+	}
 
-			pathSectionHashtable.get(lastPoint).add(p1);
-
-			PathSection p2 = new PathSection(point, lastPoint, stepNumber);
-			if (!pathSectionHashtable.containsKey(point)) {
+	private void buildGraph() {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+				Point point = new Point(i, j);
 				pathSectionHashtable.put(point, new HashSet<PathSection>());
-			}
-
-			pathSectionHashtable.get(point).add(p2);
-
-			pathSections.add(p1);
-			pathSections.add(p2);
-		}
-	}
-
-	private void walk(Point point, Point lastPoint, int stepNumber) {
-		// First figure out what directions we can walk
-		stepNumber++;
-		point.setInspecting();
-		Point newLastPoint = lastPoint;
-		Vector<Direction> walkableDirections = getWalkableDirections(point);
-		if (getWalkableDirectionCount(point) > 2 && !point.isChoice()) {
-			// We hit a choice point add the section if we haven't been here
-			// already
-			addPathSection(point, lastPoint, stepNumber);
-			newLastPoint = point;
-			stepNumber = 0;
-			point.setIsChoice();
-		}
-
-		Iterator<Direction> i = walkableDirections.iterator();
-		// Just to make sure we don't step on our tail
-
-		while (i.hasNext()) {
-			Point newPoint = point.copy();
-			Direction dir = i.next();
-			newPoint.step(dir);
-
-			if (newPoint.isChoice()) {
-				// We ran into our tail we have been here before
-				addPathSection(newPoint, newLastPoint, stepNumber + 1);
-			} else {
-				walk(newPoint, newLastPoint, stepNumber);
+				allPoints.put(point.getNodeNumber(), point);
 			}
 		}
-		point.setVisited();
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+
+				Point fromPoint = allPoints.get(i + "-" + j);
+				if (canWalkDown(fromPoint)) {
+					Point downPoint = allPoints.get(fromPoint.stepDown().nodeNumber);
+					reachablePoints.add(fromPoint);
+					reachablePoints.add(downPoint);
+					PathSection pathSection1 = new PathSection(fromPoint, downPoint, 1);
+					PathSection pathSection2 = new PathSection(downPoint, fromPoint, 1);
+					pathSectionHashtable.get(fromPoint).add(pathSection1);
+					pathSectionHashtable.get(downPoint).add(pathSection2);
+				}
+				if (canWalkRight(fromPoint)) {
+					Point rightPoint = allPoints.get(fromPoint.stepRight().nodeNumber);
+					reachablePoints.add(fromPoint);
+					reachablePoints.add(rightPoint);
+					PathSection pathSection1 = new PathSection(fromPoint, rightPoint, 1);
+					PathSection pathSection2 = new PathSection(rightPoint, fromPoint, 1);
+					pathSectionHashtable.get(fromPoint).add(pathSection1);
+					pathSectionHashtable.get(rightPoint).add(pathSection2);
+				}
+			}
+		}
+		for (short i = 0; i < Board.NUMBLOCKS; i += 2) {
+			for (short j = 0; j < Board.NUMBLOCKS; j += 2) {
+				connectionCheck[j][i] = 0;
+			}
+		}
+		// Starting point for Pacman
+		connectionCheck[8][11] = 1;
+
+		for (short iteration = 0; iteration < 15; iteration++) {
+			for (short i = 0; i < Board.NUMBLOCKS; i++) {
+				for (short j = 0; j < Board.NUMBLOCKS; j++) {
+					Point point = allPoints.get(i + "-" + j);
+					if (canWalkDown(point))
+						connectionCheck[j][i] += connectionCheck[(j + 1) % Board.NUMBLOCKS][i];
+					if (canWalkUp(point))
+						connectionCheck[j][i] += connectionCheck[(j - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][i];
+					if (canWalkRight(point))
+						connectionCheck[j][i] += connectionCheck[j][(i + 1) % Board.NUMBLOCKS];
+					if (canWalkLeft(point))
+						connectionCheck[j][i] += connectionCheck[j][(i - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS];
+					connectionCheck[j][i] = (short) Math.min(connectionCheck[j][i], 1);
+				}
+			}
+		}
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+				if (connectionCheck[j][i] == 0) {
+					reachablePoints.remove(new Point(i, j));
+				}
+			}
+		}
+		System.out.println("Have " + reachablePoints.size() + " reachabe");
+		System.out.println("and " + allPoints.size() + " total.");
+
 	}
 
-	private Vector<Direction> getWalkableDirections(Point point) {
-		short ch = (short) (grid[point.x][point.y] & (short) 15);
-		Vector<Direction> directions = new Vector<Direction>();
-
-		// Check down
-		if ((ch & 8) == 0 && (visited[(point.x + 1) % Board.NUMBLOCKS][point.y] >= 0))
-			directions.add(new Direction(1, 0));
-		// Check up
-		if ((ch & 2) == 0 && (visited[(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.y] >= 0))
-			directions.add(new Direction(-1, 0));
-		// Check right
-		if ((ch & 4) == 0 && (visited[point.x][(point.y + 1) % Board.NUMBLOCKS] >= 0))
-			directions.add(new Direction(0, 1));
-		// Check left
-		if ((ch & 1) == 0 && (visited[point.x][(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] >= 0))
-			directions.add(new Direction(0, -1));
-		return directions;
+	private boolean canWalkRight(Point point) {
+		// Current point
+		short ch = (short) (grid[point.y][point.x] & (short) 15);
+		// Right point from current
+		short ch2 = (short) (grid[point.y][(point.x + 1) % Board.NUMBLOCKS] & (short) 15);
+		// Check that we can walk right and back left to current
+		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
-	private int getWalkableDirectionCount(Point point) {
-		short ch = (short) (grid[point.x][point.y] & (short) 15);
-		int directionCount = 0;
-
-		// Check down
-		if ((ch & 8) == 0)
-			directionCount++;
-		// Check up
-		if ((ch & 2) == 0)
-			directionCount++;
-		// Check right
-		if ((ch & 4) == 0)
-			directionCount++;
-		// Check left
-		if ((ch & 1) == 0)
-			directionCount++;
-		;
-		return directionCount;
+	private boolean canWalkLeft(Point point) {
+		// Current point
+		short ch = (short) (grid[point.y][(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] & (short) 15);
+		// Right point from current
+		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
+		// Check that we can walk right and back left to current
+		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
+	private boolean canWalkDown(Point point) {
+		// Current point
+		short ch = (short) (grid[point.y][point.x] & (short) 15);
+		// Down point from current
+		short ch2 = (short) (grid[(point.y + 1) % Board.NUMBLOCKS][point.x] & (short) 15);
+		// Check that we can walk down and back up to current
+		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
+	}
+
+	private boolean canWalkUp(Point point) {
+		// Current point
+		short ch = (short) (grid[(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.x] & (short) 15);
+		// Down point from current
+		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
+		// Check that we can walk up and back down to current
+		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
+	}
 }
