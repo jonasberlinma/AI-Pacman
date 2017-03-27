@@ -3,19 +3,23 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Vector;
 
 public class GridWalker {
-
+	public enum Direction {LEFT, RIGHT, UP, DOWN};
+	
 	private short[][] grid = null;
 	private short[][] connectionCheck = null;
 
 	private HashSet<Point> reachablePoints = new HashSet<Point>();
 	private Hashtable<String, Point> allPoints = new Hashtable<String, Point>();
-	private Hashtable<Point, HashSet<PathSection>> pathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
+	private Hashtable<Point, HashSet<PathSection>> fromPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
+	private Hashtable<Point, HashSet<PathSection>> toPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
 
 	GridWalker(GridData level) {
 		grid = level.get2DGridData();
@@ -24,6 +28,7 @@ public class GridWalker {
 	}
 
 	protected class PathSection {
+
 		Point fromPoint, toPoint;
 		int length;
 
@@ -32,7 +37,20 @@ public class GridWalker {
 			this.toPoint = toPoint;
 			this.length = length;
 		}
-
+		
+		Direction getDirection(){
+			Direction d = null;
+			if(fromPoint.x < toPoint.x){
+				d = Direction.RIGHT;
+			} else if(fromPoint.x > toPoint.x){
+				d = Direction.LEFT;
+			} else if( fromPoint.y < toPoint.y){
+				d = Direction.DOWN;
+			} else if(fromPoint.y > toPoint.y){
+				d = Direction.UP;
+			}
+			return d;
+		}
 		@Override
 		public boolean equals(Object other) {
 			PathSection ps = (PathSection) other;
@@ -62,12 +80,12 @@ public class GridWalker {
 		}
 
 		Point stepRight() {
-			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y );
+			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y);
 			return newPoint;
 		}
 
 		Point stepDown() {
-			Point newPoint = new Point(x , (y+ 1) % Board.NUMBLOCKS);
+			Point newPoint = new Point(x, (y + 1) % Board.NUMBLOCKS);
 			return newPoint;
 		}
 
@@ -97,6 +115,15 @@ public class GridWalker {
 		}
 	}
 
+	protected class Path {
+		int distance;
+		Vector<PathSection> pathSections = null;
+		Path(int distance, Vector<PathSection> pathSections){
+			this.distance = distance;
+			this.pathSections = pathSections;
+		}
+	}
+	
 	public void printGrid(PrintStream out) {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
@@ -117,14 +144,15 @@ public class GridWalker {
 		}
 	}
 
-	private void printGraph() {
+	public void printGraph(String fileName) {
 		PrintStream nodeOut = null;
 		PrintStream edgeOut = null;
 		try {
-			nodeOut = new PrintStream(new FileOutputStream("nodes.csv"));
-			edgeOut = new PrintStream(new FileOutputStream("edges.csv"));
+			nodeOut = new PrintStream(new FileOutputStream(fileName + "_nodes.csv"));
+			edgeOut = new PrintStream(new FileOutputStream(fileName + "_edges.csv"));
 		} catch (FileNotFoundException e) {
-			System.err.println("Unable to open output files \"nodes.csv\" and \"edges.csv\"");
+			System.err.println(
+					"Unable to open output files \"" + fileName + "_nodes.csv\" and \"" + fileName + "_edges.csv\"");
 			e.printStackTrace();
 		}
 
@@ -133,7 +161,7 @@ public class GridWalker {
 
 		// Write the edges (PathSections)
 
-		Enumeration<HashSet<PathSection>> i = pathSectionHashtable.elements();
+		Enumeration<HashSet<PathSection>> i = fromPathSectionHashtable.elements();
 		while (i.hasMoreElements()) {
 			HashSet<PathSection> psh = i.nextElement();
 			Iterator<PathSection> j = psh.iterator();
@@ -142,7 +170,7 @@ public class GridWalker {
 			}
 		}
 		// Write the nodes (Points with path choices)
-		Enumeration<Point> ip = pathSectionHashtable.keys();
+		Enumeration<Point> ip = fromPathSectionHashtable.keys();
 		while (ip.hasMoreElements()) {
 			ip.nextElement().print(nodeOut);
 			nodeOut.println();
@@ -155,8 +183,12 @@ public class GridWalker {
 
 	private HashSet<Point> visitedPoints;
 	private HashSet<Point> unvisitedPoints;
+	
+	HashSet<PathSection> getPossiblePaths(Point point){
+		return fromPathSectionHashtable.get(point);
+	}
 
-	public int getShortestPath(int fromX, int fromY, int toX, int toY) {
+	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
 		int startX = fromX / Board.BLOCKSIZE;
 		int startY = fromY / Board.BLOCKSIZE;
 		int endX = toX / Board.BLOCKSIZE;
@@ -168,15 +200,15 @@ public class GridWalker {
 
 		if (!reachablePoints.contains(startPoint)) {
 			System.err.println("Start point not found " + startX + "-" + startY);
-			return 0;
+			return null;
 		}
 		if (!reachablePoints.contains(endPoint)) {
 			System.err.println("End point not found " + endX + "-" + endY);
-			return 0;
+			return null;
 		}
 		visitedPoints.clear();
 		unvisitedPoints.clear();
-		Enumeration<Point> p = pathSectionHashtable.keys();
+		Enumeration<Point> p = fromPathSectionHashtable.keys();
 		while (p.hasMoreElements()) {
 			Point point = p.nextElement();
 			if (reachablePoints.contains(point)) {
@@ -194,13 +226,32 @@ public class GridWalker {
 			visitedPoints.add(currentPoint);
 			unvisitedPoints.remove(currentPoint);
 			updateDistances(currentPoint);
-			currentPoint = findNext(currentPoint);;
+			currentPoint = findNext(currentPoint);
 		}
-		return (currentPoint == null) ? 0 : currentPoint.distance;
+		int shortestDistance = currentPoint.distance;
+		// Now walk backwards to find the shortest path
+		Vector<PathSection> shortestPath = new Vector<PathSection>();
+		while(!currentPoint.equals(startPoint)){
+			HashSet<PathSection> psh = toPathSectionHashtable.get(currentPoint);
+			int minDistance = Integer.MAX_VALUE;
+			PathSection minPathSection = null;
+			for(PathSection ps: psh){
+				if(ps.fromPoint.distance < minDistance){
+					minDistance = ps.fromPoint.distance;
+					minPathSection = ps;
+				}
+			}
+			currentPoint = minPathSection.fromPoint;
+			shortestPath.add(minPathSection);
+		}
+		// Reverse the order since we walked backwards
+		Collections.reverse(shortestPath);
+		Path path = new Path(shortestDistance, shortestPath);
+		return path;
 	}
 
 	private void updateDistances(Point thisPoint) {
-		HashSet<PathSection> p = pathSectionHashtable.get(thisPoint);
+		HashSet<PathSection> p = fromPathSectionHashtable.get(thisPoint);
 		for (PathSection i : p) {
 			if (!visitedPoints.contains(i.toPoint)) {
 				if (i.toPoint.distance > (thisPoint.distance + i.length)) {
@@ -226,7 +277,8 @@ public class GridWalker {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				Point point = new Point(i, j);
-				pathSectionHashtable.put(point, new HashSet<PathSection>());
+				fromPathSectionHashtable.put(point, new HashSet<PathSection>());
+				toPathSectionHashtable.put(point, new HashSet<PathSection>());
 				allPoints.put(point.getNodeNumber(), point);
 			}
 		}
@@ -240,8 +292,10 @@ public class GridWalker {
 					reachablePoints.add(downPoint);
 					PathSection pathSection1 = new PathSection(fromPoint, downPoint, 1);
 					PathSection pathSection2 = new PathSection(downPoint, fromPoint, 1);
-					pathSectionHashtable.get(fromPoint).add(pathSection1);
-					pathSectionHashtable.get(downPoint).add(pathSection2);
+					fromPathSectionHashtable.get(fromPoint).add(pathSection1);
+					fromPathSectionHashtable.get(downPoint).add(pathSection2);
+					toPathSectionHashtable.get(fromPoint).add(pathSection2);
+					toPathSectionHashtable.get(downPoint).add(pathSection1);
 				}
 				if (canWalkRight(fromPoint)) {
 					Point rightPoint = allPoints.get(fromPoint.stepRight().nodeNumber);
@@ -249,8 +303,10 @@ public class GridWalker {
 					reachablePoints.add(rightPoint);
 					PathSection pathSection1 = new PathSection(fromPoint, rightPoint, 1);
 					PathSection pathSection2 = new PathSection(rightPoint, fromPoint, 1);
-					pathSectionHashtable.get(fromPoint).add(pathSection1);
-					pathSectionHashtable.get(rightPoint).add(pathSection2);
+					fromPathSectionHashtable.get(fromPoint).add(pathSection1);
+					fromPathSectionHashtable.get(rightPoint).add(pathSection2);
+					toPathSectionHashtable.get(fromPoint).add(pathSection2);
+					toPathSectionHashtable.get(rightPoint).add(pathSection1);
 				}
 			}
 		}
@@ -281,7 +337,10 @@ public class GridWalker {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if (connectionCheck[j][i] == 0) {
-					reachablePoints.remove(new Point(i, j));
+					Point p = new Point(i, j);
+					reachablePoints.remove(p);
+					fromPathSectionHashtable.remove(p);
+					toPathSectionHashtable.remove(p);
 				}
 			}
 		}
