@@ -217,13 +217,9 @@ public class GridWalker {
 		}
 		visitedPoints.clear();
 		unvisitedPoints.clear();
-		Enumeration<Point> p = fromPathSectionHashtable.keys();
-		while (p.hasMoreElements()) {
-			Point point = p.nextElement();
-			if (reachablePoints.contains(point)) {
-				unvisitedPoints.add(point);
-			}
-		}
+
+		unvisitedPoints.addAll(reachablePoints);
+		
 		unvisitedPoints.forEach((x) -> x.setDistance(Integer.MAX_VALUE));
 		startPoint.setDistance(0);
 

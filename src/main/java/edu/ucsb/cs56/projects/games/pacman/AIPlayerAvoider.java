@@ -65,9 +65,7 @@ public class AIPlayerAvoider extends AIPlayer {
 				case "PACMA":
 					if (numSteps-- == 0 && closestGhostPath != null) {
 						GridWalker.Direction newDirection = null;
-						if (closestGhostPath.pathSections.size() == 0) {
-							System.out.println("Crap, we lost");
-						} else {
+						if (closestGhostPath.pathSections.size() != 0) {
 							GridWalker.PathSection p = closestGhostPath.pathSections.elementAt(0);
 							// This has to be fixed so the user doesn't have to
 							// worry about BLOCKSIZE
