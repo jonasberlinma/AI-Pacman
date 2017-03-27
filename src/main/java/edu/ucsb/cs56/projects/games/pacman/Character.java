@@ -162,8 +162,8 @@ public abstract class Character implements EventTrackable {
 		Hashtable<String, String> hashtable = new Hashtable<String,String>();
 		hashtable.put("playerType", playerType.name());
 		hashtable.put("characterID", "" + characterID);
-		hashtable.put("x", "" + x);
-		hashtable.put("y", "" + y);
+		hashtable.put("x", "" + x / Board.BLOCKSIZE);
+		hashtable.put("y", "" + y / Board.BLOCKSIZE);
 		hashtable.put("dx", "" + dx);
 		hashtable.put("dy", "" + dy);
 		hashtable.put("reqdx", "" + reqdx);

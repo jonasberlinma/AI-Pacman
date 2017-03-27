@@ -46,15 +46,15 @@ public class AIPlayerAvoider extends AIPlayer {
 			break;
 
 		case MOVE:
-			String playerType = dataEvent.keyValues.get("playerType");
-			String characterID = dataEvent.keyValues.get("characterID");
+			String playerType = dataEvent.getString("playerType");
+			String characterID = dataEvent.getString("characterID");
 			if (playerType != null) {
 				String playerTypeShort = playerType.substring(0, 5);
 				switch (playerTypeShort) {
 				case "GHOST":
 					if (numSteps % 4 == 0) {
-						int ghostX = new Integer(dataEvent.keyValues.get("x")).intValue();
-						int ghostY = new Integer(dataEvent.keyValues.get("y")).intValue();
+						int ghostX = dataEvent.getInt("x");
+						int ghostY = dataEvent.getInt("y");
 						Path path = gridWalker.getShortestPath(myX, myY, ghostX, ghostY);
 						if (path != null && closestGhostDistance > path.distance) {
 							closestGhostDistance = Math.min(closestGhostDistance, path.distance);
@@ -70,7 +70,7 @@ public class AIPlayerAvoider extends AIPlayer {
 							// This has to be fixed so the user doesn't have to
 							// worry about BLOCKSIZE
 							HashSet<PathSection> ps = grid.getGridWalker().getPossiblePaths(
-									gridWalker.new Point(myX / Board.BLOCKSIZE, myY / Board.BLOCKSIZE));
+									gridWalker.new Point(myX, myY));
 
 							if (ps != null) {
 								Vector<Direction> possibleDirections = new Vector<Direction>();
@@ -103,8 +103,8 @@ public class AIPlayerAvoider extends AIPlayer {
 							}
 						}
 					}
-					myX = new Integer(dataEvent.keyValues.get("x")).intValue();
-					myY = new Integer(dataEvent.keyValues.get("y")).intValue();
+					myX = dataEvent.getInt("x");
+					myY = dataEvent.getInt("y");
 					closestGhostDistance = Integer.MAX_VALUE;
 					break;
 				default:

@@ -11,7 +11,7 @@ public class DataEvent {
 	DataEventType eventType;
 	private long gameID = 0;
 	private int gameStep = 0;
-	HashMap<String, String> keyValues = new HashMap<String, String>(); 
+	private HashMap<String, String> keyValues = new HashMap<String, String>(); 
 
 	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
 		this.eventType = eventType;
@@ -38,5 +38,11 @@ public class DataEvent {
 	}
 	public void setGameID(long gameID) {
 		this.gameID = gameID;
+	}
+	public String getString(String key){
+		return keyValues.get(key);
+	}
+	public int getInt(String key){
+		return new Integer(keyValues.get(key)).intValue();
 	}
 }

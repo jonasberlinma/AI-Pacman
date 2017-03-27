@@ -198,21 +198,18 @@ public class GridWalker {
 	}
 
 	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
-		int startX = fromX / Board.BLOCKSIZE;
-		int startY = fromY / Board.BLOCKSIZE;
-		int endX = toX / Board.BLOCKSIZE;
-		int endY = toY / Board.BLOCKSIZE;
+
 		visitedPoints = new HashSet<Point>();
 		unvisitedPoints = new HashSet<Point>();
-		Point startPoint = allPoints.get(new Point(startX, startY).nodeNumber);
-		Point endPoint = allPoints.get(new Point(endX, endY).nodeNumber);
+		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
+		Point endPoint = allPoints.get(new Point(toX, toY).nodeNumber);
 
 		if (!reachablePoints.contains(startPoint)) {
-			System.err.println("Start point not found " + startX + "-" + startY);
+			System.err.println("Start point not found " + fromX + "-" + fromY);
 			return null;
 		}
 		if (!reachablePoints.contains(endPoint)) {
-			System.err.println("End point not found " + endX + "-" + endY);
+			System.err.println("End point not found " + toX + "-" + toY);
 			return null;
 		}
 		visitedPoints.clear();
