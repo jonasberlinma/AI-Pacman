@@ -52,54 +52,46 @@ public class AIPlayerAvoider extends AIPlayer {
 				String playerTypeShort = playerType.substring(0, 5);
 				switch (playerTypeShort) {
 				case "GHOST":
-					if (numSteps % 4 == 0) {
-						int ghostX = dataEvent.getInt("x");
-						int ghostY = dataEvent.getInt("y");
-						Path path = gridWalker.getShortestPath(myX, myY, ghostX, ghostY);
-						if (path != null && closestGhostDistance > path.distance) {
-							closestGhostDistance = Math.min(closestGhostDistance, path.distance);
-							closestGhostPath = path;
-						}
+					// Ghost move record where it is and figure out the shortest path to the ghost
+					int ghostX = dataEvent.getInt("x");
+					int ghostY = dataEvent.getInt("y");
+					Path path = gridWalker.getShortestPath(myX, myY, ghostX, ghostY);
+					// Figure out the closest ghost
+					if (path != null && closestGhostDistance > path.distance) {
+						closestGhostDistance = Math.min(closestGhostDistance, path.distance);
+						closestGhostPath = path;
 					}
 					break;
 				case "PACMA":
-					if (numSteps-- == 0 && closestGhostPath != null) {
-						GridWalker.Direction newDirection = null;
-						if (closestGhostPath.pathSections.size() != 0) {
-							GridWalker.PathSection p = closestGhostPath.pathSections.elementAt(0);
-							// This has to be fixed so the user doesn't have to
-							// worry about BLOCKSIZE
-							HashSet<PathSection> ps = grid.getGridWalker().getPossiblePaths(
-									gridWalker.new Point(myX, myY));
+					if (closestGhostPath != null) {
+						Direction newDirection = null;
+						Path walkPath = null;
+						if (closestGhostDistance > 4) {
+							// If there is a ghost closer than 6 away run
+							walkPath = gridWalker.getClosestGoodiesPath(myX, myY);
+							newDirection = getForwardDirection(walkPath);
+						} else {
+							// If not run to the closest pellet
+							walkPath = closestGhostPath;
+							newDirection = getRandomReverseDirection(gridWalker, walkPath);
+						}
+						if (newDirection != null) {
+							numSteps = random.nextInt(10) + 1;
+							switch (newDirection) {
+							case LEFT:
+								pressKey(KeyEvent.VK_LEFT);
+								break;
+							case RIGHT:
+								pressKey(KeyEvent.VK_RIGHT);
+								break;
+							case DOWN:
+								pressKey(KeyEvent.VK_DOWN);
+								break;
+							case UP:
+								pressKey(KeyEvent.VK_UP);
+								break;
+							default:
 
-							if (ps != null) {
-								Vector<Direction> possibleDirections = new Vector<Direction>();
-								for (PathSection psi : ps) {
-									if (psi.getDirection() != p.getDirection()) {
-										possibleDirections.add(psi.getDirection());
-									}
-								}
-								if (possibleDirections.size() > 0) {
-									newDirection = possibleDirections
-											.get(new Random().nextInt(possibleDirections.size()));
-									numSteps = random.nextInt(10) + 1;
-									switch (newDirection) {
-									case LEFT:
-										pressKey(KeyEvent.VK_LEFT);
-										break;
-									case RIGHT:
-										pressKey(KeyEvent.VK_RIGHT);
-										break;
-									case DOWN:
-										pressKey(KeyEvent.VK_DOWN);
-										break;
-									case UP:
-										pressKey(KeyEvent.VK_UP);
-										break;
-									default:
-
-									}
-								}
 							}
 						}
 					}
@@ -115,5 +107,37 @@ public class AIPlayerAvoider extends AIPlayer {
 
 		default:
 		}
+	}
+
+	private Direction getRandomReverseDirection(GridWalker gridWalker, Path walkPath) {
+
+		Direction newDirection = null;
+		if (walkPath.pathSections.size() != 0) {
+			Direction directionFollowingThePath  = walkPath.pathSections.elementAt(0).getDirection();
+			HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
+
+			if (ps != null) {
+				Vector<Direction> possibleDirections = new Vector<Direction>();
+				for (PathSection psi : ps) {
+					// Can't walk down the given path any other direction is fair game
+					if (psi.getDirection() != directionFollowingThePath) {
+						possibleDirections.add(psi.getDirection());
+					}
+				}
+				// Of the possible direction pick a random one
+				if (possibleDirections.size() > 0) {
+					newDirection = possibleDirections.get(new Random().nextInt(possibleDirections.size()));
+				}
+			}
+		}
+		return newDirection;
+	}
+
+	private Direction getForwardDirection(Path walkPath) {
+		Direction newDirection = null;
+		if (walkPath != null && walkPath.pathSections.size() > 0) {
+			newDirection = walkPath.pathSections.elementAt(0).getDirection();
+		}
+		return newDirection;
 	}
 }

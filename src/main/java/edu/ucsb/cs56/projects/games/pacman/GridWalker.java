@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.function.BiFunction;
 
 public class GridWalker {
 	public enum Direction {
@@ -16,6 +17,7 @@ public class GridWalker {
 	};
 
 	private short[][] grid = null;
+	private short[][] screenData = null;
 	private short[][] connectionCheck = null;
 
 	private HashSet<Point> reachablePoints = new HashSet<Point>();
@@ -23,8 +25,9 @@ public class GridWalker {
 	private Hashtable<Point, HashSet<PathSection>> fromPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
 	private Hashtable<Point, HashSet<PathSection>> toPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
 
-	GridWalker(GridData level) {
+	GridWalker(GridData level, short[][] screenData) {
 		grid = level.get2DGridData();
+		this.screenData = screenData;
 		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 		buildGraph();
 	}
@@ -116,6 +119,20 @@ public class GridWalker {
 		private void setDistance(int distance) {
 			this.distance = distance;
 		}
+
+		private boolean checkReachable() {
+			boolean reachable = false;
+			if (!reachablePoints.contains(this)) {
+				System.err.println("Start point not found " + x + "-" + y);
+			} else {
+				reachable = true;
+			}
+			return reachable;
+		}
+
+		boolean hasGoodies() {
+			return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 32) != 0 || (screenData[y][x] & 64) != 0;
+		}
 	}
 
 	protected class Path {
@@ -197,34 +214,50 @@ public class GridWalker {
 		return fromPathSectionHashtable.get(point);
 	}
 
-	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
-
+	private void initDijkstra(Point startPoint) {
 		visitedPoints = new HashSet<Point>();
 		unvisitedPoints = new HashSet<Point>();
+		unvisitedPoints.addAll(reachablePoints);
+		unvisitedPoints.forEach((x) -> x.setDistance(Integer.MAX_VALUE));
+		startPoint.setDistance(0);
+		visitedPoints.add(startPoint);
+		unvisitedPoints.remove(startPoint);
+	}
+
+	public Path getClosestGoodiesPath(int fromX, int fromY) {
+		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
+
+		if (!startPoint.checkReachable()) {
+			return null;
+		}
+		initDijkstra(startPoint);
+
+		Point currentPoint = startPoint;
+		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasGoodies());
+	}
+
+	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
 		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
 		Point endPoint = allPoints.get(new Point(toX, toY).nodeNumber);
 
-		if (!reachablePoints.contains(startPoint)) {
-			System.err.println("Start point not found " + fromX + "-" + fromY);
+		if (!startPoint.checkReachable()) {
 			return null;
 		}
-		if (!reachablePoints.contains(endPoint)) {
-			System.err.println("End point not found " + toX + "-" + toY);
+		if (!endPoint.checkReachable()) {
+			// The ghosts step out of bounds once in a while. Probably a
+			// rounding error
 			return null;
 		}
-		visitedPoints.clear();
-		unvisitedPoints.clear();
+		initDijkstra(startPoint);
 
-		unvisitedPoints.addAll(reachablePoints);
-		
-		unvisitedPoints.forEach((x) -> x.setDistance(Integer.MAX_VALUE));
-		startPoint.setDistance(0);
-
-		visitedPoints.add(startPoint);
-		unvisitedPoints.remove(startPoint);
 		Point currentPoint = startPoint;
+		return walkPath(currentPoint, startPoint, endPoint, (x, y) -> !x.equals(y));
+	}
 
-		while (currentPoint != null && !currentPoint.equals(endPoint)) {
+	private Path walkPath(Point currentPoint, Point startPoint, Point endPoint,
+			BiFunction<Point, Point, Boolean> stoppingCondition) {
+
+		while (currentPoint != null && stoppingCondition.apply(currentPoint, endPoint)) {
 			visitedPoints.add(currentPoint);
 			unvisitedPoints.remove(currentPoint);
 			updateDistances(currentPoint);

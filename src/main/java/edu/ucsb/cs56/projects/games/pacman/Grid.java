@@ -52,7 +52,7 @@ public class Grid {
 		gridWalkers = new GridWalker[loadableLevels.length];
 			for (int i = 0; i < loadableLevels.length; i++) {
 			GridData level = loadLevel("assets/levels/" + loadableLevels[i]);
-			gridWalkers[i] = new GridWalker(level);
+			gridWalkers[i] = new GridWalker(level, screenData);
 			levelsData[i] = level.get2DGridData();
 		}
 	}
