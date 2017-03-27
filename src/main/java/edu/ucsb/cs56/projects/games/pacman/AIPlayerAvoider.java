@@ -8,9 +8,11 @@ import java.util.Vector;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.PathSection;
+
 /**
- * This one tries to avoid all the ghosts by running away from the closest ghost.
- * It seems to work at shorter distance but is not a very good overall strategy.
+ * This one tries to avoid all the ghosts by running away from the closest
+ * ghost. It seems to work at shorter distance but is not a very good overall
+ * strategy.
  * 
  * @author jonas
  *
@@ -50,16 +52,18 @@ public class AIPlayerAvoider extends AIPlayer {
 				String playerTypeShort = playerType.substring(0, 5);
 				switch (playerTypeShort) {
 				case "GHOST":
-					int ghostX = new Integer(dataEvent.keyValues.get("x")).intValue();
-					int ghostY = new Integer(dataEvent.keyValues.get("y")).intValue();
-					Path path = gridWalker.getShortestPath(myX, myY, ghostX, ghostY);
-					if (path != null && closestGhostDistance > path.distance) {
-						closestGhostDistance = Math.min(closestGhostDistance, path.distance);
-						closestGhostPath = path;
+					if (numSteps % 4 == 0) {
+						int ghostX = new Integer(dataEvent.keyValues.get("x")).intValue();
+						int ghostY = new Integer(dataEvent.keyValues.get("y")).intValue();
+						Path path = gridWalker.getShortestPath(myX, myY, ghostX, ghostY);
+						if (path != null && closestGhostDistance > path.distance) {
+							closestGhostDistance = Math.min(closestGhostDistance, path.distance);
+							closestGhostPath = path;
+						}
 					}
 					break;
 				case "PACMA":
-					if (closestGhostPath != null) {
+					if (numSteps-- == 0 && closestGhostPath != null) {
 						GridWalker.Direction newDirection = null;
 						if (closestGhostPath.pathSections.size() == 0) {
 							System.out.println("Crap, we lost");
@@ -80,6 +84,7 @@ public class AIPlayerAvoider extends AIPlayer {
 								if (possibleDirections.size() > 0) {
 									newDirection = possibleDirections
 											.get(new Random().nextInt(possibleDirections.size()));
+									numSteps = random.nextInt(10) + 1;
 									switch (newDirection) {
 									case LEFT:
 										pressKey(KeyEvent.VK_LEFT);

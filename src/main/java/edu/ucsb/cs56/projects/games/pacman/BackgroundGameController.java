@@ -60,7 +60,7 @@ public class BackgroundGameController implements Runnable {
 			if (gameList.size() < nThreads) {
 				AIGame aiGame;
 				try {
-					aiGame = new AIGame(aiPlayerClassName, 0, true);
+					aiGame = new AIGame(aiPlayerClassName, 5, true);
 					gameList.addElement(aiGame);
 					aiGame.start();
 				} catch (FileNotFoundException e) {

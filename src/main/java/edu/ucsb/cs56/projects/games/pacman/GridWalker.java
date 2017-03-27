@@ -11,8 +11,10 @@ import java.util.Iterator;
 import java.util.Vector;
 
 public class GridWalker {
-	public enum Direction {LEFT, RIGHT, UP, DOWN};
-	
+	public enum Direction {
+		LEFT, RIGHT, UP, DOWN
+	};
+
 	private short[][] grid = null;
 	private short[][] connectionCheck = null;
 
@@ -37,20 +39,21 @@ public class GridWalker {
 			this.toPoint = toPoint;
 			this.length = length;
 		}
-		
-		Direction getDirection(){
+
+		Direction getDirection() {
 			Direction d = null;
-			if(fromPoint.x < toPoint.x){
+			if (fromPoint.x < toPoint.x) {
 				d = Direction.RIGHT;
-			} else if(fromPoint.x > toPoint.x){
+			} else if (fromPoint.x > toPoint.x) {
 				d = Direction.LEFT;
-			} else if( fromPoint.y < toPoint.y){
+			} else if (fromPoint.y < toPoint.y) {
 				d = Direction.DOWN;
-			} else if(fromPoint.y > toPoint.y){
+			} else if (fromPoint.y > toPoint.y) {
 				d = Direction.UP;
 			}
 			return d;
 		}
+
 		@Override
 		public boolean equals(Object other) {
 			PathSection ps = (PathSection) other;
@@ -118,12 +121,13 @@ public class GridWalker {
 	protected class Path {
 		int distance;
 		Vector<PathSection> pathSections = null;
-		Path(int distance, Vector<PathSection> pathSections){
+
+		Path(int distance, Vector<PathSection> pathSections) {
 			this.distance = distance;
 			this.pathSections = pathSections;
 		}
 	}
-	
+
 	public void printGrid(PrintStream out) {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
@@ -144,6 +148,11 @@ public class GridWalker {
 		}
 	}
 
+	/**
+	 * Prints the board graph in a format suitable for Gephi
+	 * 
+	 * @param fileName
+	 */
 	public void printGraph(String fileName) {
 		PrintStream nodeOut = null;
 		PrintStream edgeOut = null;
@@ -183,8 +192,8 @@ public class GridWalker {
 
 	private HashSet<Point> visitedPoints;
 	private HashSet<Point> unvisitedPoints;
-	
-	HashSet<PathSection> getPossiblePaths(Point point){
+
+	HashSet<PathSection> getPossiblePaths(Point point) {
 		return fromPathSectionHashtable.get(point);
 	}
 
@@ -231,12 +240,12 @@ public class GridWalker {
 		int shortestDistance = currentPoint.distance;
 		// Now walk backwards to find the shortest path
 		Vector<PathSection> shortestPath = new Vector<PathSection>();
-		while(!currentPoint.equals(startPoint)){
+		while (!currentPoint.equals(startPoint)) {
 			HashSet<PathSection> psh = toPathSectionHashtable.get(currentPoint);
 			int minDistance = Integer.MAX_VALUE;
 			PathSection minPathSection = null;
-			for(PathSection ps: psh){
-				if(ps.fromPoint.distance < minDistance){
+			for (PathSection ps : psh) {
+				if (ps.fromPoint.distance < minDistance) {
 					minDistance = ps.fromPoint.distance;
 					minPathSection = ps;
 				}
