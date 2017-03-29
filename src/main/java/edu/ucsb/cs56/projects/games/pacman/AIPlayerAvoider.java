@@ -68,7 +68,7 @@ public class AIPlayerAvoider extends AIPlayer {
 						Path walkPath = null;
 						if (closestGhostDistance > 4) {
 							// If there is a ghost closer than 6 away run
-							walkPath = gridWalker.getClosestGoodiesPath(myX, myY);
+							walkPath = gridWalker.getClosestPelletPath(myX, myY);
 							newDirection = getForwardDirection(walkPath);
 						} else {
 							// If not run to the closest pellet

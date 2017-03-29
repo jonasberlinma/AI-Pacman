@@ -3,6 +3,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Vector;
 
 public class AIGame implements Runnable {
@@ -14,11 +15,11 @@ public class AIGame implements Runnable {
 	private Thread aiGameThread;
 	private boolean isRunning = false;
 
-	public AIGame(String aiPlayerClassName, int loopDelay, boolean background)
+	public AIGame(Properties prop, int loopDelay, boolean background)
 			throws FileNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		board = new Board(!background);
 		board.setLoopDelay(loopDelay);
-		Class<?> theClass = Class.forName(aiPlayerClassName);
+		Class<?> theClass = Class.forName(prop.getProperty("aiPlayerClassName"));
 
 		aiPlayer = (AIPlayer) theClass.newInstance();
 		aiPlayer.setBoard(board);

@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Vector;
 
 public class BackgroundGameController implements Runnable {
@@ -15,10 +16,13 @@ public class BackgroundGameController implements Runnable {
 	private String aiPlayerClassName = null;
 	private int nCompletedGames = 0;
 	private PrintWriter out = null;
+	private Properties prop = null;
 
-	BackgroundGameController(String aiPlayerClassName, int backgroundGameThreads) {
-		this.nThreads = backgroundGameThreads;
-		this.aiPlayerClassName = aiPlayerClassName;
+	BackgroundGameController(Properties prop) {
+		this.prop = prop;
+		this.nThreads = Integer.parseInt(prop.getProperty("nBackgroundPlayers"));
+		this.aiPlayerClassName = prop.getProperty("aiPlayerClassName");
+		
 		controllerThread = new Thread(this, "BackgroundGameController");
 		try {
 			out = new PrintWriter(new FileOutputStream("eventlog.csv"));
@@ -60,7 +64,7 @@ public class BackgroundGameController implements Runnable {
 			if (gameList.size() < nThreads) {
 				AIGame aiGame;
 				try {
-					aiGame = new AIGame(aiPlayerClassName, 5, true);
+					aiGame = new AIGame(prop, 5, true);
 					gameList.addElement(aiGame);
 					aiGame.start();
 				} catch (FileNotFoundException e) {

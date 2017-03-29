@@ -321,7 +321,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		} else {
 			String s = "Score: " + score;
 			g.drawString(s, Board.SCRSIZE / 2 + 136, Board.SCRSIZE + 16);
-			g.drawString("Bacground Games: " + bgc.getNCompletedGames(), Board.SCRSIZE / 2 - 75, Board.SCRSIZE + 16);
+			g.drawString("BG Games: " + bgc.getNCompletedGames(), Board.SCRSIZE / 2 - 100, Board.SCRSIZE + 16);
+			g.drawString("Models: " + 0, Board.SCRSIZE / 2 +20, Board.SCRSIZE + 16);
 		}
 
 		for (int i = 0; i < board.pacman.lives; i++) {

@@ -120,18 +120,20 @@ public class GridWalker {
 			this.distance = distance;
 		}
 
-		private boolean checkReachable() {
+		private boolean checkReachable(String type) {
 			boolean reachable = false;
 			if (!reachablePoints.contains(this)) {
-				System.err.println("Start point not found " + x + "-" + y);
+				System.err.println(type + " point not found " + x + "-" + y);
 			} else {
 				reachable = true;
 			}
 			return reachable;
 		}
 
-		boolean hasGoodies() {
-			return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 32) != 0 || (screenData[y][x] & 64) != 0;
+		boolean hasPellet() {
+			// return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 32) !=
+			// 0 || (screenData[y][x] & 64) != 0;
+			return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 64) != 0;
 		}
 	}
 
@@ -224,26 +226,26 @@ public class GridWalker {
 		unvisitedPoints.remove(startPoint);
 	}
 
-	public Path getClosestGoodiesPath(int fromX, int fromY) {
+	public Path getClosestPelletPath(int fromX, int fromY) {
 		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
 
-		if (!startPoint.checkReachable()) {
+		if (!startPoint.checkReachable("Start")) {
 			return null;
 		}
 		initDijkstra(startPoint);
 
 		Point currentPoint = startPoint;
-		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasGoodies());
+		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
 	}
 
 	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
 		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
 		Point endPoint = allPoints.get(new Point(toX, toY).nodeNumber);
 
-		if (!startPoint.checkReachable()) {
+		if (!startPoint.checkReachable("Start")) {
 			return null;
 		}
-		if (!endPoint.checkReachable()) {
+		if (!endPoint.checkReachable("End")) {
 			// The ghosts step out of bounds once in a while. Probably a
 			// rounding error
 			return null;
@@ -263,25 +265,28 @@ public class GridWalker {
 			updateDistances(currentPoint);
 			currentPoint = findNext(currentPoint);
 		}
-		int shortestDistance = currentPoint.distance;
-		// Now walk backwards to find the shortest path
-		Vector<PathSection> shortestPath = new Vector<PathSection>();
-		while (!currentPoint.equals(startPoint)) {
-			HashSet<PathSection> psh = toPathSectionHashtable.get(currentPoint);
-			int minDistance = Integer.MAX_VALUE;
-			PathSection minPathSection = null;
-			for (PathSection ps : psh) {
-				if (ps.fromPoint.distance < minDistance) {
-					minDistance = ps.fromPoint.distance;
-					minPathSection = ps;
+		Path path = null;
+		if (currentPoint != null) {
+			int shortestDistance = currentPoint.distance;
+			// Now walk backwards to find the shortest path
+			Vector<PathSection> shortestPath = new Vector<PathSection>();
+			while (!currentPoint.equals(startPoint)) {
+				HashSet<PathSection> psh = toPathSectionHashtable.get(currentPoint);
+				int minDistance = Integer.MAX_VALUE;
+				PathSection minPathSection = null;
+				for (PathSection ps : psh) {
+					if (ps.fromPoint.distance < minDistance) {
+						minDistance = ps.fromPoint.distance;
+						minPathSection = ps;
+					}
 				}
+				currentPoint = minPathSection.fromPoint;
+				shortestPath.add(minPathSection);
 			}
-			currentPoint = minPathSection.fromPoint;
-			shortestPath.add(minPathSection);
+			// Reverse the order since we walked backwards
+			Collections.reverse(shortestPath);
+			path = new Path(shortestDistance, shortestPath);
 		}
-		// Reverse the order since we walked backwards
-		Collections.reverse(shortestPath);
-		Path path = new Path(shortestDistance, shortestPath);
 		return path;
 	}
 

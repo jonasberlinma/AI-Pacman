@@ -3,6 +3,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -32,27 +33,26 @@ public class PacMan {
 	 * 
 	 */
 
-	public void runIt(String aiPlayerClassName, String leaderBoard, int loopDelay, boolean headLess, boolean autoPlay,
-			int nBackgroundPlayers) throws InterruptedException, FileNotFoundException, ClassNotFoundException,
+	public void runIt(Properties prop) throws InterruptedException, FileNotFoundException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
 		BoardRenderer boardRenderer = null;
 		BoardFrame bf = null;
 
-		AIGame aiGame = new AIGame(aiPlayerClassName, loopDelay, false);
+		AIGame aiGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay")), false);
 
-		BackgroundGameController bgc = new BackgroundGameController(aiPlayerClassName, nBackgroundPlayers);
+		BackgroundGameController bgc = new BackgroundGameController(prop);
 
-		if (!headLess) {
+		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
 			boardRenderer = new BoardRenderer(aiGame.getBoard(), bgc);
-			aiGame.addBoardRendered(boardRenderer, leaderBoard);
+			aiGame.addBoardRendered(boardRenderer, prop.getProperty("leaderBoard"));
 
 			bf = new BoardFrame();
 
 			bf.add(boardRenderer);
-			boardRenderer.callLeaderboardMain(leaderBoard);
+			boardRenderer.callLeaderboardMain(prop.getProperty("leaderBoard"));
 
 			boardRenderer.start();
 		}
@@ -79,33 +79,28 @@ public class PacMan {
 
 		Iterator<String> argi = new Vector<String>(Arrays.asList(args)).iterator();
 
-		int loopDelay = 40;
-		String leaderBoard = "";
-		boolean headLess = false;
-		boolean autoPlay = false;
-		String aiPlayerClassName = null;
-		int nBackgroundPlayers = 0;
+		Properties prop = new Properties();
 
 		while (argi.hasNext()) {
 			String theArg = argi.next();
 			switch (theArg) {
 			case "-loopDelay":
-				loopDelay = new Integer(argi.next());
+				prop.setProperty("loopDelay", argi.next());
 				break;
 			case "-leaderBoard":
-				leaderBoard = argi.next();
+				prop.setProperty("leaderBoard", argi.next());
 				break;
 			case "-headLess":
-				headLess = true;
+				prop.setProperty("headLess", Boolean.toString(true));
 				break;
 			case "-autoPlay":
-				autoPlay = true;
+				prop.setProperty("autoPlay", Boolean.toString(true));
 				break;
 			case "-nBackgroundPlayers":
-				nBackgroundPlayers = new Integer(argi.next()).intValue();
+				prop.setProperty("nBackgroundPlayers", argi.next());
 				break;
 			case "-aiPlayerClassName":
-				aiPlayerClassName = argi.next();
+				prop.setProperty("aiPlayerClassName", argi.next());
 				break;
 
 			default:
@@ -114,16 +109,16 @@ public class PacMan {
 			}
 
 		}
-		if (!autoPlay) {
-			aiPlayerClassName = "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull";
+		if (prop.getProperty("autoPlay") == null) {
+			prop.setProperty("aiPlayerClassName", "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull");
 
-		} else if (aiPlayerClassName == null) {
+		} else if (prop.getProperty("aiPlayerClassName") == null) {
 			System.err.println("In auto play a player class name has to be specified");
 			System.exit(1);
 		}
 		PacMan pacman = new PacMan();
 		try {
-			pacman.runIt(aiPlayerClassName, leaderBoard, loopDelay, headLess, autoPlay, nBackgroundPlayers);
+			pacman.runIt(prop);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {

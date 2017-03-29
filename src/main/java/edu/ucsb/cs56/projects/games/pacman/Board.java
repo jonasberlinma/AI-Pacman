@@ -52,7 +52,7 @@ public class Board implements Runnable, EventTrackable {
 	Ghost ghost1, ghost2;
 	Vector<Character> pacmen;
 	Vector<Ghost> ghosts;
-	private int numGhosts = 6;
+	private int numGhosts = 2;
 	int numBoardsCleared = 0;
 	private int curSpeed = 3;
 	int numPellet;
