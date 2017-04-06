@@ -163,7 +163,7 @@ public class AIPlayerAvoider extends AIPlayer {
 			if (closestGhostPath.pathSections.size() > 0) {
 				closestGhostDirection = closestGhostPath.pathSections.elementAt(0).getDirection();
 			}
-			if (secondClosestGhostPath.pathSections.size() > 0) {
+			if (secondClosestGhostPath != null && secondClosestGhostPath.pathSections.size() > 0) {
 				secondClosestGhostDirection = secondClosestGhostPath.pathSections.elementAt(0).getDirection();
 			}
 			for (PathSection psi : ps) {
