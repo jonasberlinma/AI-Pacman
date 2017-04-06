@@ -8,4 +8,10 @@ public class AIPlayerNull extends AIPlayer {
 		
 	}
 
+	@Override
+	protected void newModel(AIModel aiModel) {
+		// Doesn't use model training
+		
+	}
+
 }

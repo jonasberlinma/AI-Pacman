@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
@@ -32,41 +31,6 @@ public class PacMan {
 	 * @throws ClassNotFoundException
 	 * 
 	 */
-
-	public void runIt(Properties prop) throws InterruptedException, FileNotFoundException, ClassNotFoundException,
-			InstantiationException, IllegalAccessException {
-
-		BoardRenderer boardRenderer = null;
-		BoardFrame bf = null;
-
-		AIGame aiGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay")), false);
-
-		BackgroundGameController bgc = new BackgroundGameController(prop);
-
-		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
-			// This circular dependency can be removed by removing the the
-			// leaderboard call in Board
-			boardRenderer = new BoardRenderer(aiGame.getBoard(), bgc);
-			aiGame.addBoardRendered(boardRenderer, prop.getProperty("leaderBoard"));
-
-			bf = new BoardFrame();
-
-			bf.add(boardRenderer);
-			boardRenderer.callLeaderboardMain(prop.getProperty("leaderBoard"));
-
-			boardRenderer.start();
-		}
-
-		bgc.start();
-		aiGame.start();
-		aiGame.join();
-		// Turn off the renderer if there is one
-		if (boardRenderer != null) {
-			boardRenderer.stop();
-			bf.dispose();
-		}
-		System.exit(0);
-	}
 
 	/**
 	 * Main function for PacMan Class that tests to see if there are command
@@ -102,6 +66,12 @@ public class PacMan {
 			case "-aiPlayerClassName":
 				prop.setProperty("aiPlayerClassName", argi.next());
 				break;
+			case "-aiModelTrainerClassName":
+				prop.setProperty("aiModelTrainerClassName", argi.next());
+				break;
+			case "-numGhosts":
+				prop.setProperty("numGhosts", argi.next());
+				break;
 
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
@@ -111,29 +81,26 @@ public class PacMan {
 		}
 		if (prop.getProperty("autoPlay") == null) {
 			prop.setProperty("aiPlayerClassName", "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull");
+			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
 
 		} else if (prop.getProperty("aiPlayerClassName") == null) {
 			System.err.println("In auto play a player class name has to be specified");
 			System.exit(1);
 		}
-		PacMan pacman = new PacMan();
-		try {
-			pacman.runIt(prop);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (prop.getProperty("aiModelTrainerClassName") == null) {
+
+			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
 		}
+		System.out.println("Using model trainer " + prop.getProperty("aiModelTrainerClassName"));
+		
+
+		GameController gc = new GameController(prop);
+
+		gc.start();
+
+		gc.join();
+
+		System.exit(0);
 
 		return;
 

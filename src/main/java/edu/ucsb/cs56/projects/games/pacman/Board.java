@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
@@ -43,6 +44,7 @@ public class Board implements Runnable, EventTrackable {
 
 	private long gameID = 0;
 	private int gameStep = 0;
+	private int nTrainedModels;
 
 	private int score;
 	private Grid grid;
@@ -52,7 +54,7 @@ public class Board implements Runnable, EventTrackable {
 	Ghost ghost1, ghost2;
 	Vector<Character> pacmen;
 	Vector<Ghost> ghosts;
-	private int numGhosts = 2;
+	private int numGhosts = 6;
 	int numBoardsCleared = 0;
 	private int curSpeed = 3;
 	int numPellet;
@@ -71,9 +73,10 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 * @throws FileNotFoundException
 	 */
-	public Board(boolean doWrite) throws FileNotFoundException {
+	public Board(Properties prop, boolean doWrite) throws FileNotFoundException {
 
 		dataInterface = new DataInterface(doWrite);
+		numGhosts = Integer.parseInt(prop.getProperty("numGhosts", "6"));
 
 		grid = new Grid();
 
@@ -516,5 +519,12 @@ public class Board implements Runnable, EventTrackable {
 		}
 		return hashtable;
 
+	}
+
+	public int getNTrainedModels() {
+		return this.nTrainedModels;
+	}
+	public void setNTrainedModels(int nTrainedModels){
+		this.nTrainedModels = nTrainedModels;
 	}
 }

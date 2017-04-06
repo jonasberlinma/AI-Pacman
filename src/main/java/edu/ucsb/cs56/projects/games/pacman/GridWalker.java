@@ -30,6 +30,8 @@ public class GridWalker {
 		this.screenData = screenData;
 		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 		buildGraph();
+		// printGraph("");
+		// System.exit(0);
 	}
 
 	protected class PathSection {
@@ -45,14 +47,33 @@ public class GridWalker {
 
 		Direction getDirection() {
 			Direction d = null;
+			// This is for the periodic boundary conditions
+			int xDistance = Math.abs(fromPoint.x - toPoint.x);
+			int yDistance = Math.abs(fromPoint.y - toPoint.y);
 			if (fromPoint.x < toPoint.x) {
-				d = Direction.RIGHT;
+				if (xDistance < 2) {
+					d = Direction.RIGHT;
+				} else {
+					d = Direction.LEFT;
+				}
 			} else if (fromPoint.x > toPoint.x) {
-				d = Direction.LEFT;
+				if (xDistance < 2) {
+					d = Direction.LEFT;
+				} else {
+					d = Direction.RIGHT;
+				}
 			} else if (fromPoint.y < toPoint.y) {
-				d = Direction.DOWN;
+				if (yDistance < 2) {
+					d = Direction.DOWN;
+				} else {
+					d = Direction.UP;
+				}
 			} else if (fromPoint.y > toPoint.y) {
-				d = Direction.UP;
+				if (yDistance < 2) {
+					d = Direction.UP;
+				} else {
+					d = Direction.DOWN;
+				}
 			}
 			return d;
 		}
@@ -233,7 +254,6 @@ public class GridWalker {
 			return null;
 		}
 		initDijkstra(startPoint);
-
 		Point currentPoint = startPoint;
 		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
 	}
@@ -251,14 +271,12 @@ public class GridWalker {
 			return null;
 		}
 		initDijkstra(startPoint);
-
 		Point currentPoint = startPoint;
 		return walkPath(currentPoint, startPoint, endPoint, (x, y) -> !x.equals(y));
 	}
 
 	private Path walkPath(Point currentPoint, Point startPoint, Point endPoint,
 			BiFunction<Point, Point, Boolean> stoppingCondition) {
-
 		while (currentPoint != null && stoppingCondition.apply(currentPoint, endPoint)) {
 			visitedPoints.add(currentPoint);
 			unvisitedPoints.remove(currentPoint);

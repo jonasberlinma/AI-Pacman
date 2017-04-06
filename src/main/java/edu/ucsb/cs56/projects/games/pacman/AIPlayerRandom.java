@@ -55,4 +55,10 @@ public class AIPlayerRandom extends AIPlayer {
 			}
 		}
 	}
+
+	@Override
+	protected void newModel(AIModel aiModel) {
+		// Don't use trained models for random player
+		
+	}
 }

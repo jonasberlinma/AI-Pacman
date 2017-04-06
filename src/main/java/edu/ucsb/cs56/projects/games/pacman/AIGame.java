@@ -14,15 +14,17 @@ public class AIGame implements Runnable {
 	private String leaderBoard;
 	private Thread aiGameThread;
 	private boolean isRunning = false;
+	private AIModel currentModel = null;
 
 	public AIGame(Properties prop, int loopDelay, boolean background)
 			throws FileNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-		board = new Board(!background);
+		board = new Board(prop, !background);
 		board.setLoopDelay(loopDelay);
 		Class<?> theClass = Class.forName(prop.getProperty("aiPlayerClassName"));
 
 		aiPlayer = (AIPlayer) theClass.newInstance();
 		aiPlayer.setBoard(board);
+		aiPlayer.setAIModel(currentModel);
 		aiGameThread = new Thread(this, "AI Game Player 1");
 	}
 
@@ -75,5 +77,17 @@ public class AIGame implements Runnable {
 		while (i.hasNext()) {
 			out.println(i.next().toCSV());
 		}
+	}
+	Vector<DataEvent> getEventLog(){
+		return aiPlayer.getEventLog();
+	}
+
+	public void setNTrainedModels(int nTrainedModels) {
+		board.setNTrainedModels(nTrainedModels);
+	}
+
+	public void setModel(AIModel newModel) {
+		aiPlayer.newModel(newModel);
+		
 	}
 }

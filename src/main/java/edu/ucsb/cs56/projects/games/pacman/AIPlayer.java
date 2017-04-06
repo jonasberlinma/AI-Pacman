@@ -17,6 +17,11 @@ public abstract class AIPlayer implements Runnable {
 		eventCollection = new Vector<DataEvent>(10000);
 	}
 
+	protected void setAIModel(AIModel aiModel) {
+		// Tell the subclass there is a new model
+		newModel(aiModel);
+	}
+
 	public void start() {
 		aiPlayerThread.start();
 	}
@@ -61,7 +66,15 @@ public abstract class AIPlayer implements Runnable {
 	 * 
 	 * @param dataEvent
 	 */
-	protected abstract void dataEvent(Grid grid,DataEvent dataEvent);
+	protected abstract void dataEvent(Grid grid, DataEvent dataEvent);
+
+	/**
+	 * Player implementations should implement this method to get new models as
+	 * they are trained
+	 * 
+	 * @param aiModel
+	 */
+	protected abstract void newModel(AIModel aiModel);
 
 	protected void pressKey(int key) {
 		if (lastKey != key) {
@@ -74,7 +87,8 @@ public abstract class AIPlayer implements Runnable {
 	private void logEvent(DataEvent dataEvent) {
 		eventCollection.add(dataEvent);
 	}
-	protected Vector<DataEvent> getEventLog(){
+
+	protected Vector<DataEvent> getEventLog() {
 		return eventCollection;
 	}
 
