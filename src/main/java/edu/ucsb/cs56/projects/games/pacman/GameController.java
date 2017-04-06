@@ -98,6 +98,7 @@ public class GameController implements Runnable {
 					AIGame aiGame;
 
 					aiGame = new AIGame(prop, 5, true);
+					aiGame.setModel(currentModel);
 					gameList.addElement(aiGame);
 					aiGame.start();
 
@@ -129,8 +130,6 @@ public class GameController implements Runnable {
 			InstantiationException, IllegalAccessException {
 
 		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay")), false);
-
-		// AIModelTrainer aiModelTrainer = new AIModelTrainer();
 
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
@@ -175,7 +174,7 @@ public class GameController implements Runnable {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 		aiModelTrainer.setController(this, gameResultQueue);
 	}
 }
