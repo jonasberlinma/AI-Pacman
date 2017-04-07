@@ -1,6 +1,8 @@
 # AI-Pacman
 Various implementations of algorithms to learn what AI algorithms are suitable for online learning of a Pacman game.
 
+Check the wiki for documentation.
+
 You can either use Eclipse to edit and run (.project and .classpath) included, or run it from the command line just typing
 
 % ant run       
@@ -9,26 +11,6 @@ This requires that you install ant if don't have it. If someone wants to change 
 When running there is a file (EventStream.csv) written in the root directory of the project. This is the event trace of the run. Work is in progress to dump out more data. Currently you just get the GameID, StepID, and event type for each event. 
 
 The leaderboard doesn't work. We could add something that automatically updates the leader board using the class name as the user. That way we could automatically track which implementation is the current champion.
-
-Command line switches are:
-
--loopDelay 
-
-Delay between update of the game. This does not affect the rendering speed. Default value is 40, which makes the game run at standard human speed.
-
--autoPlay 
-
-Runs the AIPayerRandom implementation of AIPlayer. Next step is to add dynamic class loading so you can kick off your own implementation.
-
--headLess
-
-Runs the program without the graphical display. Only output is the event log file.
-
--aiPlayerClassName
-
-The complete class name for the auto player class, for example "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull" a player that does nothing, or "edu.ucsb.cs56.projects.games.pacman.AIPlayerRandom" a player that does a random walk.
-
--nBackgroundPlayers
 
 The number of concurrent players (threads) that play in the background collecting game experience. Once a game is finished the bacground player reports the experience and starts a new game.
 
