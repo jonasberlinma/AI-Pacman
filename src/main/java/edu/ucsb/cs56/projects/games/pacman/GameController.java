@@ -24,11 +24,12 @@ public class GameController implements Runnable {
 	private PrintWriter out = null;
 	private Properties prop = null;
 
-	// These are all related to the foreground game and the rendeting of the forground game
+	// These are all related to the foreground game and the rendeting of the
+	// forground game
 	AIGame foregroundAIGame = null;
 	BoardRenderer boardRenderer = null;
 	BoardFrame bf = null;
-	
+
 	// Training
 	private AIModelTrainer aiModelTrainer = null;
 	private ArrayBlockingQueue<Vector<DataEvent>> gameResultQueue;
@@ -36,13 +37,13 @@ public class GameController implements Runnable {
 	private int nTrainedModels = 0;
 
 	GameController(Properties prop) {
-		
+
 		gameResultQueue = new ArrayBlockingQueue<Vector<DataEvent>>(1000);
-		
+
 		loadTrainer(prop);
 		aiModelTrainer.start();
 		this.prop = prop;
-		this.nThreads = Integer.parseInt(prop.getProperty("nBackgroundPlayers"));
+		this.nThreads = Integer.parseInt(prop.getProperty("nBackgroundPlayers", "0"));
 
 		controllerThread = new Thread(this, "BackgroundGameController");
 		try {
@@ -77,51 +78,38 @@ public class GameController implements Runnable {
 			Thread.sleep(100);
 
 			while (foregroundAIGame.isRunning()) {
-				try {
-					Thread.sleep(10);
-					Iterator<AIGame> i = gameList.iterator();
-					while (i.hasNext()) {
-						AIGame aiGame = i.next();
-						if (!aiGame.isRunning()) {
-							aiGame.join();
-							i.remove();
-							nCompletedGames++;
-							aiGame.report(out);
-							gameResultQueue.put(aiGame.getEventLog());
-						}
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (gameList.size() < nThreads) {
-					AIGame aiGame;
 
-					aiGame = new AIGame(prop, 5, true);
+				Thread.sleep(10);
+				Iterator<AIGame> i = gameList.iterator();
+				while (i.hasNext()) {
+					AIGame aiGame = i.next();
+					if (!aiGame.isRunning()) {
+						aiGame.join();
+						i.remove();
+						nCompletedGames++;
+						aiGame.report(out);
+						gameResultQueue.put(aiGame.getEventLog());
+					}
+				}
+
+				if (gameList.size() < nThreads) {
+					AIGame aiGame = new AIGame(prop, 5, true);
 					aiGame.setModel(currentModel);
 					gameList.addElement(aiGame);
 					aiGame.start();
-
 				}
 			}
 			stop();
 		} catch (NumberFormatException e1) {
-			// TODO Auto-generated catch block
+			System.err.println("Failed to parse property");
 			e1.printStackTrace();
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
+			System.err.println("Failed to open event log");
 			e1.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (InstantiationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e1) {
+			System.err.println("Failed to load player class");
 			e1.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -129,7 +117,7 @@ public class GameController implements Runnable {
 	private void startForegroundGame() throws NumberFormatException, FileNotFoundException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay")), false);
+		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay", "40")), false);
 
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
@@ -162,19 +150,16 @@ public class GameController implements Runnable {
 		foregroundAIGame.setModel(newModel);
 		currentModel = newModel;
 	}
-	
-	private void loadTrainer(Properties prop){
+
+	private void loadTrainer(Properties prop) {
 		System.out.println("Loading trainer");
 		try {
 			Class<?> theClass = Class.forName(prop.getProperty("aiModelTrainerClassName"));
 			aiModelTrainer = (AIModelTrainer) theClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			System.err.println("Failed to load trainer");
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		aiModelTrainer.setController(this, gameResultQueue);
 	}
 }
