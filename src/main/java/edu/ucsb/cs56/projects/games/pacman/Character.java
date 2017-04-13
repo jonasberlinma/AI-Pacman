@@ -169,12 +169,14 @@ public abstract class Character implements EventTrackable {
 		hashtable.put("reqdx", "" + reqdx);
 		hashtable.put("reqdy", "" + reqdy);
 		hashtable.put("speed", "" + speed);
+		hashtable.put("edible", "" + getEdible());
 
 		return hashtable;
 	}
 	PlayerType getPlayerType(){
 		return playerType;
 	}
+	public abstract boolean getEdible();
 	public static synchronized int nextCharacterID(){
 		return ++nextCharacterID;
 	}

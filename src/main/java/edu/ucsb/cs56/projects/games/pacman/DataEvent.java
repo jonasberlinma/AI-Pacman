@@ -11,7 +11,7 @@ public class DataEvent {
 	DataEventType eventType;
 	private long gameID = 0;
 	private int gameStep = 0;
-	private HashMap<String, String> keyValues = new HashMap<String, String>(); 
+	private HashMap<String, String> keyValues = new HashMap<String, String>();
 
 	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
 		this.eventType = eventType;
@@ -19,30 +19,40 @@ public class DataEvent {
 		this.gameStep = board.getGameStep();
 		this.keyValues.putAll(trackable.getData(eventType));
 	}
-	public void setKeyValuePair(String key, String value){
+
+	public void setKeyValuePair(String key, String value) {
 		keyValues.put(key, value);
 	}
-	public String toCSV(){
+
+	public String toCSV() {
 		StringBuffer out = new StringBuffer();
-		
-		out.append("gameID=" + gameID + ",gameStep=" + gameStep + ",time=" + System.currentTimeMillis() + ",eventType=" + eventType);
-		
+
+		out.append("gameID=" + gameID + ",gameStep=" + gameStep + ",time=" + System.currentTimeMillis() + ",eventType="
+				+ eventType);
+
 		Iterator<String> i = keyValues.keySet().iterator();
-		
-		while(i.hasNext()){
+
+		while (i.hasNext()) {
 			String key = i.next();
 			out.append("," + key + "=" + keyValues.get(key));
 		}
-		
+
 		return out.toString();
 	}
+
 	public void setGameID(long gameID) {
 		this.gameID = gameID;
 	}
-	public String getString(String key){
+
+	public String getString(String key) {
 		return keyValues.get(key);
 	}
-	public int getInt(String key){
+
+	public int getInt(String key) {
 		return new Integer(keyValues.get(key)).intValue();
+	}
+
+	public boolean getBoolean(String key) {
+		return keyValues.get(key).compareTo("true") == 0;
 	}
 }

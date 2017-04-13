@@ -286,4 +286,8 @@ public class PacPlayer extends Character {
 	public Image getLifeImage() {
 		return AssetController.getInstance().getLifeImage(playerType);
 	}
+	@Override
+	public boolean getEdible(){
+		return false;
+	}
 }

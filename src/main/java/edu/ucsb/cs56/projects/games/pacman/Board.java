@@ -54,6 +54,7 @@ public class Board implements Runnable, EventTrackable {
 	Ghost ghost1, ghost2;
 	Vector<Character> pacmen;
 	Vector<Ghost> ghosts;
+	private int startNumGhosts =0 ;
 	private int numGhosts = 6;
 	int numBoardsCleared = 0;
 	private int curSpeed = 3;
@@ -76,7 +77,8 @@ public class Board implements Runnable, EventTrackable {
 	public Board(Properties prop, boolean doWrite) throws FileNotFoundException {
 
 		dataInterface = new DataInterface(doWrite);
-		numGhosts = Integer.parseInt(prop.getProperty("numGhosts", "6"));
+		startNumGhosts = Integer.parseInt(prop.getProperty("numGhosts", "6"));
+		numGhosts = startNumGhosts;
 
 		grid = new Grid();
 
@@ -236,8 +238,9 @@ public class Board implements Runnable, EventTrackable {
 	 * End the game if remaining lives reaches 0.
 	 */
 	public void gameOver() {
-
-		dataInterface.setData(new DataEvent(DataEventType.GAME_OVER, this, this));
+		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
+		de.setKeyValuePair("score", "" + score);
+		dataInterface.setData(de);
 		if (boardRenderer != null)
 			boardRenderer.drawGameOver();
 
@@ -298,7 +301,7 @@ public class Board implements Runnable, EventTrackable {
 		grid.levelInit(numBoardsCleared);
 		levelContinue();
 		score = 0;
-		numGhosts = 6;
+		numGhosts = startNumGhosts;
 		curSpeed = 3;
 		numPills = 4;
 

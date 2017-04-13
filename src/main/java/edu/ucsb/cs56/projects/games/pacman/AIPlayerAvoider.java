@@ -22,26 +22,29 @@ import edu.ucsb.cs56.projects.games.pacman.GridWalker.PathSection;
  */
 public class AIPlayerAvoider extends AIPlayer {
 
+	private static final long PILL_DURATION_MOVES = 125;
 	Random random = new Random(System.currentTimeMillis());
 	int numSteps = 1;
 
 	private int myX, myY;
 	private int moveCount = 0;
 
+	private long pillEatMove = 0;
+
 	Comparator<Path> distanceComparator = new Comparator<Path>() {
 		@Override
 		public int compare(Path path1, Path path2) {
 			int ret = 0;
-			if (path1.distance < path2.distance) {
+			if (path1.getDistance() < path2.getDistance()) {
 				ret = -1;
-			} else if (path1.distance > path2.distance) {
+			} else if (path1.getDistance() > path2.getDistance()) {
 				ret = 1;
 			}
 			return ret;
 		}
 	};
 
-	TreeMap<String, Path> paths = new TreeMap<String, Path>();
+	private TreeMap<String, Path> paths = new TreeMap<String, Path>();
 
 	void addPath(String characterID, Path path) {
 		if (path != null) {
@@ -95,23 +98,33 @@ public class AIPlayerAvoider extends AIPlayer {
 					int ghostX = dataEvent.getInt("x");
 					int ghostY = dataEvent.getInt("y");
 					Path path = gridWalker.getShortestPath(myX, myY, ghostX, ghostY);
-					addPath(characterID, path);
+					if (path != null) {
+						path.setEdible(dataEvent.getBoolean("edible"));
+						addPath(characterID, path);
+					}
 
 					break;
 				case "PACMA":
 					moveCount++;
 					// Can't move too fast or we end up with an unstable
 					// feedback loop
+					myX = dataEvent.getInt("x");
+					myY = dataEvent.getInt("y");
 					if (moveCount % 2 == 0) {
 						Path closestGhostPath = getNClosestPath(0);
-						int closestGhostDistance = closestGhostPath.distance;
+						int closestGhostDistance = closestGhostPath.getDistance();
 						if (closestGhostPath != null) {
 							Direction newDirection = null;
-
 							if (closestGhostDistance > 4) {
 								// If there is no ghost closer than 4 run to the
 								// closes pellet
 								newDirection = getForwardDirection(gridWalker.getClosestPelletPath(myX, myY));
+							} else if (closestGhostPath.getEdible() && (movesSincePillEat() < PILL_DURATION_MOVES)) {
+								// If the ghosts are edible run to the closes
+								// one
+								if (closestGhostPath.pathSections.size() > 0) {
+									newDirection = closestGhostPath.pathSections.elementAt(0).getDirection();
+								}
 							} else {
 								// If not run away from the two closest ghosts
 								newDirection = getRandomAwayDirection(gridWalker);
@@ -136,8 +149,7 @@ public class AIPlayerAvoider extends AIPlayer {
 								}
 							}
 						}
-						myX = dataEvent.getInt("x");
-						myY = dataEvent.getInt("y");
+
 						closestGhostDistance = Integer.MAX_VALUE;
 						break;
 					}
@@ -145,8 +157,15 @@ public class AIPlayerAvoider extends AIPlayer {
 				}
 			}
 			break;
+		case EAT_PILL:
+			pillEatMove = this.moveCount;
+			break;
 		default:
 		}
+	}
+
+	private long movesSincePillEat() {
+		return moveCount - pillEatMove;
 	}
 
 	private Direction getRandomAwayDirection(GridWalker gridWalker) {
@@ -171,8 +190,8 @@ public class AIPlayerAvoider extends AIPlayer {
 				// fair game
 				if (closestGhostDirection != null && secondClosestGhostDirection != null
 						&& psi.getDirection() != closestGhostDirection
-						//&& psi.getDirection() != secondClosestGhostDirection
-						) {
+				// && psi.getDirection() != secondClosestGhostDirection
+				) {
 					possibleDirections.add(psi.getDirection());
 				}
 			}

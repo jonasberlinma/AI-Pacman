@@ -36,8 +36,8 @@ public class GridWalker {
 
 	protected class PathSection {
 
-		Point fromPoint, toPoint;
-		int length;
+		private Point fromPoint, toPoint;
+		private int length;
 
 		PathSection(Point fromPoint, Point toPoint, int length) {
 			this.fromPoint = fromPoint;
@@ -159,12 +159,22 @@ public class GridWalker {
 	}
 
 	protected class Path {
-		int distance;
+		private int distance;
+		private boolean edible;
 		Vector<PathSection> pathSections = null;
 
 		Path(int distance, Vector<PathSection> pathSections) {
 			this.distance = distance;
 			this.pathSections = pathSections;
+		}
+		public int getDistance(){
+			return distance;
+		}
+		public boolean getEdible(){
+			return edible;
+		}
+		public void setEdible(boolean edible){
+			this.edible = edible;
 		}
 	}
 

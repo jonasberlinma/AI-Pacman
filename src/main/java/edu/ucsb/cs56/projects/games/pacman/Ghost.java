@@ -431,6 +431,9 @@ public class Ghost extends Character {
 	public String getCharacterID(){
 		return "G" + playerType;
 	}
+	public boolean getEdible(){
+		return this.edible;
+	}
 /*	public String getCharacterType(){
 		return playerType.name();
 	}*/
