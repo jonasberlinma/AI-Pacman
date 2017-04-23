@@ -156,6 +156,9 @@ public class GridWalker {
 			// 0 || (screenData[y][x] & 64) != 0;
 			return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 64) != 0;
 		}
+		boolean hasPill(){
+			return (screenData[y][x] & 64) != 0;
+		}
 	}
 
 	protected class Path {
@@ -166,6 +169,17 @@ public class GridWalker {
 		Path(int distance, Vector<PathSection> pathSections) {
 			this.distance = distance;
 			this.pathSections = pathSections;
+		}
+		
+		public Direction getFirstDirection(){
+			Direction ret = null;
+			if(this.pathSections.size() > 0){
+				ret = this.pathSections.elementAt(0).getDirection();
+			}
+			return ret;
+		}
+		public boolean isSameDirection(Path otherPath){
+			return this.getFirstDirection().equals(otherPath.getFirstDirection());
 		}
 		public int getDistance(){
 			return distance;
@@ -242,6 +256,9 @@ public class GridWalker {
 
 	private HashSet<Point> visitedPoints;
 	private HashSet<Point> unvisitedPoints;
+	private Point getPoint(int x, int y){
+		return allPoints.get(new Point(x, y).nodeNumber);
+	}
 
 	HashSet<PathSection> getPossiblePaths(Point point) {
 		return fromPathSectionHashtable.get(point);
@@ -258,7 +275,7 @@ public class GridWalker {
 	}
 
 	public Path getClosestPelletPath(int fromX, int fromY) {
-		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
+		Point startPoint = getPoint(fromX, fromY);
 
 		if (!startPoint.checkReachable("Start")) {
 			return null;
@@ -267,17 +284,26 @@ public class GridWalker {
 		Point currentPoint = startPoint;
 		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
 	}
+	
+	public Path getClosestPillPath(int fromX, int fromY) {
+		Point startPoint = getPoint(fromX, fromY);
 
+		if (!startPoint.checkReachable("Start")) {
+			return null;
+		}
+		initDijkstra(startPoint);
+		Point currentPoint = startPoint;
+		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasPill());
+	}
+	
 	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
-		Point startPoint = allPoints.get(new Point(fromX, fromY).nodeNumber);
-		Point endPoint = allPoints.get(new Point(toX, toY).nodeNumber);
+		Point startPoint = getPoint(fromX, fromY);
+		Point endPoint = getPoint(toX, toY);
 
 		if (!startPoint.checkReachable("Start")) {
 			return null;
 		}
 		if (!endPoint.checkReachable("End")) {
-			// The ghosts step out of bounds once in a while. Probably a
-			// rounding error
 			return null;
 		}
 		initDijkstra(startPoint);

@@ -113,20 +113,27 @@ public class AIPlayerAvoider extends AIPlayer {
 					if (moveCount % 2 == 0) {
 						Path closestGhostPath = getNClosestPath(0);
 						int closestGhostDistance = closestGhostPath.getDistance();
+						Path closestPillPath = gridWalker.getClosestPelletPath(myX, myY);
+						int closestPillDistance = closestPillPath.getDistance();
 						if (closestGhostPath != null) {
 							Direction newDirection = null;
-							if (closestGhostDistance > 4) {
+							if (closestGhostPath.getEdible() && closestGhostDistance < 12
+									&& (movesSincePillEat() < PILL_DURATION_MOVES)) {
+								// If the ghosts are edible run to the closes
+								// one if it it not more than 12 steps away
+								newDirection = closestGhostPath.getFirstDirection();
+							} else if (closestGhostDistance > 4 && closestGhostDistance < 12 && closestPillDistance < 12
+									&& !closestGhostPath.equals(closestPillPath)) {
+								// If there is no ghosts within 4 steps and both
+								// a ghost and a pill within 12 steps go eat the
+								// pill
+								newDirection = getForwardDirection(closestPillPath);
+							} else if (closestGhostDistance > 4) {
 								// If there is no ghost closer than 4 run to the
 								// closes pellet
 								newDirection = getForwardDirection(gridWalker.getClosestPelletPath(myX, myY));
-							} else if (closestGhostPath.getEdible() && (movesSincePillEat() < PILL_DURATION_MOVES)) {
-								// If the ghosts are edible run to the closes
-								// one
-								if (closestGhostPath.pathSections.size() > 0) {
-									newDirection = closestGhostPath.pathSections.elementAt(0).getDirection();
-								}
 							} else {
-								// If not run away from the two closest ghosts
+								// If not run away from the closest ghosts
 								newDirection = getRandomAwayDirection(gridWalker);
 							}
 							if (newDirection != null) {
@@ -179,23 +186,19 @@ public class AIPlayerAvoider extends AIPlayer {
 			Path secondClosestGhostPath = getNClosestPath(1);
 			Direction closestGhostDirection = null;
 			Direction secondClosestGhostDirection = null;
-			if (closestGhostPath.pathSections.size() > 0) {
-				closestGhostDirection = closestGhostPath.pathSections.elementAt(0).getDirection();
-			}
-			if (secondClosestGhostPath != null && secondClosestGhostPath.pathSections.size() > 0) {
-				secondClosestGhostDirection = secondClosestGhostPath.pathSections.elementAt(0).getDirection();
+			closestGhostDirection = closestGhostPath.getFirstDirection();
+			if (secondClosestGhostPath != null) {
+				secondClosestGhostDirection = secondClosestGhostPath.getFirstDirection();
 			}
 			for (PathSection psi : ps) {
 				// Can't walk down the given path any other direction is
 				// fair game
 				if (closestGhostDirection != null && secondClosestGhostDirection != null
-						&& psi.getDirection() != closestGhostDirection
-				// && psi.getDirection() != secondClosestGhostDirection
-				) {
+						&& psi.getDirection() != closestGhostDirection) {
 					possibleDirections.add(psi.getDirection());
 				}
 			}
-			// Of the possible direction pick a random one
+			// Of the possible directions pick a random one
 			if (possibleDirections.size() > 0) {
 				newDirection = possibleDirections.get(new Random().nextInt(possibleDirections.size()));
 			}
@@ -205,8 +208,8 @@ public class AIPlayerAvoider extends AIPlayer {
 
 	private Direction getForwardDirection(Path walkPath) {
 		Direction newDirection = null;
-		if (walkPath != null && walkPath.pathSections.size() > 0) {
-			newDirection = walkPath.pathSections.elementAt(0).getDirection();
+		if (walkPath != null) {
+			newDirection = walkPath.getFirstDirection();
 		}
 		return newDirection;
 	}
