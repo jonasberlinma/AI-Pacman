@@ -74,7 +74,7 @@
 		<junit haltonerror="no" haltonfailure="no">
 			<classpath refid="project.class.path" />
 			<batchtest fork="yes">
-				<fileset dir="src">
+				<fileset dir="src/main/java">
 					<include name="**/*Test.java"/>
 				</fileset>
 			</batchtest>
