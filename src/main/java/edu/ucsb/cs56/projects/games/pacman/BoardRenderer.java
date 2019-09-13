@@ -20,6 +20,10 @@ import javax.swing.Timer;
 
 public class BoardRenderer extends JPanel implements ActionListener {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7383414799194976684L;
 	private Board board = null;
 	private GameController bgc = null;
 	

@@ -39,6 +39,10 @@ import edu.ucsb.cs56.projects.games.pacman.GridData;
  * @version CS56 F16
  */
 public class PacManLevelEditor extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6290307523772436615L;
 	private JMenuBar menu_bar;
 	private JMenu menu_file;
 	private JMenuItem menu_file_new;

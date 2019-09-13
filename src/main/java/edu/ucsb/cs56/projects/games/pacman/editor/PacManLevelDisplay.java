@@ -16,6 +16,10 @@ import edu.ucsb.cs56.projects.games.pacman.GridData;
  * @version CS56 F16
  */
 public class PacManLevelDisplay extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8299559999912589029L;
 	private short[][] grid_data;
 	private Color color_maze, color_dot, color_select;
 	private int block_size;

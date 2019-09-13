@@ -7,6 +7,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class DataInterface extends ArrayBlockingQueue<DataEvent> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7034759291697883018L;
 	private PrintStream eventOutputStream = null;
 	private boolean doWrite = false;
 	
