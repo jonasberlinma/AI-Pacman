@@ -1,7 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman.editor;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 
 import edu.ucsb.cs56.projects.games.pacman.GridData;
 
@@ -60,12 +60,15 @@ public class GridDataConversion {
 		GridData grid_data_out = new GridData(grid_width, grid_data);
 
 		// Dump the grid data object into file.
+		ObjectOutputStream grid_data_object_out;
 		try {
 			FileOutputStream grid_data_out_file = new FileOutputStream("level_out.data");
-			ObjectOutputStream grid_data_object_out = new ObjectOutputStream(grid_data_out_file);
+			grid_data_object_out = new ObjectOutputStream(grid_data_out_file);
 			grid_data_object_out.writeObject(grid_data_out);
+			grid_data_object_out.flush();
+			grid_data_object_out.close();
 		} catch (Exception e) {
 			System.out.println(e);
-		}
+		} 
 	}
 }

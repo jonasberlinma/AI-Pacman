@@ -63,7 +63,8 @@ public class PacManLevelDisplay extends JPanel {
 		g2.setStroke(new BasicStroke(2));
 
 		int pellet_size = (int)(this.block_size * 0.2);
-		int fruit_size = (int)(this.block_size * 0.3);
+		// Not sure why this was here
+		//int fruit_size = (int)(this.block_size * 0.3);
 		int pill_size = (int)(this.block_size * 0.5);
 		
 		for (int i = 0; i < this.grid_data.length; i++) {
