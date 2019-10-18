@@ -20,6 +20,8 @@ public class GridWalker {
 	private short[][] screenData = null;
 	private short[][] connectionCheck = null;
 
+	private boolean walkerInitialized = false;
+
 	private HashSet<Point> reachablePoints = new HashSet<Point>();
 	private Hashtable<String, Point> allPoints = new Hashtable<String, Point>();
 	private Hashtable<Point, HashSet<PathSection>> fromPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
@@ -30,6 +32,7 @@ public class GridWalker {
 		this.screenData = screenData;
 		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 		buildGraph();
+		walkerInitialized = true;
 		// printGraph("");
 		// System.exit(0);
 	}
@@ -98,7 +101,7 @@ public class GridWalker {
 
 		int x, y;
 		String nodeNumber = "";
-		private int distance;
+		// private int distance;
 
 		Point(int x, int y) {
 			this.x = x;
@@ -137,11 +140,7 @@ public class GridWalker {
 			out.print("" + nodeNumber + "," + nodeNumber);
 		}
 
-		private void setDistance(int distance) {
-			this.distance = distance;
-		}
-
-		private boolean checkReachable(String type) {
+		public boolean checkReachable(String type) {
 			boolean reachable = false;
 			if (!reachablePoints.contains(this)) {
 				System.err.println(type + " point not found " + x + "-" + y);
@@ -156,9 +155,11 @@ public class GridWalker {
 			// 0 || (screenData[y][x] & 64) != 0;
 			return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 64) != 0;
 		}
-		boolean hasPill(){
+
+		boolean hasPill() {
 			return (screenData[y][x] & 64) != 0;
 		}
+
 	}
 
 	protected class Path {
@@ -170,24 +171,28 @@ public class GridWalker {
 			this.distance = distance;
 			this.pathSections = pathSections;
 		}
-		
-		public Direction getFirstDirection(){
+
+		public Direction getFirstDirection() {
 			Direction ret = null;
-			if(this.pathSections.size() > 0){
+			if (this.pathSections.size() > 0) {
 				ret = this.pathSections.elementAt(0).getDirection();
 			}
 			return ret;
 		}
-		public boolean isSameDirection(Path otherPath){
+
+		public boolean isSameDirection(Path otherPath) {
 			return this.getFirstDirection().equals(otherPath.getFirstDirection());
 		}
-		public int getDistance(){
+
+		public int getDistance() {
 			return distance;
 		}
-		public boolean getEdible(){
+
+		public boolean getEdible() {
 			return edible;
 		}
-		public void setEdible(boolean edible){
+
+		public void setEdible(boolean edible) {
 			this.edible = edible;
 		}
 	}
@@ -254,9 +259,22 @@ public class GridWalker {
 		edgeOut.close();
 	}
 
-	private HashSet<Point> visitedPoints;
-	private HashSet<Point> unvisitedPoints;
-	private Point getPoint(int x, int y){
+	class WalkInstance {
+		private HashSet<Point> visitedPoints;
+		private HashSet<Point> unvisitedPoints;
+		private Hashtable<Point, Integer> distance;
+		private int maxIterations = 0;
+
+		WalkInstance() {
+			visitedPoints = new HashSet<Point>();
+			unvisitedPoints = new HashSet<Point>();
+			distance = new Hashtable<Point, Integer>();
+
+			maxIterations = 10000;
+		}
+	}
+
+	private Point getPoint(int x, int y) {
 		return allPoints.get(new Point(x, y).nodeNumber);
 	}
 
@@ -264,39 +282,64 @@ public class GridWalker {
 		return fromPathSectionHashtable.get(point);
 	}
 
-	private void initDijkstra(Point startPoint) {
-		visitedPoints = new HashSet<Point>();
-		unvisitedPoints = new HashSet<Point>();
-		unvisitedPoints.addAll(reachablePoints);
-		unvisitedPoints.forEach((x) -> x.setDistance(Integer.MAX_VALUE));
-		startPoint.setDistance(0);
-		visitedPoints.add(startPoint);
-		unvisitedPoints.remove(startPoint);
+	private WalkInstance initDijkstra(Point startPoint) {
+		WalkInstance wi = new WalkInstance();
+		wi.unvisitedPoints.addAll(reachablePoints);
+		wi.unvisitedPoints.forEach((x) -> wi.distance.put(x, Integer.MAX_VALUE));
+		wi.distance.put(startPoint, 0);
+		wi.visitedPoints.add(startPoint);
+		wi.unvisitedPoints.remove(startPoint);
+		return wi;
 	}
 
 	public Path getClosestPelletPath(int fromX, int fromY) {
+		if (!walkerInitialized) {
+			return null;
+		}
 		Point startPoint = getPoint(fromX, fromY);
 
 		if (!startPoint.checkReachable("Start")) {
 			return null;
 		}
-		initDijkstra(startPoint);
+		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
+		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
 	}
-	
+
 	public Path getClosestPillPath(int fromX, int fromY) {
+		if (!walkerInitialized) {
+			return null;
+		}
 		Point startPoint = getPoint(fromX, fromY);
 
 		if (!startPoint.checkReachable("Start")) {
 			return null;
 		}
-		initDijkstra(startPoint);
+		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		return walkPath(currentPoint, startPoint, null, (x, y) -> !x.hasPill());
+		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPill());
 	}
-	
+
+	class DirectionDistance {
+		Direction direction;
+		int distance;
+	}
+
+	public DirectionDistance getShortestPathDirectionDistance(int fromX, int fromY, int toX, int toY) {
+		DirectionDistance dd = null;
+		Path shortest = getShortestPath(fromX, fromY, toX, toY);
+		if (shortest != null && shortest.getFirstDirection() != null) {
+			dd = new DirectionDistance();
+			dd.direction = shortest.getFirstDirection();
+			dd.distance = shortest.distance;
+		}
+		return dd;
+	}
+
 	public Path getShortestPath(int fromX, int fromY, int toX, int toY) {
+		if (!walkerInitialized) {
+			return null;
+		}
 		Point startPoint = getPoint(fromX, fromY);
 		Point endPoint = getPoint(toX, toY);
 
@@ -306,36 +349,39 @@ public class GridWalker {
 		if (!endPoint.checkReachable("End")) {
 			return null;
 		}
-		initDijkstra(startPoint);
+		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		return walkPath(currentPoint, startPoint, endPoint, (x, y) -> !x.equals(y));
+		return walkPath(wi, currentPoint, startPoint, endPoint, (x, y) -> !x.equals(y));
 	}
 
-	private Path walkPath(Point currentPoint, Point startPoint, Point endPoint,
+	private Path walkPath(WalkInstance wi, Point currentPoint, Point startPoint, Point endPoint,
 			BiFunction<Point, Point, Boolean> stoppingCondition) {
 		while (currentPoint != null && stoppingCondition.apply(currentPoint, endPoint)) {
-			visitedPoints.add(currentPoint);
-			unvisitedPoints.remove(currentPoint);
-			updateDistances(currentPoint);
-			currentPoint = findNext(currentPoint);
+			wi.visitedPoints.add(currentPoint);
+			wi.unvisitedPoints.remove(currentPoint);
+			updateDistances(wi, currentPoint);
+			currentPoint = findNext(wi, currentPoint);
 		}
 		Path path = null;
 		if (currentPoint != null) {
-			int shortestDistance = currentPoint.distance;
+			int shortestDistance = wi.distance.get(currentPoint);
 			// Now walk backwards to find the shortest path
 			Vector<PathSection> shortestPath = new Vector<PathSection>();
-			while (!currentPoint.equals(startPoint)) {
+			while (!currentPoint.equals(startPoint) && wi.maxIterations-- > 0) {
 				HashSet<PathSection> psh = toPathSectionHashtable.get(currentPoint);
 				int minDistance = Integer.MAX_VALUE;
 				PathSection minPathSection = null;
 				for (PathSection ps : psh) {
-					if (ps.fromPoint.distance < minDistance) {
-						minDistance = ps.fromPoint.distance;
+					if (wi.distance.get(ps.fromPoint) < minDistance) {
+						minDistance = wi.distance.get(ps.fromPoint);
 						minPathSection = ps;
 					}
 				}
-				currentPoint = minPathSection.fromPoint;
-				shortestPath.add(minPathSection);
+				// Due to some bug some characters decide to step out of bounds
+				if (minPathSection != null) {
+					currentPoint = minPathSection.fromPoint;
+					shortestPath.add(minPathSection);
+				}
 			}
 			// Reverse the order since we walked backwards
 			Collections.reverse(shortestPath);
@@ -344,24 +390,24 @@ public class GridWalker {
 		return path;
 	}
 
-	private void updateDistances(Point thisPoint) {
+	private void updateDistances(WalkInstance wi, Point thisPoint) {
 		HashSet<PathSection> p = fromPathSectionHashtable.get(thisPoint);
 		for (PathSection i : p) {
-			if (!visitedPoints.contains(i.toPoint)) {
-				if (i.toPoint.distance > (thisPoint.distance + i.length)) {
-					i.toPoint.distance = thisPoint.distance + i.length;
+			if (!wi.visitedPoints.contains(i.toPoint)) {
+				if (wi.distance.get(i.toPoint) > (wi.distance.get(thisPoint) + i.length)) {
+					wi.distance.put(i.toPoint, wi.distance.get(thisPoint) + i.length);
 				}
 			}
 		}
 	}
 
-	private Point findNext(Point thisPoint) {
+	private Point findNext(WalkInstance wi, Point thisPoint) {
 		Point nextPoint = null;
 		int minDistance = Integer.MAX_VALUE;
-		for (Point i : unvisitedPoints) {
-			if (i.distance < minDistance) {
+		for (Point i : wi.unvisitedPoints) {
+			if (wi.distance.get(i) < minDistance) {
 				nextPoint = i;
-				minDistance = i.distance;
+				minDistance = wi.distance.get(i);
 			}
 		}
 		return nextPoint;

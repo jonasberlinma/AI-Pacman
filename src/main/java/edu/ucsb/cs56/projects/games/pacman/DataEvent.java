@@ -5,7 +5,8 @@ import java.util.Iterator;
 
 public class DataEvent {
 	public enum DataEventType {
-		NEW_BOARD, INTRO, MOVE, PACMAN_DEATH, EAT_PELLET, EAT_GHOST, EAT_FRUIT, EAT_PILL, GAME_OVER, KEY_RELEASE, KEY_PRESS
+		NEW_BOARD, INTRO, MOVE, PACMAN_DEATH, EAT_PELLET, EAT_GHOST, EAT_FRUIT, EAT_PILL, GAME_OVER, KEY_RELEASE,
+		KEY_PRESS
 	};
 
 	DataEventType eventType;
@@ -30,11 +31,17 @@ public class DataEvent {
 		out.append("gameID=" + gameID + ",gameStep=" + gameStep + ",time=" + System.currentTimeMillis() + ",eventType="
 				+ eventType);
 
+		if (keyValues.containsKey("playerType")) {
+			out.append(",playerType=" + keyValues.get("playerType"));
+		}
+
 		Iterator<String> i = keyValues.keySet().iterator();
 
 		while (i.hasNext()) {
 			String key = i.next();
-			out.append("," + key + "=" + keyValues.get(key));
+			if (key.compareTo("playerType") != 0) {
+				out.append("," + key + "=" + keyValues.get(key));
+			}
 		}
 
 		return out.toString();

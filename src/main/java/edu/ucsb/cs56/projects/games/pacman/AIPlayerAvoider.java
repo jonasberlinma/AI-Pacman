@@ -55,7 +55,7 @@ public class AIPlayerAvoider extends AIPlayer {
 		}
 	}
 
-	Path getNClosestPath(int order) {
+	Path getNthClosestPath(int order) {
 		Path path = null;
 		if (paths.size() > order) {
 			Vector<Path> v = new Vector<Path>(paths.values());
@@ -71,7 +71,6 @@ public class AIPlayerAvoider extends AIPlayer {
 		switch (dataEvent.eventType) {
 
 		case INTRO:
-			// Let's press the start key
 			pressKey(KeyEvent.VK_S);
 			pressKey(KeyEvent.VK_DOWN);
 			break;
@@ -111,10 +110,10 @@ public class AIPlayerAvoider extends AIPlayer {
 					myX = dataEvent.getInt("x");
 					myY = dataEvent.getInt("y");
 					if (moveCount % 2 == 0) {
-						Path closestGhostPath = getNClosestPath(0);
+						Path closestGhostPath = getNthClosestPath(0);
 						int closestGhostDistance = closestGhostPath.getDistance();
 						Path closestPillPath = gridWalker.getClosestPelletPath(myX, myY);
-						int closestPillDistance = closestPillPath.getDistance();
+						int closestPillDistance = closestPillPath != null ?closestPillPath.getDistance():30;
 						if (closestGhostPath != null) {
 							Direction newDirection = null;
 							if (closestGhostPath.getEdible() && closestGhostDistance < 12
@@ -122,7 +121,7 @@ public class AIPlayerAvoider extends AIPlayer {
 								// If the ghosts are edible run to the closes
 								// one if it it not more than 12 steps away
 								newDirection = closestGhostPath.getFirstDirection();
-							} else if (closestGhostDistance > 4 && closestGhostDistance < 12 && closestPillDistance < 12
+							} else if (closestGhostDistance > 5 && closestGhostDistance < 12 && closestPillDistance < 12
 									&& !closestGhostPath.equals(closestPillPath)) {
 								// If there is no ghosts within 4 steps and both
 								// a ghost and a pill within 12 steps go eat the
@@ -182,8 +181,8 @@ public class AIPlayerAvoider extends AIPlayer {
 
 		if (ps != null) {
 			Vector<Direction> possibleDirections = new Vector<Direction>();
-			Path closestGhostPath = getNClosestPath(0);
-			Path secondClosestGhostPath = getNClosestPath(1);
+			Path closestGhostPath = getNthClosestPath(0);
+			Path secondClosestGhostPath = getNthClosestPath(1);
 			Direction closestGhostDirection = null;
 			Direction secondClosestGhostDirection = null;
 			closestGhostDirection = closestGhostPath.getFirstDirection();

@@ -21,8 +21,8 @@ public class Grid {
 	public int y;
 
 	/*
-	 * check this link to implement the ghost AI movement at intersection.
-	 * Revise the level 1 data to classic pacman for intersection detection
+	 * check this link to implement the ghost AI movement at intersection. Revise
+	 * the level 1 data to classic pacman for intersection detection
 	 * http://gameinternals.com/post/2072558330/understanding-pac-man-ghost-
 	 * behavior
 	 */
@@ -50,7 +50,7 @@ public class Grid {
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
 		gridWalkers = new GridWalker[loadableLevels.length];
-			for (int i = 0; i < loadableLevels.length; i++) {
+		for (int i = 0; i < loadableLevels.length; i++) {
 			GridData level = loadLevel("assets/levels/" + loadableLevels[i]);
 			gridWalkers[i] = new GridWalker(level, screenData);
 			levelsData[i] = level.get2DGridData();
@@ -74,8 +74,8 @@ public class Grid {
 	}
 
 	/**
-	 * Checks if there are any pellets left for Pacman to eat, and restarts the
-	 * game on the next board in a higher difficulty if finished
+	 * Checks if there are any pellets left for Pacman to eat, and restarts the game
+	 * on the next board in a higher difficulty if finished
 	 *
 	 * @return A boolean indicating whether or not the maze is finished
 	 */
@@ -124,8 +124,7 @@ public class Grid {
 	/**
 	 * Count the number of pellets in each map
 	 *
-	 * @param numBoardsCleared
-	 *            the number of levels that have been cleared
+	 * @param numBoardsCleared the number of levels that have been cleared
 	 * @return An int indicating how many pellets are left
 	 */
 	public int getPelletNumForMap(int numBoardsCleared) {
@@ -144,8 +143,7 @@ public class Grid {
 	/**
 	 * Initialize level
 	 * 
-	 * @param numBoardsCleared
-	 *            the number of levels that have been cleared
+	 * @param numBoardsCleared the number of levels that have been cleared
 	 */
 	public void levelInit(int numBoardsCleared) {
 		this.currentLevel = numBoardsCleared;
@@ -158,25 +156,25 @@ public class Grid {
 	/*
 	 * Better Implementation Idea You could have an ArrayList that holds Point
 	 * Objects of locations that the Pacman has eaten pellets. - Create
-	 * ArrayList<Point> in Grid.java & initialize - Add new Point every time
-	 * Pacman eats pellet/fruit in PacPlayer.java
+	 * ArrayList<Point> in Grid.java & initialize - Add new Point every time Pacman
+	 * eats pellet/fruit in PacPlayer.java
 	 * 
-	 * When it is time to spawn a fruit, choose a random Point from this
-	 * ArrayList (int) (Math.random() * list.size()), then remove the point
-	 * where you spawned the fruit.
+	 * When it is time to spawn a fruit, choose a random Point from this ArrayList
+	 * (int) (Math.random() * list.size()), then remove the point where you spawned
+	 * the fruit.
 	 * 
 	 * When a level is complete, make sure you clear this ArrayList using
 	 * list.clear()
 	 ** 
-	 * If you want to fix this too, you can try: To prevent the fruit from
-	 * spawning on Pacman, just cross-check that the spawning location != any of
-	 * the Pacman location (use a loop on pacmen array for this so you handle
-	 * multi-player mode)
+	 * If you want to fix this too, you can try: To prevent the fruit from spawning
+	 * on Pacman, just cross-check that the spawning location != any of the Pacman
+	 * location (use a loop on pacmen array for this so you handle multi-player
+	 * mode)
 	 * 
-	 * I think without having a defined search space, and just searching
-	 * randomly, you cannot easily fix the bug where the program is looking
-	 * forever to find an open space. That's why having this list of possible
-	 * spaces is the best way I can think of.
+	 * I think without having a defined search space, and just searching randomly,
+	 * you cannot easily fix the bug where the program is looking forever to find an
+	 * open space. That's why having this list of possible spaces is the best way I
+	 * can think of.
 	 */
 
 	public void randomBlock() {
@@ -187,8 +185,7 @@ public class Grid {
 	/**
 	 * Increment fruit as the pacman is alive
 	 *
-	 * @param numBoardsCleared
-	 *            number of levels cleared
+	 * @param numBoardsCleared number of levels cleared
 	 */
 	public void incrementFruit(int numBoardsCleared) {
 		if (this.getPelletNum() < this.getPelletNumForMap(numBoardsCleared)) {
@@ -223,7 +220,8 @@ public class Grid {
 			gridOut.println("");
 		}
 	}
-	public GridWalker getGridWalker(){
+
+	public GridWalker getGridWalker() {
 		return gridWalkers[currentLevel];
 	}
 }

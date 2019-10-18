@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
+import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all
@@ -54,7 +55,7 @@ public class Board implements Runnable, EventTrackable {
 	Ghost ghost1, ghost2;
 	Vector<Character> pacmen;
 	Vector<Ghost> ghosts;
-	private int startNumGhosts =0 ;
+	private int startNumGhosts = 0;
 	private int numGhosts = 6;
 	int numBoardsCleared = 0;
 	private int curSpeed = 3;
@@ -155,12 +156,10 @@ public class Board implements Runnable, EventTrackable {
 	/**
 	 * Main game logic loop
 	 *
-	 * @param g2d
-	 *            a Graphics 2D object
+	 * @param g2d a Graphics 2D object
 	 */
 	private void playGame() {
 		if (gt == GameType.SINGLEPLAYER || gt == GameType.VERSUS || gt == GameType.COOPERATIVE) {
-
 			if (!checkAlive()) {
 				gameOver();
 			} else {
@@ -180,7 +179,15 @@ public class Board implements Runnable, EventTrackable {
 			case SINGLEPLAYER:
 				for (Ghost g : ghosts) {
 					g.moveAI(grid, pacmen);
-					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, g));
+					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(pacman.x / BLOCKSIZE,
+							pacman.y / BLOCKSIZE, g.x / BLOCKSIZE, g.y / BLOCKSIZE);
+					DataEvent de = new DataEvent(DataEventType.MOVE, this, g);
+					if (dd != null) {
+						String distanceString = new Integer(dd.distance).toString();
+						de.setKeyValuePair("distance", distanceString);
+						de.setKeyValuePair("direction", dd.direction.toString());
+					}
+					dataInterface.setData(de);
 				}
 				grid.incrementFruit(numBoardsCleared);
 				detectCollision(ghosts);
@@ -253,8 +260,7 @@ public class Board implements Runnable, EventTrackable {
 	/**
 	 * Detects when ghosts and pacman collide
 	 *
-	 * @param ghosts
-	 *            An array of Ghost
+	 * @param ghosts An array of Ghost
 	 */
 	public void detectCollision(Vector<Ghost> ghosts) {
 		for (Character pacman : pacmen) {
@@ -527,7 +533,8 @@ public class Board implements Runnable, EventTrackable {
 	public int getNTrainedModels() {
 		return this.nTrainedModels;
 	}
-	public void setNTrainedModels(int nTrainedModels){
+
+	public void setNTrainedModels(int nTrainedModels) {
 		this.nTrainedModels = nTrainedModels;
 	}
 }

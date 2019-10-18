@@ -117,7 +117,7 @@ public class GameController implements Runnable {
 	private void startForegroundGame() throws NumberFormatException, FileNotFoundException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
 
-		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay", "40")), false);
+		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay", "40")), true);
 
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
