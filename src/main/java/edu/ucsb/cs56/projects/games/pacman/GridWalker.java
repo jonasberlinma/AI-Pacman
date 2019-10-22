@@ -281,6 +281,14 @@ public class GridWalker {
 	HashSet<PathSection> getPossiblePaths(Point point) {
 		return fromPathSectionHashtable.get(point);
 	}
+	Vector<Direction> getPossibleDirections(int x, int y) {
+		HashSet<PathSection> ps = getPossiblePaths(new Point(x, y));
+		Vector<Direction> ret = new Vector<Direction>();
+		for(PathSection p : ps) {
+			ret.add(p.getDirection());
+		}
+		return ret;
+	}
 
 	private WalkInstance initDijkstra(Point startPoint) {
 		WalkInstance wi = new WalkInstance();

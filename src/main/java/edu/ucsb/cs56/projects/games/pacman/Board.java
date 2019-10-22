@@ -2,13 +2,13 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
+import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
 
 /**
@@ -48,6 +48,7 @@ public class Board implements Runnable, EventTrackable {
 	private int nTrainedModels;
 
 	private int score;
+
 	private Grid grid;
 	private GameType gt = GameType.INTRO;
 	PacPlayer pacman;
@@ -93,8 +94,8 @@ public class Board implements Runnable, EventTrackable {
 		pacman = new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PlayerType.PACMAN, grid);
 		// msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 *
 		// BLOCKSIZE, PacPlayer.MSPACMAN, grid);
-		ghost1 = new Ghost(dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
-		ghost2 = new Ghost(dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST2, grid);
+		ghost1 = new Ghost(0, dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
+		ghost2 = new Ghost(1, dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST2, grid);
 
 		ghosts = new Vector<Ghost>();
 		numPills = 4;
@@ -165,7 +166,16 @@ public class Board implements Runnable, EventTrackable {
 			} else {
 				if (pacman.alive) {
 					pacman.move(grid, this);
-					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, pacman));
+					DataEvent de = new DataEvent(DataEventType.MOVE, this, pacman);
+					Vector<Direction> dirs = grid.getGridWalker().getPossibleDirections(pacman.x / BLOCKSIZE,
+							pacman.y / BLOCKSIZE);
+					de.setKeyValuePair("UP", dirs.contains(Direction.UP)?"True":"False");
+					de.setKeyValuePair("DOWN", dirs.contains(Direction.DOWN)?"True":"False");
+					de.setKeyValuePair("LEFT", dirs.contains(Direction.LEFT)?"True":"False");
+					de.setKeyValuePair("RIGHT", dirs.contains(Direction.RIGHT)?"True":"False");
+					de.setKeyValuePair("score", new Integer(score).toString());
+					
+					dataInterface.setData(de);
 					if (grid.getPillNum() != numPills) {
 						for (Ghost g : ghosts) {
 							g.edible = true;
@@ -182,6 +192,7 @@ public class Board implements Runnable, EventTrackable {
 					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(pacman.x / BLOCKSIZE,
 							pacman.y / BLOCKSIZE, g.x / BLOCKSIZE, g.y / BLOCKSIZE);
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, g);
+					de.setKeyValuePair("ghostNum", new Integer(g.ghostNum).toString());
 					if (dd != null) {
 						String distanceString = new Integer(dd.distance).toString();
 						de.setKeyValuePair("distance", distanceString);
@@ -267,6 +278,7 @@ public class Board implements Runnable, EventTrackable {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {
 					if (pacman.deathTimer <= 0) {
+						score -= 100;
 						dataInterface.setData(new DataEvent(DataEventType.PACMAN_DEATH, this, this));
 					}
 					;
@@ -307,6 +319,7 @@ public class Board implements Runnable, EventTrackable {
 		grid.levelInit(numBoardsCleared);
 		levelContinue();
 		score = 0;
+
 		numGhosts = startNumGhosts;
 		curSpeed = 3;
 		numPills = 4;
@@ -349,10 +362,12 @@ public class Board implements Runnable, EventTrackable {
 				int the_type = i % 2;
 				switch (the_type) {
 				case 0:
-					ghosts.add(new Ghost(dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST1));
+					ghosts.add(
+							new Ghost(i, dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST1));
 					break;
 				case 1:
-					ghosts.add(new Ghost(dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST2));
+					ghosts.add(
+							new Ghost(i, dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST2));
 				}
 
 			}
@@ -518,8 +533,8 @@ public class Board implements Runnable, EventTrackable {
 	}
 
 	@Override
-	public Map<String, String> getData(DataEvent.DataEventType dataEvent) {
-		Hashtable<String, String> hashtable = new Hashtable<String, String>();
+	public LinkedHashMap<String, String> getData(DataEvent.DataEventType dataEvent) {
+		LinkedHashMap<String, String> hashtable = new LinkedHashMap<String, String>();
 
 		switch (dataEvent) {
 		case MOVE:

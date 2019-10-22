@@ -12,7 +12,7 @@ public class AIModelTrainerNull extends AIModelTrainer {
 		if(nGames % 10 == 0){
 			this.setNewModel(null);
 			System.out.println("Sending new model");
-		}
-		System.out.println("Training");
+		} 
+		System.out.println("Training on " + gameEventLog.size() + " events");
 	}
 }

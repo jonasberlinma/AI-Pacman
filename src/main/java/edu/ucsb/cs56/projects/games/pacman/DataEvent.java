@@ -2,6 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 public class DataEvent {
 	public enum DataEventType {
@@ -12,7 +13,7 @@ public class DataEvent {
 	DataEventType eventType;
 	private long gameID = 0;
 	private int gameStep = 0;
-	private HashMap<String, String> keyValues = new HashMap<String, String>();
+	private LinkedHashMap<String, String> keyValues = new LinkedHashMap<String, String>();
 
 	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
 		this.eventType = eventType;
@@ -31,15 +32,15 @@ public class DataEvent {
 		out.append("gameID=" + gameID + ",gameStep=" + gameStep + ",time=" + System.currentTimeMillis() + ",eventType="
 				+ eventType);
 
-		if (keyValues.containsKey("playerType")) {
-			out.append(",playerType=" + keyValues.get("playerType"));
+		if (keyValues.containsKey("ghostNum")) {
+			out.append(",ghostNum=G" + keyValues.get("ghostNum"));
 		}
 
 		Iterator<String> i = keyValues.keySet().iterator();
 
 		while (i.hasNext()) {
 			String key = i.next();
-			if (key.compareTo("playerType") != 0) {
+			if (key.compareTo("ghostNum") != 0) {
 				out.append("," + key + "=" + keyValues.get(key));
 			}
 		}
@@ -50,13 +51,21 @@ public class DataEvent {
 	public void setGameID(long gameID) {
 		this.gameID = gameID;
 	}
-
+	public long getGameID() {
+		return gameID;
+	}
+	public int getGameStep() {
+		return gameStep;
+	}
 	public String getString(String key) {
 		return keyValues.get(key);
 	}
 
 	public int getInt(String key) {
 		return new Integer(keyValues.get(key)).intValue();
+	}
+	public long getLong(String key) {
+		return new Long(keyValues.get(key)).longValue();
 	}
 
 	public boolean getBoolean(String key) {

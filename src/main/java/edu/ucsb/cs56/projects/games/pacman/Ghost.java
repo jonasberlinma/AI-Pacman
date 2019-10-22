@@ -21,21 +21,24 @@ import java.util.Vector;
  */
 public class Ghost extends Character {
 
+	
 	public boolean edible;
 	public int prev_speed;
 	public int edibleTimer;
-	//public int type;
+	public int ghostNum;
 
-	public Ghost(DataInterface dataInterface, int x, int y, int speed, PlayerType playerType) {
+	public Ghost(int ghostNum, DataInterface dataInterface, int x, int y, int speed, PlayerType playerType) {
 		super(dataInterface, x, y, playerType);
+		this.ghostNum = ghostNum;
 		this.speed = speed;
 		edible = false;
 		prev_speed = speed;
 		edibleTimer = 1;
 	}
 
-	public Ghost(DataInterface dataInterface, int x, int y, int speed, PlayerType playerNum, Grid grid) {
+	public Ghost(int ghostNum, DataInterface dataInterface, int x, int y, int speed, PlayerType playerNum, Grid grid) {
 		super(dataInterface, x, y, playerNum);
+		this.ghostNum = ghostNum;
 		this.speed = speed;
 		edible = false;
 		prev_speed = speed;
@@ -428,13 +431,7 @@ public class Ghost extends Character {
 		}
 		return false;
 	}
-	public String getCharacterID(){
-		return "G" + playerType;
-	}
 	public boolean getEdible(){
 		return this.edible;
 	}
-/*	public String getCharacterType(){
-		return playerType.name();
-	}*/
 }

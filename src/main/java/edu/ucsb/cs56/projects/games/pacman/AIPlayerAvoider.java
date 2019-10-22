@@ -24,7 +24,6 @@ public class AIPlayerAvoider extends AIPlayer {
 
 	private static final long PILL_DURATION_MOVES = 125;
 	Random random = new Random(System.currentTimeMillis());
-	int numSteps = 1;
 
 	private int myX, myY;
 	private int moveCount = 0;
@@ -113,7 +112,7 @@ public class AIPlayerAvoider extends AIPlayer {
 						Path closestGhostPath = getNthClosestPath(0);
 						int closestGhostDistance = closestGhostPath.getDistance();
 						Path closestPillPath = gridWalker.getClosestPelletPath(myX, myY);
-						int closestPillDistance = closestPillPath != null ?closestPillPath.getDistance():30;
+						int closestPillDistance = closestPillPath != null ? closestPillPath.getDistance() : 30;
 						if (closestGhostPath != null) {
 							Direction newDirection = null;
 							if (closestGhostPath.getEdible() && closestGhostDistance < 12
@@ -121,7 +120,7 @@ public class AIPlayerAvoider extends AIPlayer {
 								// If the ghosts are edible run to the closes
 								// one if it it not more than 12 steps away
 								newDirection = closestGhostPath.getFirstDirection();
-							} else if (closestGhostDistance > 5 && closestGhostDistance < 12 && closestPillDistance < 12
+							} else if (closestGhostDistance > 4 && closestGhostDistance < 12 && closestPillDistance < 12
 									&& !closestGhostPath.equals(closestPillPath)) {
 								// If there is no ghosts within 4 steps and both
 								// a ghost and a pill within 12 steps go eat the
@@ -136,7 +135,6 @@ public class AIPlayerAvoider extends AIPlayer {
 								newDirection = getRandomAwayDirection(gridWalker);
 							}
 							if (newDirection != null) {
-								numSteps = random.nextInt(10) + 1;
 								switch (newDirection) {
 								case LEFT:
 									pressKey(KeyEvent.VK_LEFT);
@@ -193,13 +191,17 @@ public class AIPlayerAvoider extends AIPlayer {
 				// Can't walk down the given path any other direction is
 				// fair game
 				if (closestGhostDirection != null && secondClosestGhostDirection != null
-						&& psi.getDirection() != closestGhostDirection) {
+						&& psi.getDirection() != closestGhostDirection
+						&& psi.getDirection() != secondClosestGhostDirection) {
 					possibleDirections.add(psi.getDirection());
 				}
 			}
 			// Of the possible directions pick a random one
 			if (possibleDirections.size() > 0) {
 				newDirection = possibleDirections.get(new Random().nextInt(possibleDirections.size()));
+			}
+			if(newDirection == null) {
+				newDirection = secondClosestGhostDirection;
 			}
 		}
 		return newDirection;

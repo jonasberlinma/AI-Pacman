@@ -3,7 +3,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.awt.Image;
 import java.io.PrintStream;
 import java.util.Hashtable;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 /**
@@ -158,8 +158,8 @@ public abstract class Character implements EventTrackable {
 	public int getGameStep(){
 		return 0;
 	}
-	public Map<String, String> getData(DataEvent.DataEventType eventType){
-		Hashtable<String, String> hashtable = new Hashtable<String,String>();
+	public LinkedHashMap<String, String> getData(DataEvent.DataEventType eventType){
+		LinkedHashMap<String, String> hashtable = new LinkedHashMap<String,String>();
 		hashtable.put("playerType", playerType.name());
 		hashtable.put("characterID", "" + characterID);
 		hashtable.put("x", "" + x / Board.BLOCKSIZE);
