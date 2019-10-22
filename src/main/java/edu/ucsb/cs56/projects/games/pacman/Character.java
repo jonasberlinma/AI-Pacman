@@ -2,7 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.Image;
 import java.io.PrintStream;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 

@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
