@@ -15,7 +15,7 @@ public class AIPlayerRandom extends AIPlayer {
 	@Override
 	public void dataEvent(Grid grid, DataEvent dataEvent) {
 
-		switch (dataEvent.eventType) {
+		switch (dataEvent.getEventType()) {
 
 		case INTRO:
 			// Let's press the start key

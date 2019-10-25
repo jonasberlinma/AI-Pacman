@@ -1,5 +1,15 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-public class AIModel {
+import java.util.Vector;
 
+public abstract class AIModel {
+
+	/**
+	 * Override to score an observation
+	 * 
+	 * @return
+	 */
+	abstract double score(DataObservation observation);
+	abstract void setDataObservations(Vector<DataObservation> observations);
+	abstract void train();
 }

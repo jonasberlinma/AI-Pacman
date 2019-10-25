@@ -4,7 +4,12 @@ import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Vector;
+
+import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
+import edu.ucsb.cs56.projects.games.pacman.GridWalker.PathSection;
 
 public class AIPlayerLearner extends AIPlayer {
 
@@ -12,15 +17,24 @@ public class AIPlayerLearner extends AIPlayer {
 
 	private int lastScore;
 	private RewardCalculator rc = null;
+	private DataFlipper df = null;
+	private Vector<DataEvent> eventHistory;
+	public AIModel model = null;
+	private double lastPredictedReward;
+	private int accept = 0;
+	private int iterations = 0;
 
 	public AIPlayerLearner() throws FileNotFoundException {
 		lastScore = 0;
+		df = new DataFlipper();
+		eventHistory = new Vector<DataEvent>();
 	}
 
 	@Override
 	public void dataEvent(Grid grid, DataEvent dataEvent) {
+		GridWalker gridWalker = grid.getGridWalker();
 
-		switch (dataEvent.eventType) {
+		switch (dataEvent.getEventType()) {
 
 		case INTRO:
 			// Let's press the start key
@@ -36,6 +50,7 @@ public class AIPlayerLearner extends AIPlayer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			System.out.println("Acceptance rate " + (double)accept/iterations);
 			// Press ESCAPE to quit the game and then stop
 			pressKey(KeyEvent.VK_ESCAPE);
 			stop();
@@ -46,6 +61,7 @@ public class AIPlayerLearner extends AIPlayer {
 			String key = dataEvent.getString("key");
 			switch (key) {
 			case "S":
+				// Have to put this one here since the gameID is not set until the game starts
 				rc = new RewardCalculator(dataEvent.getGameID(), 20, 0.8d);
 				break;
 			default:
@@ -60,26 +76,55 @@ public class AIPlayerLearner extends AIPlayer {
 				String playerTypeShort = playerType.substring(0, 5);
 				switch (playerTypeShort) {
 
+				case "GHOST":
+
+					eventHistory.add(dataEvent);
+					break;
 				case "PACMA":
-
-					int randomKey = random.nextInt(4);
-
-					switch (randomKey) {
-					case 0:
-						pressKey(KeyEvent.VK_LEFT);
-						break;
-					case 1:
-						pressKey(KeyEvent.VK_DOWN);
-						break;
-					case 2:
-						pressKey(KeyEvent.VK_RIGHT);
-						break;
-					case 3:
-						pressKey(KeyEvent.VK_UP);
-						break;
-					default:
+					// Get basic info
+					int myX = dataEvent.getInt("x");
+					int myY = dataEvent.getInt("y");
+					HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
+					Vector<Direction> possibleDirections = new Vector<Direction>();
+					for (PathSection p : ps) {
+						possibleDirections.add(p.getDirection());
 					}
 
+					eventHistory.add(dataEvent);
+
+					// Prep the data
+					DataObservation observation = df.getObservation(eventHistory);
+					int randomKey = random.nextInt(possibleDirections.size());
+					// TODO: Add the proposed direction
+
+					// Score the proposed change
+					double predictedReward = 0;
+
+					if (model != null) {
+						predictedReward = model.score(observation);
+					}
+					double alpha = lastPredictedReward > 0 ? predictedReward / lastPredictedReward : 1.0;
+					lastPredictedReward = predictedReward;
+					double randomNumber = random.nextDouble();
+					iterations++;
+					if (alpha > randomNumber) {
+						accept++;
+						switch (possibleDirections.get(randomKey)) {
+						case LEFT:
+							pressKey(KeyEvent.VK_LEFT);
+							break;
+						case DOWN:
+							pressKey(KeyEvent.VK_DOWN);
+							break;
+						case RIGHT:
+							pressKey(KeyEvent.VK_RIGHT);
+							break;
+						case UP:
+							pressKey(KeyEvent.VK_UP);
+							break;
+						default:
+						}
+					}
 					int gameStep = dataEvent.getGameStep();
 					int score = dataEvent.getInt("score");
 
@@ -96,7 +141,7 @@ public class AIPlayerLearner extends AIPlayer {
 
 	@Override
 	protected void newModel(AIModel aiModel) {
-		// Don't use trained models for random player
+		model = aiModel;
 
 	}
 }

@@ -2,6 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 public class DataEvent {
 	public enum DataEventType {
@@ -9,18 +10,29 @@ public class DataEvent {
 		KEY_PRESS
 	};
 
-	DataEventType eventType;
-	private long gameID = 0;
-	private int gameStep = 0;
 	private LinkedHashMap<String, String> keyValues = new LinkedHashMap<String, String>();
 
 	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
-		this.eventType = eventType;
-		this.gameID = board.getGameID();
-		this.gameStep = board.getGameStep();
+		this.keyValues.put("eventType", eventType.toString());
+		this.keyValues.put("gameID", new Long(board.getGameID()).toString());
+		this.keyValues.put("gameStep", new Integer(board.getGameStep()).toString());
 		this.keyValues.putAll(trackable.getData(eventType));
 	}
 
+	public DataEvent(LinkedHashMap<String, String> keyValues) {
+		this.keyValues.putAll(keyValues);
+	}
+
+	protected Set<String> getKeys() {
+		return keyValues.keySet();
+	}
+
+	protected String getValue(String key) {
+		return keyValues.get(key);
+	}
+	protected DataEventType getEventType() {
+		return DataEventType.valueOf(this.keyValues.get("eventType"));
+	}
 	public void setKeyValuePair(String key, String value) {
 		keyValues.put(key, value);
 	}
@@ -28,34 +40,29 @@ public class DataEvent {
 	public String toCSV() {
 		StringBuffer out = new StringBuffer();
 
-		out.append("gameID=" + gameID + ",gameStep=" + gameStep + ",time=" + System.currentTimeMillis() + ",eventType="
-				+ eventType);
-
-		if (keyValues.containsKey("ghostNum")) {
-			out.append(",ghostNum=G" + keyValues.get("ghostNum"));
-		}
-
 		Iterator<String> i = keyValues.keySet().iterator();
 
 		while (i.hasNext()) {
 			String key = i.next();
-			if (key.compareTo("ghostNum") != 0) {
 				out.append("," + key + "=" + keyValues.get(key));
-			}
 		}
 
 		return out.toString();
 	}
 
 	public void setGameID(long gameID) {
-		this.gameID = gameID;
+		this.keyValues.put("gameID", new Long(gameID).toString());
 	}
+
 	public long getGameID() {
-		return gameID;
+		return Long.parseLong(this.keyValues.get("gameID"));
 	}
+
 	public int getGameStep() {
-		return gameStep;
+		return Integer.parseInt(this.keyValues.get("gameStep"));
+		
 	}
+
 	public String getString(String key) {
 		return keyValues.get(key);
 	}
@@ -63,6 +70,7 @@ public class DataEvent {
 	public int getInt(String key) {
 		return new Integer(keyValues.get(key)).intValue();
 	}
+
 	public long getLong(String key) {
 		return new Long(keyValues.get(key)).longValue();
 	}

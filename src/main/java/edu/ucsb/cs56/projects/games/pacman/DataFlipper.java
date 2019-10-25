@@ -27,24 +27,24 @@ public class DataFlipper {
 		try {
 
 			String line;
-			Vector<LinkedHashMap<String, String>> parsedLines = new Vector<LinkedHashMap<String, String>>();
-			String level0Value = "";
-			Vector<LinkedHashMap<String, String>> observations = new Vector<LinkedHashMap<String, String>>();
+			Vector<DataEvent> parsedLines = new Vector<DataEvent>();
+			int level0Value = 0;
+			Vector<DataObservation> observations = new Vector<DataObservation>();
 			while ((line = fb.readLine()) != null) {
 
 				// Parse the line
-				LinkedHashMap<String, String> parsedLine = parseLine(line);
+				DataEvent parsedLine = parseLine(line);
 				// Check if we have a key break
-				if (level0Value.compareTo(parsedLine.get("gameStep")) != 0) {
+				if (level0Value != parsedLine.getGameStep()) {
 					// If so get the data values
-					LinkedHashMap<String, String> observation = getObservation(parsedLines);
+					DataObservation observation = getObservation(parsedLines);
 					// and write the output if we are supposed to
-					if (level0Value.compareTo("") != 0) {
+					if (level0Value != 0) {
 						observations.add(observation);
 					}
 					parsedLines.clear();
 					// And set the new value
-					level0Value = parsedLine.get("gameStep");
+					level0Value = parsedLine.getGameStep();
 				}
 				parsedLines.add(parsedLine);
 			}
@@ -62,11 +62,11 @@ public class DataFlipper {
 	 * @param gameEventHistory
 	 * @return
 	 */
-	public Vector<LinkedHashMap<String, String>> findObservationsFromHistory(Vector<DataEvent> gameEventHistory) {
-		Vector<LinkedHashMap<String, String>> observations = new Vector<LinkedHashMap<String, String>>();
+	public Vector<DataObservation> findObservationsFromHistory(Vector<DataEvent> gameEventHistory) {
+		Vector<DataObservation> observations = new Vector<DataObservation>();
 		int level0Value = 0;
 		for (DataEvent dataEvent : gameEventHistory) {
-			Vector<LinkedHashMap<String, String>> observationEvents = new Vector<LinkedHashMap<String, String>>();
+			Vector<DataEvent> observationEvents = new Vector<DataEvent>();
 			// Parse the line
 			// Check if we have a key break
 			if (level0Value != dataEvent.getGameStep()) {
@@ -89,18 +89,20 @@ public class DataFlipper {
 	 * @param parsedLines
 	 * @return
 	 */
-	private LinkedHashMap<String, String> getObservation(Vector<LinkedHashMap<String, String>> events) {
+	// public LinkedHashMap<String, String>
+	// getObservation(Vector<LinkedHashMap<String, String>> events) {
+	public DataObservation getObservation(Vector<DataEvent> events) {
 
 		String keyPrefix = "";
 		// Through the file line by line
 
 		// The top level pivot field value is not the same so we have found a new top
 		// level group
-		LinkedHashMap<String, String> observation = new LinkedHashMap<String, String>();
-		for (LinkedHashMap<String, String> event : events) {
+		DataObservation observation = new DataObservation();
+		for (DataEvent event : events) {
 			// Loop through the key value pairs on the line. Remember the order matters
-			for (String key : event.keySet()) {
-				String value = event.get(key);
+			for (String key : event.getKeys()) {
+				String value = event.getValue(key);
 				// Check if the key is a pivot key
 				if (pivotFields.containsKey(key)) {
 					PivotField pivotField = pivotFields.get(key);
@@ -112,7 +114,7 @@ public class DataFlipper {
 						// If the pivot field is not the top level we have to start concatenating fields
 						// to get the compound key. All fields after this one are expected to be this
 						// pivot level until we hit the next pivot.
-					} else if (pivotField.getPivotLevel() > 0){
+					} else if (pivotField.getPivotLevel() > 0) {
 						keyPrefix = keyPrefix + value;
 					}
 					// If it is not a pivot field but we have found the top add it
@@ -131,14 +133,19 @@ public class DataFlipper {
 	 * @param line
 	 * @return
 	 */
-	private LinkedHashMap<String, String> parseLine(String line) {
+	private DataEvent parseLine(String line) {
 		String[] pairs = line.split(",");
-		LinkedHashMap<String, String> parsedLine = new LinkedHashMap<String, String>();
-
+		LinkedHashMap<String, String> temp = new LinkedHashMap<String, String>();
 		for (String pair : pairs) {
 			String[] keyValue = pair.split("=");
+			String key = keyValue[0];
 			String value = keyValue.length > 1 ? keyValue[1] : "";
-			parsedLine.put(keyValue[0], value);
+			temp.put(key, value);
+		}
+		DataEvent parsedLine = new DataEvent(temp);
+
+		for (String key : temp.keySet()) {
+			parsedLine.setKeyValuePair(key, temp.get(key));
 		}
 		return parsedLine;
 	}
@@ -150,25 +157,25 @@ public class DataFlipper {
 	 * @param write
 	 * @throws Exception
 	 */
-	private void writeObservations(Vector<LinkedHashMap<String, String>> observations, PrintWriter write)
-			throws Exception {
+	private void writeObservations(Vector<DataObservation> observations, PrintWriter write) throws Exception {
 		LinkedHashSet<String> uniqueKeys = new LinkedHashSet<String>();
 		for (LinkedHashMap<String, String> observation : observations) {
 			uniqueKeys.addAll(observation.keySet());
 		}
-		for(String key: uniqueKeys) {
-			write.print(""+key + ",");
+		for (String key : uniqueKeys) {
+			write.print("" + key + ",");
 		}
 		write.println();
 		for (LinkedHashMap<String, String> observation : observations) {
 			for (String key : uniqueKeys) {
 				String stringValue = observation.get(key) != null ? observation.get(key) : "";
-				
+
 				write.print(standardizeValue(stringValue) + ",");
 			}
 			write.println();
 		}
 	}
+
 	String standardizeValue(String inputValue) throws Exception {
 		String value = "0";
 		switch (inputValue) {
