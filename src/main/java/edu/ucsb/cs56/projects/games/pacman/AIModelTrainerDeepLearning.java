@@ -1,18 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.util.LinkedHashMap;
 import java.util.Vector;
-
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.DropoutLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.nn.weights.WeightInit;
-import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.learning.config.Nesterovs;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class AIModelTrainerDeepLearning extends AIModelTrainer {
 
@@ -37,9 +25,12 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 
 		// Train a new model
 
-		AIModel model = new AIModelDeepLearning();
+		AIModelDeepLearning model = new AIModelDeepLearning();
+		model.setDataObservations(observations);
+		
+		model.train();
 		// Make the new model available to the players
 		this.setNewModel(model);
-		System.out.println("Sending new model");
+		System.out.println("Sending new model " + model.getModelID());
 	}
 }
