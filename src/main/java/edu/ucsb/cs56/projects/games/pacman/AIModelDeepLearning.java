@@ -61,4 +61,8 @@ public class AIModelDeepLearning extends AIModel {
 		System.out.println("Training Deep Learning model");
 		// Call NN training
 	}
+	private Object getDataFrame(Vector<DataObservation> observations) {
+		// Create the data frame
+		return null;
+	}
 }
