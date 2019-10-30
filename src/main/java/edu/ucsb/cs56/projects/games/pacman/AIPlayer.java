@@ -40,7 +40,7 @@ public abstract class AIPlayer implements Runnable {
 		try {
 			Thread.sleep(500);
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 		while (doRun) {
 			try {

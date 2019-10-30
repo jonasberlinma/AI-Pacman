@@ -2,6 +2,8 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Vector;
@@ -103,6 +105,8 @@ public class Board implements Runnable, EventTrackable {
 		dataInterface.setData(new DataEvent(DataEventType.INTRO, this, this));
 
 		boardThread = new Thread(this, "Game Board");
+		
+
 
 	}
 
@@ -478,6 +482,7 @@ public class Board implements Runnable, EventTrackable {
 			// Required due to heisenbug. Somehow the game type changes to
 			// single, versus, or cooperative before the characters are
 			// fully initialized
+			System.out.println("Initial game type " + gt);
 			Thread.sleep(1000);
 			while (doRun) {
 				gameStep++;
@@ -488,6 +493,7 @@ public class Board implements Runnable, EventTrackable {
 				}
 			}
 		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 

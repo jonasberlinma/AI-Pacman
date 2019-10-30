@@ -42,6 +42,11 @@ public class AIPlayerLearner extends AIPlayer {
 			pressKey(KeyEvent.VK_DOWN);
 			break;
 		case GAME_OVER:
+			// Have to add the last score
+			int gameStep = dataEvent.getGameStep();
+			int score = dataEvent.getInt("score");
+
+			rc.addScore(gameStep, score - lastScore);
 			try {
 				PrintWriter out = new PrintWriter(new FileOutputStream("rewards.dat", true));
 				rc.reportRewards(out);
@@ -50,7 +55,7 @@ public class AIPlayerLearner extends AIPlayer {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("Acceptance rate " + (double)accept/iterations);
+			System.out.println("Acceptance rate " + (double) accept / iterations);
 			// Press ESCAPE to quit the game and then stop
 			pressKey(KeyEvent.VK_ESCAPE);
 			stop();
@@ -124,12 +129,13 @@ public class AIPlayerLearner extends AIPlayer {
 							break;
 						default:
 						}
-					}
-					int gameStep = dataEvent.getGameStep();
-					int score = dataEvent.getInt("score");
 
-					rc.addScore(gameStep, score - lastScore);
-					lastScore = score;
+						gameStep = dataEvent.getGameStep();
+						score = dataEvent.getInt("score");
+
+						rc.addScore(gameStep, score - lastScore);
+						lastScore = score;
+					}
 					break;
 				default:
 				}

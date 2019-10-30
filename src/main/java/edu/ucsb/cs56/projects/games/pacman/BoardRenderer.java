@@ -49,7 +49,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		setFocusable(true);
 		setBackground(Color.black);
 		setDoubleBuffered(true);
-
+		AssetController.getInstance();
 
 	}
 
@@ -62,7 +62,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if(firstAction){
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

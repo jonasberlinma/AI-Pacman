@@ -33,11 +33,10 @@ public class PacMan {
 	 */
 
 	/**
-	 * Main function for PacMan Class that tests to see if there are command
-	 * line arguments
+	 * Main function for PacMan Class that tests to see if there are command line
+	 * arguments
 	 *
-	 * @param args
-	 *            -- the command line arguments
+	 * @param args -- the command line arguments
 	 */
 	public static void main(String[] args) {
 
@@ -91,8 +90,10 @@ public class PacMan {
 
 			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
 		}
+		if (prop.getProperty("headLess") == null) {
+			prop.setProperty("headLess", Boolean.toString(false));
+		}
 		System.out.println("Using model trainer " + prop.getProperty("aiModelTrainerClassName"));
-		
 
 		GameController gc = new GameController(prop);
 

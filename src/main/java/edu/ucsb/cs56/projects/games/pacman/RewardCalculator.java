@@ -44,10 +44,23 @@ public class RewardCalculator {
 			measures.get(0).reward = reward;
 		}
 	}
-
+	private void finalizeRewards() {
+		for(int j = 0; j < measures.size(); j++) {
+			double reward = 0;
+			for (int i = j; i < measures.size(); i++) {
+				reward = reward + measures.get(i).score * Math.pow(discountRate, i - j);
+				measures.get(j).reward = reward;
+			}
+			rewardHistory.add(measures.get(j));
+		}
+	}
 	public void reportRewards(PrintWriter out) {
+		finalizeRewards();
 		for (Measure measure : rewardHistory) {
 			out.println("" + gameID + "," + measure.gameStep + "," + measure.score + "," + measure.reward);
 		}
+	}
+	public Vector<Measure> getRewardHistory(){
+		return this.rewardHistory;
 	}
 }

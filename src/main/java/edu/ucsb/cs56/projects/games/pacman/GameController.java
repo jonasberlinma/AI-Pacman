@@ -48,6 +48,10 @@ public class GameController implements Runnable {
 		controllerThread = new Thread(this, "BackgroundGameController");
 		try {
 			out = new PrintWriter(new FileOutputStream("eventlog.csv"));
+			// This is a bad location for this code. It should be moved
+			PrintWriter rewardsOut = new PrintWriter(new FileOutputStream("rewards.dat"));
+			rewardsOut.flush();
+			rewardsOut.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

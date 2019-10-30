@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Vector;
 
