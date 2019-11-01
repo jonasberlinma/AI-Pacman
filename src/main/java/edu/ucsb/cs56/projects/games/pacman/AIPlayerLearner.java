@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Vector;
 
@@ -149,5 +150,10 @@ public class AIPlayerLearner extends AIPlayer {
 	protected void newModel(AIModel aiModel) {
 		model = aiModel;
 
+	}
+
+	@Override
+	public LinkedHashMap<String, DataObservation> reportExperience() {
+		return rc.getRewardHistory();
 	}
 }

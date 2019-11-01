@@ -65,7 +65,7 @@ public class AIGame implements Runnable {
 			board.stop();
 			board.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		isRunning = false;
@@ -78,8 +78,10 @@ public class AIGame implements Runnable {
 			out.println(i.next().toCSV());
 		}
 	}
-	Vector<DataEvent> getEventLog(){
-		return aiPlayer.getEventLog();
+
+	public DataGameResult getDataGameResult() {
+		DataGameResult dgr = new DataGameResult(aiPlayer.getEventLog(), aiPlayer.reportExperience());
+		return dgr;
 	}
 
 	public void setNTrainedModels(int nTrainedModels) {
@@ -88,6 +90,6 @@ public class AIGame implements Runnable {
 
 	public void setModel(AIModel newModel) {
 		aiPlayer.newModel(newModel);
-		
+
 	}
 }

@@ -6,7 +6,6 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 
 	DataFlipper dataFlipper = null;
 
-
 	AIModelTrainerDeepLearning() {
 		dataFlipper = new DataFlipper();
 		dataFlipper.addPivotField(new PivotField("gameStep", 0));
@@ -16,18 +15,28 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 	}
 
 	@Override
-	protected void gameCompleteEvent(Vector<DataEvent> gameEventLog) {
+	protected void gameCompleteEvent(DataGameResult gameEventLog) {
 
-		System.out.println("Training on " + gameEventLog.size() + " events");
+		System.out.println("Training on " + gameEventLog.events.size() + " events and " + gameEventLog.experience.size()
+				+ " experience points");
 		// Prep the data
 
-		Vector<DataObservation> observations = dataFlipper.findObservationsFromHistory(gameEventLog);
+		Vector<DataObservation> observations = dataFlipper.findObservationsFromHistory(gameEventLog.events);
+
+		int matchCount = 0;
+		for (DataObservation dataObservation : observations) {
+			String thisGameStep = dataObservation.get("gameStep");
+			DataObservation experienceObs = gameEventLog.experience.get(thisGameStep);
+			matchCount = experienceObs != null ? ++matchCount : matchCount;
+		}
+		System.out.println("Observations " + observations.size() + " experience count " + gameEventLog.experience.size()
+				+ " match count " + matchCount);
 
 		// Train a new model
 
 		AIModelDeepLearning model = new AIModelDeepLearning();
 		model.setDataObservations(observations);
-		
+
 		model.train();
 		// Make the new model available to the players
 		this.setNewModel(model);

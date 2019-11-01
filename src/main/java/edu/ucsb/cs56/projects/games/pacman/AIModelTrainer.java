@@ -7,14 +7,14 @@ public abstract class AIModelTrainer implements Runnable {
 
 	private Thread trainingThread = null;
 	private boolean doRun = false;
-	private ArrayBlockingQueue<Vector<DataEvent>> eventQueue = null;
+	private ArrayBlockingQueue<DataGameResult> eventQueue = null;
 	private GameController gameController = null;
 
 	protected AIModelTrainer() {
 		trainingThread = new Thread(this, "Training thread");
 	}
 
-	protected void setController(GameController gameController, ArrayBlockingQueue<Vector<DataEvent>> eventQueue) {
+	protected void setController(GameController gameController, ArrayBlockingQueue<DataGameResult> eventQueue) {
 		this.eventQueue = eventQueue;
 		this.gameController = gameController;
 	}
@@ -32,7 +32,6 @@ public abstract class AIModelTrainer implements Runnable {
 				// trainer
 				gameCompleteEvent(eventQueue.take());
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -43,7 +42,6 @@ public abstract class AIModelTrainer implements Runnable {
 		try {
 			trainingThread.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -54,7 +52,7 @@ public abstract class AIModelTrainer implements Runnable {
 	 * 
 	 * 
 	 */
-	protected abstract void gameCompleteEvent(Vector<DataEvent> gameEventLog);
+	protected abstract void gameCompleteEvent(DataGameResult gameEventLog);
 
 	/**
 	 * Called by the model trainer implementations to report that a new model is

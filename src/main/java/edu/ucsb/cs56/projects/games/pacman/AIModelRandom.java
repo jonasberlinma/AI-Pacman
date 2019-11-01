@@ -17,13 +17,11 @@ public class AIModelRandom extends AIModel {
 
 	@Override
 	void setDataObservations(Vector<DataObservation> observations) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	void train() {
-		// TODO Auto-generated method stub
 		
 	}
 

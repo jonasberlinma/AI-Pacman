@@ -317,7 +317,7 @@ public class PacManLevelEditor extends JFrame {
 				GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, default_no_inset, 0, 0));
 
 		/*
-		 * TODO: In future revisions, if the game is changed to support additional board
+		 * In future revisions, if the game is changed to support additional board
 		 * sizes, it would make sense to enable this option and allow editors to specify
 		 * the size of the board.
 		 */

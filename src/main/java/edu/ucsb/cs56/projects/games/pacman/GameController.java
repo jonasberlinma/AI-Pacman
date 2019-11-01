@@ -24,21 +24,21 @@ public class GameController implements Runnable {
 	private PrintWriter out = null;
 	private Properties prop = null;
 
-	// These are all related to the foreground game and the rendeting of the
-	// forground game
+	// These are all related to the foreground game and the rendering of the
+	// foreground game
 	AIGame foregroundAIGame = null;
 	BoardRenderer boardRenderer = null;
 	BoardFrame bf = null;
 
 	// Training
 	private AIModelTrainer aiModelTrainer = null;
-	private ArrayBlockingQueue<Vector<DataEvent>> gameResultQueue;
+	private ArrayBlockingQueue<DataGameResult> gameResultQueue;
 	private AIModel currentModel;
 	private int nTrainedModels = 0;
 
 	GameController(Properties prop) {
 
-		gameResultQueue = new ArrayBlockingQueue<Vector<DataEvent>>(1000);
+		gameResultQueue = new ArrayBlockingQueue<DataGameResult>(1000);
 
 		loadTrainer(prop);
 		aiModelTrainer.start();
@@ -53,7 +53,6 @@ public class GameController implements Runnable {
 			rewardsOut.flush();
 			rewardsOut.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -92,7 +91,7 @@ public class GameController implements Runnable {
 						i.remove();
 						nCompletedGames++;
 						aiGame.report(out);
-						gameResultQueue.put(aiGame.getEventLog());
+						gameResultQueue.put(aiGame.getDataGameResult());
 					}
 				}
 
@@ -143,7 +142,6 @@ public class GameController implements Runnable {
 		try {
 			controllerThread.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

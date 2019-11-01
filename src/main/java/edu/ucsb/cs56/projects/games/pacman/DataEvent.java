@@ -14,8 +14,8 @@ public class DataEvent {
 
 	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
 		this.keyValues.put("eventType", eventType.toString());
-		this.keyValues.put("gameID", new Long(board.getGameID()).toString());
-		this.keyValues.put("gameStep", new Integer(board.getGameStep()).toString());
+		this.keyValues.put("gameID", Long.valueOf(board.getGameID()).toString());
+		this.keyValues.put("gameStep", Integer.valueOf(board.getGameStep()).toString());
 		this.keyValues.putAll(trackable.getData(eventType));
 	}
 
@@ -51,16 +51,15 @@ public class DataEvent {
 	}
 
 	public void setGameID(long gameID) {
-		this.keyValues.put("gameID", new Long(gameID).toString());
+		this.keyValues.put("gameID", Long.valueOf(gameID).toString());
 	}
 
 	public long getGameID() {
-		return Long.parseLong(this.keyValues.get("gameID"));
+		return Long.valueOf(this.keyValues.get("gameID"));
 	}
 
 	public int getGameStep() {
-		return Integer.parseInt(this.keyValues.get("gameStep"));
-		
+		return Integer.valueOf(this.keyValues.get("gameStep"));
 	}
 
 	public String getString(String key) {
@@ -68,11 +67,11 @@ public class DataEvent {
 	}
 
 	public int getInt(String key) {
-		return new Integer(keyValues.get(key)).intValue();
+		return Integer.valueOf(keyValues.get(key));
 	}
 
 	public long getLong(String key) {
-		return new Long(keyValues.get(key)).longValue();
+		return Long.valueOf(keyValues.get(key));
 	}
 
 	public boolean getBoolean(String key) {

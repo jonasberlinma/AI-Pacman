@@ -1,6 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 public class RewardCalculator {
@@ -44,8 +45,9 @@ public class RewardCalculator {
 			measures.get(0).reward = reward;
 		}
 	}
+
 	private void finalizeRewards() {
-		for(int j = 0; j < measures.size(); j++) {
+		for (int j = 0; j < measures.size(); j++) {
 			double reward = 0;
 			for (int i = j; i < measures.size(); i++) {
 				reward = reward + measures.get(i).score * Math.pow(discountRate, i - j);
@@ -54,13 +56,25 @@ public class RewardCalculator {
 			rewardHistory.add(measures.get(j));
 		}
 	}
+
 	public void reportRewards(PrintWriter out) {
 		finalizeRewards();
 		for (Measure measure : rewardHistory) {
 			out.println("" + gameID + "," + measure.gameStep + "," + measure.score + "," + measure.reward);
 		}
 	}
-	public Vector<Measure> getRewardHistory(){
-		return this.rewardHistory;
+
+	public LinkedHashMap<String, DataObservation> getRewardHistory() {
+		finalizeRewards();
+		LinkedHashMap<String, DataObservation> result = new LinkedHashMap<String, DataObservation>();
+		for (Measure measure : rewardHistory) {
+			DataObservation obs = new DataObservation();
+			String gameStepTmp = Long.valueOf(measure.gameStep).toString();
+			obs.put("gameStep", gameStepTmp);
+			obs.put("score", Integer.valueOf(measure.score).toString());
+			obs.put("reward", Double.valueOf(measure.reward).toString());
+			result.put(gameStepTmp, obs);
+		}
+		return result;
 	}
 }

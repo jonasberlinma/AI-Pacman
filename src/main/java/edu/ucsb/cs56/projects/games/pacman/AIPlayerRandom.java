@@ -2,6 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 public class AIPlayerRandom extends AIPlayer {
@@ -59,6 +60,12 @@ public class AIPlayerRandom extends AIPlayer {
 	@Override
 	protected void newModel(AIModel aiModel) {
 		// Don't use trained models for random player
-		
+
+	}
+
+	@Override
+	public LinkedHashMap<String, DataObservation> reportExperience() {
+		// We don't collect our experience
+		return null;
 	}
 }

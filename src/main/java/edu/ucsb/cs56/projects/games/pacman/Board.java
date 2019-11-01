@@ -2,8 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Vector;
@@ -177,7 +175,7 @@ public class Board implements Runnable, EventTrackable {
 					de.setKeyValuePair("DOWN", dirs.contains(Direction.DOWN)?"True":"False");
 					de.setKeyValuePair("LEFT", dirs.contains(Direction.LEFT)?"True":"False");
 					de.setKeyValuePair("RIGHT", dirs.contains(Direction.RIGHT)?"True":"False");
-					de.setKeyValuePair("score", new Integer(score).toString());
+					de.setKeyValuePair("score", Integer.valueOf(score).toString());
 					
 					dataInterface.setData(de);
 					if (grid.getPillNum() != numPills) {
@@ -196,9 +194,9 @@ public class Board implements Runnable, EventTrackable {
 					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(pacman.x / BLOCKSIZE,
 							pacman.y / BLOCKSIZE, g.x / BLOCKSIZE, g.y / BLOCKSIZE);
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, g);
-					de.setKeyValuePair("ghostNum", new Integer(g.ghostNum).toString());
+					de.setKeyValuePair("ghostNum", Integer.valueOf(g.ghostNum).toString());
 					if (dd != null) {
-						String distanceString = new Integer(dd.distance).toString();
+						String distanceString = Integer.valueOf(dd.distance).toString();
 						de.setKeyValuePair("distance", distanceString);
 						de.setKeyValuePair("direction", dd.direction.toString());
 					}

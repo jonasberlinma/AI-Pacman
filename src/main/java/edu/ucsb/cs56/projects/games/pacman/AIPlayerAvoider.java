@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -218,5 +219,11 @@ public class AIPlayerAvoider extends AIPlayer {
 	@Override
 	protected void newModel(AIModel aiModel) {
 		// Don't use trained models for avoider
+	}
+	@Override
+	public LinkedHashMap<String, DataObservation> reportExperience() {
+		// Don't collect experiences yet
+		return null;
+				
 	}
 }

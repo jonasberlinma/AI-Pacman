@@ -39,7 +39,7 @@ public class ScoreLoader {
 			String line = null;
 			while ((line = bufferedReader.readLine()) != null) {
 				String value = line;
-				Integer scoreRec = new Integer(value);
+				Integer scoreRec = Integer.valueOf(value);
 				scoreList.add(scoreRec);
 			}
 			bufferedReader.close();

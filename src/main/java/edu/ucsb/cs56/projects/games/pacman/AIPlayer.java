@@ -1,5 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 public abstract class AIPlayer implements Runnable {
@@ -61,20 +62,28 @@ public abstract class AIPlayer implements Runnable {
 	}
 
 	/**
-	 * Subclasses implement this method to deal with game events whatever way
-	 * they desire
+	 * Subclasses implement this method to deal with game events whatever way they
+	 * desire
 	 * 
 	 * @param dataEvent
 	 */
 	protected abstract void dataEvent(Grid grid, DataEvent dataEvent);
 
 	/**
-	 * Player implementations should implement this method to get new models as
-	 * they are trained
+	 * Player implementations should implement this method to get new models as they
+	 * are trained
 	 * 
 	 * @param aiModel
 	 */
 	protected abstract void newModel(AIModel aiModel);
+
+	/**
+	 * Player implements should implement this method to report game experience at
+	 * game end
+	 * 
+	 * @return
+	 */
+	public abstract LinkedHashMap<String, DataObservation> reportExperience();
 
 	protected void pressKey(int key) {
 		if (lastKey != key) {
