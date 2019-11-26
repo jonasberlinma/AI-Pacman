@@ -11,7 +11,6 @@ public class AIGame implements Runnable {
 	private AIPlayer aiPlayer = null;
 	private Board board = null;
 	private BoardRenderer boardRenderer;
-	private String leaderBoard;
 	private Thread aiGameThread;
 	private boolean isRunning = false;
 	private AIModel currentModel = null;
@@ -28,9 +27,8 @@ public class AIGame implements Runnable {
 		aiGameThread = new Thread(this, "AI Game Player 1");
 	}
 
-	public void addBoardRendered(BoardRenderer boardRenderer, String leaderBoard) {
+	public void addBoardRendered(BoardRenderer boardRenderer) {
 		this.boardRenderer = boardRenderer;
-		this.leaderBoard = leaderBoard;
 		board.addBoardRenderer(boardRenderer);
 	}
 
@@ -54,9 +52,7 @@ public class AIGame implements Runnable {
 	public void run() {
 		isRunning = true;
 		if (boardRenderer != null) {
-			boardRenderer.callLeaderboardMain(leaderBoard);
-
-			boardRenderer.start();
+			boardRenderer.callLeaderboardMain();
 		}
 		aiPlayer.start();
 		board.start();

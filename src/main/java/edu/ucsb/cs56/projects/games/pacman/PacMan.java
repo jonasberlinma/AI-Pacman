@@ -1,5 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.lang.management.ThreadInfo;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
@@ -94,6 +95,21 @@ public class PacMan {
 			prop.setProperty("headLess", Boolean.toString(false));
 		}
 		System.out.println("Using model trainer " + prop.getProperty("aiModelTrainerClassName"));
+
+		ThreadWarningSystem tws = new ThreadWarningSystem();
+		tws.addListener(new ThreadWarningSystem.Listener() {
+			public void deadlockDetected(ThreadInfo inf) {
+				System.out.println("Deadlocked Thread:");
+				System.out.println("------------------");
+				System.out.println(inf);
+				for (StackTraceElement ste : inf.getStackTrace()) {
+					System.out.println("\t" + ste);
+				}
+			}
+
+			public void thresholdExceeded(ThreadInfo[] threads) {
+			}
+		});
 
 		GameController gc = new GameController(prop);
 

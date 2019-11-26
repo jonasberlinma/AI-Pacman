@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.util.Vector;
 
@@ -277,15 +276,6 @@ public class PacPlayer extends Character {
 		}
 	}
 
-	/**
-	 * Returns the image used for displaying remaining lives
-	 *
-	 * @return image of pacman facing left
-	 */
-	@Override
-	public Image getLifeImage() {
-		return AssetController.getInstance().getLifeImage(playerType);
-	}
 	@Override
 	public boolean getEdible(){
 		return false;

@@ -1,6 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.awt.*;
+
 
 /**
  * Class representing a node (tile) in map used for AI pathfinding
@@ -15,12 +15,12 @@ import java.awt.*;
  * @author Kelvin Yang
  * @version CS56, W15
  */
-public class Node extends Point implements Comparable<Node>
+public class Node implements Comparable<Node>
 {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	public int x, y;
 	public static int tx, ty;
 	public int gCost, hCost, fCost, dir;
 	public Node parent;

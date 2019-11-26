@@ -9,11 +9,12 @@ public class BoardFrame extends JFrame	 {
 	private static final long serialVersionUID = 8544832190499769476L;
 
 	public BoardFrame(){
-		setTitle("Pacman");
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(420, 465);
-		setLocationRelativeTo(null);
-		setResizable(false);
-		setVisible(true);
+		this.setTitle("Pacman");
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setSize(420, 465);
+		this.setLocationRelativeTo(null);
+		this.setResizable(false);
+		this.toFront();
+		this.setVisible(true);
 	}
 }

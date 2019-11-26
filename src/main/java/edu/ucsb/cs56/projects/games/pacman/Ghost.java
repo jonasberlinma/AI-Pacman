@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -64,16 +63,6 @@ public class Ghost extends Character {
 		y = newY;
 		edible = false;
 		edibleTimer = 0;
-	}
-
-	/**
-	 * Returns the image used for displaying remaining lives
-	 *
-	 * @return Image of character
-	 */
-	@Override
-	public Image getLifeImage() {
-		return AssetController.getInstance().getGhostImage(PlayerType.GHOST1);
 	}
 
 	/**

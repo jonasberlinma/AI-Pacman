@@ -78,7 +78,7 @@ public class Leaderboard extends TreeSet<GamePlayed> implements Serializable {
 			in.close();
 			fileIn.close();
 		} catch (Exception e) {
-			//~ e.printStackTrace();
+			e.printStackTrace();
 			System.out.println("NO LEADERBOARD FOUND");
 			return;
 		}

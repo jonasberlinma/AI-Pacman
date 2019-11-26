@@ -18,6 +18,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
+
 public class BoardRenderer extends JPanel implements ActionListener {
 
 	/**
@@ -26,19 +28,19 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 7383414799194976684L;
 	private Board board = null;
 	private GameController bgc = null;
-	
-	private boolean firstAction = true;
+
+	private int actionCount = 0;
 
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
 
-	ScoreLoader sl = new ScoreLoader("highScores.txt");
+	private ScoreLoader sl = new ScoreLoader("highScores.txt");
 	private LeaderboardGUI leaderBoardGui = new LeaderboardGUI();
-
 
 	private Timer timer = null;
 	private boolean introAudioPlayed = false;
-	
-	public void stop(){
+
+	public void stop() {
+		System.out.println("Stop");
 		timer.stop();
 	}
 
@@ -48,27 +50,23 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
-		setDoubleBuffered(true);
+		setDoubleBuffered(false);
 		AssetController.getInstance();
 
 	}
 
 	public void start() {
+		System.out.println("Start");
 		timer = new Timer(40, this);
 		timer.start();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(firstAction){
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			firstAction = false;
+		if (actionCount++ > 10) {
+			this.validate();
+			this.repaint();
 		}
-		this.repaint();
 	}
 
 	@Override
@@ -82,7 +80,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		switch (gt) {
 		case INTRO:
 			showIntroScreen(g);
-			if(!introAudioPlayed){
+			if (!introAudioPlayed) {
 				AssetController.getInstance().playIntroAudio();
 				introAudioPlayed = true;
 			}
@@ -103,8 +101,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		if (!timer.isRunning())
 			showPauseScreen(g);
-		
-		if(board.doPlayAudio()){
+
+		if (board.doPlayAudio()) {
 			AssetController.getInstance().playAudio(board.getAudioClipID());
 		}
 
@@ -116,10 +114,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 * Draw a message box with the text "Press s to start." in the center of the
 	 * screen
 	 *
-	 * @param g
-	 *            a Graphics object
+	 * @param g a Graphics object
 	 */
-	public void showIntroScreen(Graphics g) {
+	private void showIntroScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
 		g.fillRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
 		g.setColor(Color.white);
@@ -144,10 +141,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Displays a list of scores on the bottom of the screen
 	 *
-	 * @param g
-	 *            a Graphics object
+	 * @param g a Graphics object
 	 */
-	public void drawHighScores(Graphics g) {
+	private void drawHighScores(Graphics g) {
 		ArrayList<Integer> scores = sl.loadScores();
 		g.setFont(smallFont);
 		FontMetrics fm = getFontMetrics(smallFont);
@@ -171,13 +167,12 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	}
 
 	/**
-	 * Draw a message box telling the player the game is paused Also tells
-	 * player to press 'p' to continue the game
+	 * Draw a message box telling the player the game is paused Also tells player to
+	 * press 'p' to continue the game
 	 *
-	 * @param g
-	 *            a Graphics object
+	 * @param g a Graphics object
 	 */
-	public void showPauseScreen(Graphics g) {
+	private void showPauseScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
 		g.fillRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
 		g.setColor(Color.white);
@@ -200,18 +195,17 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Class that handles key presses for game controls
 	 */
-	class TAdapter extends KeyAdapter {
+	private class TAdapter extends KeyAdapter {
 
 		/**
 		 * Detects when a key is pressed.
 		 * <p>
-		 * In-game: Changes Pacman's direction of movement with the arrow keys.
-		 * Quit game by pressing the escape key.
+		 * In-game: Changes Pacman's direction of movement with the arrow keys. Quit
+		 * game by pressing the escape key.
 		 * <p>
 		 * Not in-game: Press the 'S' key to begin the game.
 		 *
-		 * @param e
-		 *            a KeyEvent
+		 * @param e a KeyEvent
 		 */
 		@Override
 		public void keyPressed(KeyEvent e) {
@@ -248,10 +242,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Shows help
 	 *
-	 * @param g
-	 *            a Graphics object
+	 * @param g a Graphics object
 	 */
-	public void showHelpScreen(Graphics g) {
+	private void showHelpScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
 		g.fillRect(10, 10, Board.SCRSIZE - 15, Board.SCRSIZE - 15);
 		g.setColor(Color.white);
@@ -310,10 +303,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Display the current score on the bottom right of the screen
 	 *
-	 * @param g
-	 *            a Graphics object
+	 * @param g a Graphics object
 	 */
-	public void drawScore(Graphics g, Board board) {
+	private void drawScore(Graphics g, Board board) {
 		g.setFont(smallFont);
 		g.setColor(new Color(96, 128, 255));
 		int score = board.getScore();
@@ -325,15 +317,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			String s = "Score: " + score;
 			g.drawString(s, Board.SCRSIZE / 2 + 136, Board.SCRSIZE + 16);
 			g.drawString("BG Games: " + bgc.getNCompletedGames(), Board.SCRSIZE / 2 - 100, Board.SCRSIZE + 16);
-			g.drawString("Models: " + board.getNTrainedModels(), Board.SCRSIZE / 2 +20, Board.SCRSIZE + 16);
+			g.drawString("Models: " + board.getNTrainedModels(), Board.SCRSIZE / 2 + 20, Board.SCRSIZE + 16);
 		}
 
 		for (int i = 0; i < board.pacman.lives; i++) {
-			g.drawImage(board.pacman.getLifeImage(), i * 28 + 8, Board.SCRSIZE + 1, this);
+			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, Board.SCRSIZE + 1, this);
 		}
+		
 		if (gt == GameType.COOPERATIVE) {
 			for (int i = 0; i < board.msPacman.lives; i++) {
-				g.drawImage(board.msPacman.getLifeImage(), i * 28 + 108, Board.SCRSIZE + 1, this);
+				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, Board.SCRSIZE + 1, this);
 			}
 		}
 	}
@@ -341,12 +334,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Draws the ghost
 	 *
-	 * @param g
-	 *            a Graphics2D object
-	 * @param canvas
-	 *            A Jcomponent object to be drawn on
+	 * @param g      a Graphics2D object
+	 * @param canvas A Jcomponent object to be drawn on
 	 */
-	public void drawGhost(Graphics2D g, JComponent canvas, Ghost ghost) {
+	private void drawGhost(Graphics2D g, JComponent canvas, Ghost ghost) {
 		AssetController ac = AssetController.getInstance();
 		if (ghost.edible)
 			g.drawImage(ac.getScaredGhostImage(), ghost.x + 4, ghost.y + 4, canvas);
@@ -357,31 +348,32 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Calls the appropriate draw method for the direction Pacman is facing
 	 *
-	 * @param g2d
-	 *            a Graphics2D object
-	 * @param canvas
-	 *            A Jcomponent object to be drawn on
+	 * @param g2d    a Graphics2D object
+	 * @param canvas A Jcomponent object to be drawn on
 	 */
-	public void drawPacman(Graphics2D g2d, JComponent canvas, PacPlayer pacman) {
+	private void drawPacman(Graphics2D g2d, JComponent canvas, PacPlayer pacman) {
 		if (pacman.deathTimer % 5 > 3)
 			return; // Flicker while invincibile
 		doAnimPacman(pacman);
 		AssetController ac = AssetController.getInstance();
 		if (pacman.direction == 1)
-			g2d.drawImage(ac.pacmanLeft[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanLeft[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
+					canvas);
 		else if (pacman.direction == 2)
-			g2d.drawImage(ac.pacmanUp[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanUp[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
+					canvas);
 		else if (pacman.direction == 4)
-			g2d.drawImage(ac.pacmanDown[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanDown[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
+					canvas);
 		else
-			g2d.drawImage(ac.pacmanRight[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4, canvas);
+			g2d.drawImage(ac.pacmanRight[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
+					canvas);
 	}
 
 	/**
-	 * Animates the Pacman sprite's direction as well as mouth opening and
-	 * closing
+	 * Animates the Pacman sprite's direction as well as mouth opening and closing
 	 */
-	public void doAnimPacman(PacPlayer pacman) {
+	private void doAnimPacman(PacPlayer pacman) {
 		pacman.pacanimcount--;
 		if (pacman.pacanimcount <= 0) {
 			pacman.pacanimcount = pacman.pacanimdelay;
@@ -394,10 +386,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	/**
 	 * Calls the leaderboards main method with the command line arguments
 	 *
-	 * @param args
-	 *            - represents the command line arguments
+	 * @param args - represents the command line arguments
 	 */
-	public void callLeaderboardMain(String args) {
+	public void callLeaderboardMain() {
 		String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
 		leaderBoardGui.setLeaderBoardFileName(files);
 	}
@@ -416,17 +407,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			leaderBoardGui.showEndGameScreen(score, d, 2);
 		else if (gt == GameType.VERSUS)
 			leaderBoardGui.showEndGameScreen(score, d, 3);
-		//gt = GameType.INTRO;
+		// gt = GameType.INTRO;
 
 	}
 
 	/**
 	 * Draws the maze that serves as a playing field.
 	 *
-	 * @param g2d
-	 *            a Graphics2D object
+	 * @param g2d a Graphics2D object
 	 */
-	public void drawMaze(Graphics2D g2d) {
+	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {

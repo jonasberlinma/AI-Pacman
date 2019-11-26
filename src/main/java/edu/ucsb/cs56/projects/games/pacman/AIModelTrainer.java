@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public abstract class AIModelTrainer implements Runnable {

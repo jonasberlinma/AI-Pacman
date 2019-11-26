@@ -1,6 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.awt.Image;
+//import java.awt.Image;
 import java.io.PrintStream;
 import java.util.LinkedHashMap;
 import java.util.Vector;
@@ -90,13 +90,6 @@ public abstract class Character implements EventTrackable {
 	 * Handles character's death
 	 */
 	public abstract void death();
-
-	/**
-	 * Returns the image used for displaying remaining lives
-	 *
-	 * @return Image of character
-	 */
-	public abstract Image getLifeImage();
 
 	/**
 	 * Handles key presses for game controls

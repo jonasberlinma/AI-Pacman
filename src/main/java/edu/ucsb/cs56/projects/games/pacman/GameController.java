@@ -125,13 +125,15 @@ public class GameController implements Runnable {
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
+			
+
 			boardRenderer = new BoardRenderer(foregroundAIGame.getBoard(), this);
-			foregroundAIGame.addBoardRendered(boardRenderer, prop.getProperty("leaderBoard"));
+			foregroundAIGame.addBoardRendered(boardRenderer);
 
 			bf = new BoardFrame();
-
+			
 			bf.add(boardRenderer);
-			boardRenderer.callLeaderboardMain(prop.getProperty("leaderBoard"));
+			boardRenderer.callLeaderboardMain();
 
 			boardRenderer.start();
 			foregroundAIGame.start();
