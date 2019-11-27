@@ -65,8 +65,8 @@ public class DataFlipper {
 	public Vector<DataObservation> findObservationsFromHistory(Vector<DataEvent> gameEventHistory) {
 		Vector<DataObservation> observations = new Vector<DataObservation>();
 		int level0Value = 0;
+		Vector<DataEvent> observationEvents = new Vector<DataEvent>();
 		for (DataEvent dataEvent : gameEventHistory) {
-			Vector<DataEvent> observationEvents = new Vector<DataEvent>();
 			// Parse the line
 			// Check if we have a key break
 			if (level0Value != dataEvent.getGameStep()) {
@@ -77,6 +77,7 @@ public class DataFlipper {
 				level0Value = dataEvent.getGameStep();
 				observationEvents.clear();
 			}
+			observationEvents.add(dataEvent);
 		}
 		return observations;
 	}

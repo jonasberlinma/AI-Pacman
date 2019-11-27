@@ -13,12 +13,17 @@ public class DataEvent {
 	private LinkedHashMap<String, String> keyValues = new LinkedHashMap<String, String>();
 
 	public DataEvent(DataEventType eventType, EventTrackable board, EventTrackable trackable) {
-		this.keyValues.put("eventType", eventType.toString());
 		this.keyValues.put("gameID", Long.valueOf(board.getGameID()).toString());
 		this.keyValues.put("gameStep", Integer.valueOf(board.getGameStep()).toString());
+		this.keyValues.put("time", "" + System.currentTimeMillis());
+		this.keyValues.put("eventType", eventType.toString());
 		this.keyValues.putAll(trackable.getData(eventType));
 	}
 
+	@Override
+	public String toString() {
+		return keyValues.toString();
+	}
 	public DataEvent(LinkedHashMap<String, String> keyValues) {
 		this.keyValues.putAll(keyValues);
 	}

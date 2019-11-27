@@ -54,7 +54,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		AssetController.getInstance();
 
 	}
-
 	public void start() {
 		System.out.println("Start");
 		timer = new Timer(40, this);

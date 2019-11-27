@@ -17,10 +17,10 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 	@Override
 	protected void gameCompleteEvent(DataGameResult gameEventLog) {
 
+		
 		System.out.println("Training on " + gameEventLog.events.size() + " events and " + gameEventLog.experience.size()
 				+ " experience points");
 		// Prep the data
-
 		Vector<DataObservation> observations = dataFlipper.findObservationsFromHistory(gameEventLog.events);
 
 		int matchCount = 0;

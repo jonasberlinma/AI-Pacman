@@ -12,4 +12,8 @@ public class DataGameResult {
 		this.events = events;
 		this.experience = experience;
 	}
+	@Override
+	public String toString() {
+		return "{" + events.toString() + "},{" + experience.toString() + "}";
+	}
 }
