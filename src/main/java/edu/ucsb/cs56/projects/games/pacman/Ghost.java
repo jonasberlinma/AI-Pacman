@@ -24,7 +24,6 @@ public class Ghost extends Character {
 	public boolean edible;
 	public int prev_speed;
 	public int edibleTimer;
-	public int ghostNum;
 
 	public Ghost(int ghostNum, DataInterface dataInterface, int x, int y, int speed, PlayerType playerType) {
 		super(dataInterface, x, y, playerType);

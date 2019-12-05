@@ -28,6 +28,10 @@ public class AIPlayerLearner extends AIPlayer {
 	public AIPlayerLearner() throws FileNotFoundException {
 		lastScore = 0;
 		df = new DataFlipper();
+		df.addPivotField(new PivotField("gameStep", 0));
+		df.addPivotField(new PivotField("eventType", 1));
+		df.addPivotField(new PivotField("ghostNum", 2));
+
 		eventHistory = new Vector<DataEvent>();
 	}
 
@@ -137,6 +141,7 @@ public class AIPlayerLearner extends AIPlayer {
 						rc.addScore(gameStep, score - lastScore);
 						lastScore = score;
 					}
+					eventHistory.clear();
 					break;
 				default:
 				}

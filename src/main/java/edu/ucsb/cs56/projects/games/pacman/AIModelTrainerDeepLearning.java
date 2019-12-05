@@ -28,6 +28,10 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 			String thisGameStep = dataObservation.get("gameStep");
 			DataObservation experienceObs = gameEventLog.experience.get(thisGameStep);
 			matchCount = experienceObs != null ? ++matchCount : matchCount;
+			if(experienceObs != null) {
+				dataObservation.put("reward", experienceObs.get("reward") );
+			}
+			
 		}
 		System.out.println("Observations " + observations.size() + " experience count " + gameEventLog.experience.size()
 				+ " match count " + matchCount);

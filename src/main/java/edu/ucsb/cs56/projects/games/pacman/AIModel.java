@@ -10,6 +10,8 @@ public abstract class AIModel {
 	 * @return
 	 */
 	abstract double score(DataObservation observation);
+
 	abstract void setDataObservations(Vector<DataObservation> observations);
+
 	abstract void train();
 }

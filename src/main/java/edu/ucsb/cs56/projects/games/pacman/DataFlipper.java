@@ -118,11 +118,17 @@ public class DataFlipper {
 					} else if (pivotField.getPivotLevel() > 0) {
 						keyPrefix = keyPrefix + value;
 					}
-					// If it is not a pivot field but we have found the top add it
+					// If it is not a pivot field add it
 				} else if (value != null) {
-					observation.put(keyPrefix + key, value);
+					try {
+						observation.put(keyPrefix + key, standardizeValue(value));
+					} catch (Exception e) {
+						System.err.println(e.getMessage());
+						e.printStackTrace();
+					}
 				}
 			}
+			// Reset the pivot for next event
 			keyPrefix = "";
 		}
 		return observation;

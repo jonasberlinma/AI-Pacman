@@ -27,6 +27,7 @@ public abstract class Character implements EventTrackable {
 	public int dx, dy; // change in x/y per move (eg left = -1, 0)
 	public int reqdx, reqdy; // requested change input by keys, gets passed to
 								// dx, dy when in grid
+	public int ghostNum = 99;
 	private static int nextCharacterID = 0;
 	private int characterID;
 
@@ -152,6 +153,7 @@ public abstract class Character implements EventTrackable {
 	}
 	public LinkedHashMap<String, String> getData(DataEvent.DataEventType eventType){
 		LinkedHashMap<String, String> hashtable = new LinkedHashMap<String,String>();
+		hashtable.put("ghostNum", "" + ghostNum);
 		hashtable.put("playerType", playerType.name());
 		hashtable.put("characterID", "" + characterID);
 		hashtable.put("x", "" + x / Board.BLOCKSIZE);
