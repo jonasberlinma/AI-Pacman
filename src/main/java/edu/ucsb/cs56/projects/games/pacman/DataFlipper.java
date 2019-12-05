@@ -233,7 +233,8 @@ public class DataFlipper {
 				Long.parseLong(inputValue);
 				value = inputValue;
 			} catch (NumberFormatException e) {
-				throw new Exception("Unknown value " + inputValue);
+				System.err.println("Unknown value " + inputValue);
+				value = "0";
 			}
 		}
 		return value;

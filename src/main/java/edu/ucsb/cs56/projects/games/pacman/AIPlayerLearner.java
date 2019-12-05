@@ -113,9 +113,14 @@ public class AIPlayerLearner extends AIPlayer {
 					if (model != null) {
 						predictedReward = model.score(observation);
 					}
-					double alpha = lastPredictedReward > 0 ? predictedReward / lastPredictedReward : 1.0;
+
+					double alpha = lastPredictedReward != 0 ? predictedReward / lastPredictedReward : 1.0;
+					//System.out.println("Alpha " + alpha + " predicted reward " + predictedReward
+					//		+ " last predicted reward " + lastPredictedReward);
+
 					lastPredictedReward = predictedReward;
 					double randomNumber = random.nextDouble();
+
 					iterations++;
 					if (alpha > randomNumber) {
 						accept++;

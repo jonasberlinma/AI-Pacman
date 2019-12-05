@@ -5,6 +5,7 @@ import java.util.Vector;
 public class AIModelTrainerDeepLearning extends AIModelTrainer {
 
 	DataFlipper dataFlipper = null;
+	Vector<DataObservation> observationHistory = new Vector<DataObservation>();
 
 	AIModelTrainerDeepLearning() {
 		dataFlipper = new DataFlipper();
@@ -33,13 +34,16 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 			}
 			
 		}
-		System.out.println("Observations " + observations.size() + " experience count " + gameEventLog.experience.size()
-				+ " match count " + matchCount);
 
+		System.out.println("Observations " + observations.size() + " experience count " + gameEventLog.experience.size()
+		+ " match count " + matchCount);
+		observationHistory.addAll(observations);
+		
+		System.out.println("Total observations " + observationHistory.size());
 		// Train a new model
 
 		AIModelDeepLearning model = new AIModelDeepLearning();
-		model.setDataObservations(observations);
+		model.setDataObservations(observationHistory);
 
 		model.train();
 		// Make the new model available to the players
