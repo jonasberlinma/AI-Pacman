@@ -14,4 +14,6 @@ public abstract class AIModel {
 	abstract void setDataObservations(Vector<DataObservation> observations);
 
 	abstract void train();
+	
+	abstract void test();
 }

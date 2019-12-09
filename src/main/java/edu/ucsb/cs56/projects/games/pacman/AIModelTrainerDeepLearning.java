@@ -47,6 +47,9 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 
 		model.train();
 		// Make the new model available to the players
+		
+		model.test();
+		
 		this.setNewModel(model);
 		System.out.println("Sending new model " + model.getModelID());
 	}

@@ -104,27 +104,48 @@ public class AIPlayerLearner extends AIPlayer {
 
 					// Prep the data
 					DataObservation observation = df.getObservation(eventHistory);
-					int randomKey = random.nextInt(possibleDirections.size());
-					// TODO: Add the proposed direction
-
-					// Score the proposed change
-					double predictedReward = 0;
-
+					// Where are we
+					//System.out.print("Data: ");
+					//observation.forEach((x, y)-> System.out.print(x + "=" + y + " "));
+					//System.out.println();
+					// Get a new suggested direction
+					// Find the best possible direction
+					Direction selectedDirection = Direction.LEFT;
+					double bestReward = Double.MIN_VALUE;
+					System.out.println("Checking " + possibleDirections.size() + " directions");
 					if (model != null) {
-						predictedReward = model.score(observation);
+						for (int i = 0; i < possibleDirections.size(); i++) {
+							Direction trialDirection = possibleDirections.get(i);
+
+							// Add the proposed direction to the observation
+
+							observation.put("KEY_PRESSkey", df.standardizeValue(trialDirection.toString()));
+							// Score the proposed change
+
+							double predictedReward = model.score(observation);
+							System.out.println("Score for " + trialDirection.toString() + " " + predictedReward);
+							if (predictedReward > bestReward) {
+								bestReward = predictedReward;
+								selectedDirection = trialDirection;
+							}
+						}
+					} else {
+						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
+						System.out.println("No model picked " + selectedDirection + " randomly");
 					}
+//					double alpha = lastPredictedReward != 0 ? predictedReward / lastPredictedReward : 1.0;
+					// System.out.println("Alpha " + alpha + " predicted reward " + predictedReward
+					// + " last predicted reward " + lastPredictedReward);
 
-					double alpha = lastPredictedReward != 0 ? predictedReward / lastPredictedReward : 1.0;
-					//System.out.println("Alpha " + alpha + " predicted reward " + predictedReward
-					//		+ " last predicted reward " + lastPredictedReward);
+//					lastPredictedReward = predictedReward;
+//					double randomNumber = random.nextDouble();
 
-					lastPredictedReward = predictedReward;
-					double randomNumber = random.nextDouble();
-
+					double alpha = 1;
+					double randomNumber = 0;
 					iterations++;
 					if (alpha > randomNumber) {
 						accept++;
-						switch (possibleDirections.get(randomKey)) {
+						switch (selectedDirection) {
 						case LEFT:
 							pressKey(KeyEvent.VK_LEFT);
 							break;

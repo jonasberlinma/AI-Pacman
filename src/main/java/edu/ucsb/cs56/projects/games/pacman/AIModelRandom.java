@@ -5,11 +5,12 @@ import java.util.Vector;
 
 public class AIModelRandom extends AIModel {
 
-	private Random random =null;
-	
-	AIModelRandom(long seed){
+	private Random random = null;
+
+	AIModelRandom(long seed) {
 		random = new Random(seed);
 	}
+
 	@Override
 	double score(DataObservation observation) {
 		return random.nextDouble();
@@ -17,12 +18,17 @@ public class AIModelRandom extends AIModel {
 
 	@Override
 	void setDataObservations(Vector<DataObservation> observations) {
-		
+
 	}
 
 	@Override
 	void train() {
-		
+
+	}
+
+	@Override
+	void test() {
+
 	}
 
 }

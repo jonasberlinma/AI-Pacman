@@ -183,7 +183,7 @@ public class DataFlipper {
 		}
 	}
 
-	String standardizeValue(String inputValue) throws Exception {
+	String standardizeValue(String inputValue) {
 		String value = "0";
 		switch (inputValue) {
 		case "True":
