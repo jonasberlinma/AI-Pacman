@@ -37,11 +37,11 @@ public class AIModelDeepLearning extends AIModel {
 //	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE1distance", "MOVE1direction",
 //			"MOVE2distance", "MOVE2direction", "KEY_PRESSkey" };
 
-	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "KEY_PRESSkey" };
+	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection", "MOVE99pelletDistance", "KEY_PRESSkey" };
 
 	private Long modelID = 0l;
 	private int numInputs = theVariables.length;
-	private int numHiddenNodes = 10;
+	private int numHiddenNodes = 20;
 	private int numOutputs = 1;
 	private double learningRate = 0.02;
 	private int nEpochs = 20;
@@ -73,6 +73,7 @@ public class AIModelDeepLearning extends AIModel {
 	double score(DataObservation observation) {
 		// This will call the NN for scoring
 		// TODO: Remember to do the same data prep as in training
+		
 		double[][] indep = new double[1][theVariables.length];
 		indep[0] = getObservation(observation);
 		double[][] dep =new double[1][1];
@@ -111,6 +112,8 @@ public class AIModelDeepLearning extends AIModel {
 
 		INDArray independentVariables = getIndependentVariables();
 		INDArray dependentVariables = getDependentVariables();
+		
+		
 		INDArray output = network.output(independentVariables);
 
 		double error = dependentVariables.distance2(output.castTo(DataType.DOUBLE))
@@ -207,7 +210,7 @@ public class AIModelDeepLearning extends AIModel {
 		double[] theRow = new double[theVariables.length];
 		for (int i = 0; i < theVariables.length; i++) {
 			String stringValue = dataObservation.get(theVariables[i]);
-			// System.out.println("" + theVariables[i] + "="+stringValue);
+			//System.out.println("" + theVariables[i] + "="+stringValue);
 			if (stringValue != null) {
 				theRow[i] = Double.parseDouble(stringValue);
 			} else {

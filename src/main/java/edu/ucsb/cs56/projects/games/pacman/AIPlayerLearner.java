@@ -2,8 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Random;
@@ -21,7 +19,6 @@ public class AIPlayerLearner extends AIPlayer {
 	private DataFlipper df = null;
 	private Vector<DataEvent> eventHistory;
 	public AIModel model = null;
-	private double lastPredictedReward;
 	private int accept = 0;
 	private int iterations = 0;
 
@@ -36,7 +33,7 @@ public class AIPlayerLearner extends AIPlayer {
 	}
 
 	@Override
-	public void dataEvent(Grid grid, DataEvent dataEvent) {
+	public synchronized void dataEvent(Grid grid, DataEvent dataEvent) {
 		GridWalker gridWalker = grid.getGridWalker();
 
 		switch (dataEvent.getEventType()) {
@@ -52,14 +49,7 @@ public class AIPlayerLearner extends AIPlayer {
 			int score = dataEvent.getInt("score");
 
 			rc.addScore(gameStep, score - lastScore);
-			try {
-				PrintWriter out = new PrintWriter(new FileOutputStream("rewards.dat", true));
-				rc.reportRewards(out);
-				out.flush();
-				out.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
 			System.out.println("Acceptance rate " + (double) accept / iterations);
 			// Press ESCAPE to quit the game and then stop
 			pressKey(KeyEvent.VK_ESCAPE);
@@ -91,6 +81,8 @@ public class AIPlayerLearner extends AIPlayer {
 					eventHistory.add(dataEvent);
 					break;
 				case "PACMA":
+					if (iterations++ % 8 == 0)
+						return;
 					// Get basic info
 					int myX = dataEvent.getInt("x");
 					int myY = dataEvent.getInt("y");
@@ -105,30 +97,30 @@ public class AIPlayerLearner extends AIPlayer {
 					// Prep the data
 					DataObservation observation = df.getObservation(eventHistory);
 					// Where are we
-					//System.out.print("Data: ");
-					//observation.forEach((x, y)-> System.out.print(x + "=" + y + " "));
-					//System.out.println();
 					// Get a new suggested direction
 					// Find the best possible direction
-					Direction selectedDirection = Direction.LEFT;
-					double bestReward = Double.MIN_VALUE;
+					Direction selectedDirection = null;
+					double bestReward = -Double.MAX_VALUE;
 					System.out.println("Checking " + possibleDirections.size() + " directions");
 					if (model != null) {
 						for (int i = 0; i < possibleDirections.size(); i++) {
-							Direction trialDirection = possibleDirections.get(i);
+							Direction proposedDirection = possibleDirections.get(i);
 
 							// Add the proposed direction to the observation
 
-							observation.put("KEY_PRESSkey", df.standardizeValue(trialDirection.toString()));
-							// Score the proposed change
+							DataObservation proposedState = perturbState(observation, proposedDirection);
+							
+							observation.dumpComparison(proposedState);
 
-							double predictedReward = model.score(observation);
-							System.out.println("Score for " + trialDirection.toString() + " " + predictedReward);
+							double predictedReward = model.score(proposedState);
+							System.out.println("Score for " + playerID + " " + proposedDirection.toString() + " "
+									+ predictedReward);
 							if (predictedReward > bestReward) {
 								bestReward = predictedReward;
-								selectedDirection = trialDirection;
+								selectedDirection = proposedDirection;
 							}
 						}
+						System.out.println("Model for " + playerID + " predicts " + selectedDirection);
 					} else {
 						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
 						System.out.println("No model picked " + selectedDirection + " randomly");
@@ -142,7 +134,7 @@ public class AIPlayerLearner extends AIPlayer {
 
 					double alpha = 1;
 					double randomNumber = 0;
-					iterations++;
+
 					if (alpha > randomNumber) {
 						accept++;
 						switch (selectedDirection) {
@@ -175,6 +167,26 @@ public class AIPlayerLearner extends AIPlayer {
 		default:
 
 		}
+	}
+
+	private DataObservation perturbState(DataObservation observation, Direction proposedDirection) {
+		DataObservation perturbedState = observation.deepClone();
+		observation.put("KEY_PRESSkey", df.standardizeValue(proposedDirection.toString()));
+		// Score the proposed change
+		String ghostDirection = observation.get("MOVE0direction");
+		if (ghostDirection != null
+				&& ghostDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
+
+			int distance = Integer.parseInt(observation.get("MOVE0distance")) - 1;
+			perturbedState.put("MOVE0distance", "" + distance);
+		}
+		String pelletDirection = observation.get("MOVE99pelletDirection");
+		if(pelletDirection != null && pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
+			int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
+			
+			perturbedState.put("MOVE99pelletDistance", "" + distance);
+		}
+		return perturbedState;
 	}
 
 	@Override

@@ -10,12 +10,15 @@ public abstract class AIPlayer implements Runnable {
 
 	private boolean doRun = false;
 	private Thread aiPlayerThread;
+	protected int playerID = 0;
+	private static int nextPlayerID = 0;
 
 	private Vector<DataEvent> eventCollection;
 
 	public AIPlayer() {
 		aiPlayerThread = new Thread(this, "AI Player");
 		eventCollection = new Vector<DataEvent>(10000);
+		playerID = nextPlayerID++;
 	}
 
 	protected void setAIModel(AIModel aiModel) {

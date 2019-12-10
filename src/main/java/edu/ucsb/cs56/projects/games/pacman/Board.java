@@ -10,6 +10,7 @@ import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
+import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all
@@ -103,8 +104,6 @@ public class Board implements Runnable, EventTrackable {
 		dataInterface.setData(new DataEvent(DataEventType.INTRO, this, this));
 
 		boardThread = new Thread(this, "Game Board");
-		
-
 
 	}
 
@@ -171,12 +170,18 @@ public class Board implements Runnable, EventTrackable {
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, pacman);
 					Vector<Direction> dirs = grid.getGridWalker().getPossibleDirections(pacman.x / BLOCKSIZE,
 							pacman.y / BLOCKSIZE);
-					de.setKeyValuePair("UP", dirs.contains(Direction.UP)?"True":"False");
-					de.setKeyValuePair("DOWN", dirs.contains(Direction.DOWN)?"True":"False");
-					de.setKeyValuePair("LEFT", dirs.contains(Direction.LEFT)?"True":"False");
-					de.setKeyValuePair("RIGHT", dirs.contains(Direction.RIGHT)?"True":"False");
+					Path pelletPath = grid.getGridWalker().getClosestPelletPath(pacman.x / BLOCKSIZE,
+							pacman.y / BLOCKSIZE);
+					if (pelletPath != null) {
+						de.setKeyValuePair("pelletDirection", "" + pelletPath.getFirstDirection());
+						de.setKeyValuePair("pelletDistance" , "" + pelletPath.getDistance());
+					}
+					de.setKeyValuePair("UP", dirs.contains(Direction.UP) ? "True" : "False");
+					de.setKeyValuePair("DOWN", dirs.contains(Direction.DOWN) ? "True" : "False");
+					de.setKeyValuePair("LEFT", dirs.contains(Direction.LEFT) ? "True" : "False");
+					de.setKeyValuePair("RIGHT", dirs.contains(Direction.RIGHT) ? "True" : "False");
 					de.setKeyValuePair("score", Integer.valueOf(score).toString());
-					
+
 					dataInterface.setData(de);
 					if (grid.getPillNum() != numPills) {
 						for (Ghost g : ghosts) {
