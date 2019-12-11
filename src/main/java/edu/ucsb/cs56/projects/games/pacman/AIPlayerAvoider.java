@@ -1,13 +1,13 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
@@ -58,9 +58,9 @@ public class AIPlayerAvoider extends AIPlayer {
 	Path getNthClosestPath(int order) {
 		Path path = null;
 		if (paths.size() > order) {
-			Vector<Path> v = new Vector<Path>(paths.values());
+			ArrayList<Path> v = new ArrayList<Path>(paths.values());
 			Collections.sort(v, distanceComparator);
-			path = v.elementAt(order);
+			path = v.get(order);
 		}
 		return path;
 	}
@@ -179,7 +179,7 @@ public class AIPlayerAvoider extends AIPlayer {
 		HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
 
 		if (ps != null) {
-			Vector<Direction> possibleDirections = new Vector<Direction>();
+			ArrayList<Direction> possibleDirections = new ArrayList<Direction>();
 			Path closestGhostPath = getNthClosestPath(0);
 			Path secondClosestGhostPath = getNthClosestPath(1);
 			Direction closestGhostDirection = null;

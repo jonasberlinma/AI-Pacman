@@ -1,8 +1,8 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Vector;
 
 public class RewardCalculator {
 
@@ -21,8 +21,8 @@ public class RewardCalculator {
 		}
 	}
 
-	private Vector<Measure> measures = new Vector<Measure>();
-	private Vector<Measure> rewardHistory = new Vector<Measure>();
+	private ArrayList<Measure> measures = new ArrayList<Measure>();
+	private ArrayList<Measure> rewardHistory = new ArrayList<Measure>();
 
 	RewardCalculator(long gameID, int size, double discountRate) {
 		this.gameID = gameID;

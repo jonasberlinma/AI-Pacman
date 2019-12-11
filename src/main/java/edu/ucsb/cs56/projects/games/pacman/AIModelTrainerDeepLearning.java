@@ -1,11 +1,11 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class AIModelTrainerDeepLearning extends AIModelTrainer {
 
 	DataFlipper dataFlipper = null;
-	Vector<DataObservation> observationHistory = new Vector<DataObservation>();
+	ArrayList<DataObservation> observationHistory = new ArrayList<DataObservation>();
 
 	AIModelTrainerDeepLearning() {
 		dataFlipper = new DataFlipper();
@@ -22,7 +22,7 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 		System.out.println("Training on " + gameEventLog.events.size() + " events and " + gameEventLog.experience.size()
 				+ " experience points");
 		// Prep the data
-		Vector<DataObservation> observations = dataFlipper.findObservationsFromHistory(gameEventLog.events);
+		ArrayList<DataObservation> observations = dataFlipper.findObservationsFromHistory(gameEventLog.events);
 
 		int matchCount = 0;
 		for (DataObservation dataObservation : observations) {
@@ -35,8 +35,6 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 			
 		}
 
-		System.out.println("Observations " + observations.size() + " experience count " + gameEventLog.experience.size()
-		+ " match count " + matchCount);
 		observationHistory.addAll(observations);
 		
 		System.out.println("Total observations " + observationHistory.size());

@@ -2,10 +2,10 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Vector;
 
 public class DataFlipper {
 
@@ -27,9 +27,9 @@ public class DataFlipper {
 		try {
 
 			String line;
-			Vector<DataEvent> parsedLines = new Vector<DataEvent>();
+			ArrayList<DataEvent> parsedLines = new ArrayList<DataEvent>();
 			int level0Value = 0;
-			Vector<DataObservation> observations = new Vector<DataObservation>();
+			ArrayList<DataObservation> observations = new ArrayList<DataObservation>();
 			while ((line = fb.readLine()) != null) {
 
 				// Parse the line
@@ -62,10 +62,10 @@ public class DataFlipper {
 	 * @param gameEventHistory
 	 * @return
 	 */
-	public Vector<DataObservation> findObservationsFromHistory(Vector<DataEvent> gameEventHistory) {
-		Vector<DataObservation> observations = new Vector<DataObservation>();
+	public ArrayList<DataObservation> findObservationsFromHistory(ArrayList<DataEvent> gameEventHistory) {
+		ArrayList<DataObservation> observations = new ArrayList<DataObservation>();
 		int level0Value = 0;
-		Vector<DataEvent> observationEvents = new Vector<DataEvent>();
+		ArrayList<DataEvent> observationEvents = new ArrayList<DataEvent>();
 		for (DataEvent dataEvent : gameEventHistory) {
 			// Parse the line
 			// Check if we have a key break
@@ -90,9 +90,7 @@ public class DataFlipper {
 	 * @param parsedLines
 	 * @return
 	 */
-	// public LinkedHashMap<String, String>
-	// getObservation(Vector<LinkedHashMap<String, String>> events) {
-	public DataObservation getObservation(Vector<DataEvent> events) {
+	public DataObservation getObservation(ArrayList<DataEvent> events) {
 
 		String keyPrefix = "";
 		// Through the file line by line
@@ -164,7 +162,7 @@ public class DataFlipper {
 	 * @param write
 	 * @throws Exception
 	 */
-	private void writeObservations(Vector<DataObservation> observations, PrintWriter write) throws Exception {
+	private void writeObservations(ArrayList<DataObservation> observations, PrintWriter write) throws Exception {
 		LinkedHashSet<String> uniqueKeys = new LinkedHashSet<String>();
 		for (LinkedHashMap<String, String> observation : observations) {
 			uniqueKeys.addAll(observation.keySet());
@@ -233,7 +231,7 @@ public class DataFlipper {
 				Long.parseLong(inputValue);
 				value = inputValue;
 			} catch (NumberFormatException e) {
-				System.err.println("Unknown value " + inputValue);
+				//System.err.println("Unknown value " + inputValue);
 				value = "0";
 			}
 		}

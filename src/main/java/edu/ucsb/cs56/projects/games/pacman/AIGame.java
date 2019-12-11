@@ -2,9 +2,9 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.Vector;
 
 public class AIGame implements Runnable {
 
@@ -61,14 +61,14 @@ public class AIGame implements Runnable {
 			board.stop();
 			board.join();
 		} catch (InterruptedException e) {
-			
+
 			e.printStackTrace();
 		}
 		isRunning = false;
 	}
 
 	protected void report(PrintWriter out) {
-		Vector<DataEvent> events = aiPlayer.getEventLog();
+		ArrayList<DataEvent> events = aiPlayer.getEventLog();
 		Iterator<DataEvent> i = events.iterator();
 		while (i.hasNext()) {
 			out.println(i.next().toCSV());

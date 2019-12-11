@@ -4,15 +4,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Vector;
 
 public class FlipData {
 
 	public static void main(String[] args) {
 
-		Iterator<String> argi = new Vector<String>(Arrays.asList(args)).iterator();
+		Iterator<String> argi = new ArrayList<String>(Arrays.asList(args)).iterator();
 
 		String fileName = null;
 		

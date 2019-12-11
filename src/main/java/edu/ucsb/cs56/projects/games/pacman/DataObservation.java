@@ -18,5 +18,6 @@ public class DataObservation extends LinkedHashMap<String, String> {
 	}
 	public void dumpComparison(DataObservation otherObservation) {
 		this.forEach((x, y)->System.out.print(x + "=" + y + ";" + otherObservation.get(x) + ", "));
+		System.out.println();
 	}
 }

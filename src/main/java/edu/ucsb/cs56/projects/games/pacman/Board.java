@@ -2,6 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Vector;
@@ -168,7 +169,7 @@ public class Board implements Runnable, EventTrackable {
 				if (pacman.alive) {
 					pacman.move(grid, this);
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, pacman);
-					Vector<Direction> dirs = grid.getGridWalker().getPossibleDirections(pacman.x / BLOCKSIZE,
+					ArrayList<Direction> dirs = grid.getGridWalker().getPossibleDirections(pacman.x / BLOCKSIZE,
 							pacman.y / BLOCKSIZE);
 					Path pelletPath = grid.getGridWalker().getClosestPelletPath(pacman.x / BLOCKSIZE,
 							pacman.y / BLOCKSIZE);

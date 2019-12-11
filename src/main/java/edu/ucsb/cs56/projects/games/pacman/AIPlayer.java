@@ -1,7 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Vector;
 
 public abstract class AIPlayer implements Runnable {
 
@@ -13,11 +13,11 @@ public abstract class AIPlayer implements Runnable {
 	protected int playerID = 0;
 	private static int nextPlayerID = 0;
 
-	private Vector<DataEvent> eventCollection;
+	private ArrayList<DataEvent> eventCollection;
 
 	public AIPlayer() {
 		aiPlayerThread = new Thread(this, "AI Player");
-		eventCollection = new Vector<DataEvent>(10000);
+		eventCollection = new ArrayList<DataEvent>(10000);
 		playerID = nextPlayerID++;
 	}
 
@@ -100,7 +100,7 @@ public abstract class AIPlayer implements Runnable {
 		eventCollection.add(dataEvent);
 	}
 
-	protected Vector<DataEvent> getEventLog() {
+	protected ArrayList<DataEvent> getEventLog() {
 		return eventCollection;
 	}
 

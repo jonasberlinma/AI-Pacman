@@ -2,10 +2,10 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Random;
-import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.PathSection;
@@ -17,7 +17,7 @@ public class AIPlayerLearner extends AIPlayer {
 	private int lastScore;
 	private RewardCalculator rc = null;
 	private DataFlipper df = null;
-	private Vector<DataEvent> eventHistory;
+	private ArrayList<DataEvent> eventHistory;
 	public AIModel model = null;
 	private int accept = 0;
 	private int iterations = 0;
@@ -29,7 +29,7 @@ public class AIPlayerLearner extends AIPlayer {
 		df.addPivotField(new PivotField("eventType", 1));
 		df.addPivotField(new PivotField("ghostNum", 2));
 
-		eventHistory = new Vector<DataEvent>();
+		eventHistory = new ArrayList<DataEvent>();
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class AIPlayerLearner extends AIPlayer {
 			switch (key) {
 			case "S":
 				// Have to put this one here since the gameID is not set until the game starts
-				rc = new RewardCalculator(dataEvent.getGameID(), 20, 0.8d);
+				rc = new RewardCalculator(dataEvent.getGameID(), 5, 0.4d);
 				break;
 			default:
 			}
@@ -87,7 +87,7 @@ public class AIPlayerLearner extends AIPlayer {
 					int myX = dataEvent.getInt("x");
 					int myY = dataEvent.getInt("y");
 					HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
-					Vector<Direction> possibleDirections = new Vector<Direction>();
+					ArrayList<Direction> possibleDirections = new ArrayList<Direction>();
 					for (PathSection p : ps) {
 						possibleDirections.add(p.getDirection());
 					}
@@ -101,7 +101,8 @@ public class AIPlayerLearner extends AIPlayer {
 					// Find the best possible direction
 					Direction selectedDirection = null;
 					double bestReward = -Double.MAX_VALUE;
-					System.out.println("Checking " + possibleDirections.size() + " directions");
+					//if (playerID == 0)
+					//	System.out.println("Checking " + possibleDirections.size() + " directions");
 					if (model != null) {
 						for (int i = 0; i < possibleDirections.size(); i++) {
 							Direction proposedDirection = possibleDirections.get(i);
@@ -109,21 +110,25 @@ public class AIPlayerLearner extends AIPlayer {
 							// Add the proposed direction to the observation
 
 							DataObservation proposedState = perturbState(observation, proposedDirection);
-							
-							observation.dumpComparison(proposedState);
 
 							double predictedReward = model.score(proposedState);
-							System.out.println("Score for " + playerID + " " + proposedDirection.toString() + " "
-									+ predictedReward);
+
+					//		if (playerID == 0) {
+					//			observation.dumpComparison(proposedState);
+					//			System.out.println("Score for " + playerID + " " + proposedDirection.toString() + " "
+					//					+ predictedReward);
+					//		}
 							if (predictedReward > bestReward) {
 								bestReward = predictedReward;
 								selectedDirection = proposedDirection;
 							}
 						}
-						System.out.println("Model for " + playerID + " predicts " + selectedDirection);
+					//	if (playerID == 0)
+					//		System.out.println("Model for " + playerID + " predicts " + selectedDirection);
 					} else {
 						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
-						System.out.println("No model picked " + selectedDirection + " randomly");
+						if (playerID == 0)
+							System.out.println("No model picked " + selectedDirection + " randomly");
 					}
 //					double alpha = lastPredictedReward != 0 ? predictedReward / lastPredictedReward : 1.0;
 					// System.out.println("Alpha " + alpha + " predicted reward " + predictedReward
@@ -181,9 +186,10 @@ public class AIPlayerLearner extends AIPlayer {
 			perturbedState.put("MOVE0distance", "" + distance);
 		}
 		String pelletDirection = observation.get("MOVE99pelletDirection");
-		if(pelletDirection != null && pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
+		if (pelletDirection != null
+				&& pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
 			int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
-			
+
 			perturbedState.put("MOVE99pelletDistance", "" + distance);
 		}
 		return perturbedState;

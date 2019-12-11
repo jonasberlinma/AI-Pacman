@@ -1,7 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.util.ArrayList;
 import java.util.Random;
-import java.util.Vector;
 
 public class AIModelRandom extends AIModel {
 
@@ -17,7 +17,7 @@ public class AIModelRandom extends AIModel {
 	}
 
 	@Override
-	void setDataObservations(Vector<DataObservation> observations) {
+	void setDataObservations(ArrayList<DataObservation> observations) {
 
 	}
 

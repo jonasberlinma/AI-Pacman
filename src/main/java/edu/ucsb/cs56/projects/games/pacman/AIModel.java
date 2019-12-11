@@ -1,6 +1,6 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 public abstract class AIModel {
 
@@ -11,7 +11,7 @@ public abstract class AIModel {
 	 */
 	abstract double score(DataObservation observation);
 
-	abstract void setDataObservations(Vector<DataObservation> observations);
+	abstract void setDataObservations(ArrayList<DataObservation> observations);
 
 	abstract void train();
 	

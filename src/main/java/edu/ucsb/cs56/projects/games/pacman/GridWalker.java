@@ -3,12 +3,12 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
 import java.util.function.BiFunction;
 
 public class GridWalker {
@@ -165,9 +165,9 @@ public class GridWalker {
 	protected class Path {
 		private int distance;
 		private boolean edible;
-		Vector<PathSection> pathSections = null;
+		ArrayList<PathSection> pathSections = null;
 
-		Path(int distance, Vector<PathSection> pathSections) {
+		Path(int distance, ArrayList<PathSection> pathSections) {
 			this.distance = distance;
 			this.pathSections = pathSections;
 		}
@@ -175,7 +175,7 @@ public class GridWalker {
 		public Direction getFirstDirection() {
 			Direction ret = null;
 			if (this.pathSections.size() > 0) {
-				ret = this.pathSections.elementAt(0).getDirection();
+				ret = this.pathSections.get(0).getDirection();
 			}
 			return ret;
 		}
@@ -281,9 +281,9 @@ public class GridWalker {
 	HashSet<PathSection> getPossiblePaths(Point point) {
 		return fromPathSectionHashtable.get(point);
 	}
-	Vector<Direction> getPossibleDirections(int x, int y) {
+	ArrayList<Direction> getPossibleDirections(int x, int y) {
 		HashSet<PathSection> ps = getPossiblePaths(new Point(x, y));
-		Vector<Direction> ret = new Vector<Direction>();
+		ArrayList<Direction> ret = new ArrayList<Direction>();
 		for(PathSection p : ps) {
 			ret.add(p.getDirection());
 		}
@@ -374,7 +374,7 @@ public class GridWalker {
 		if (currentPoint != null) {
 			int shortestDistance = wi.distance.get(currentPoint);
 			// Now walk backwards to find the shortest path
-			Vector<PathSection> shortestPath = new Vector<PathSection>();
+			ArrayList<PathSection> shortestPath = new ArrayList<PathSection>();
 			while (!currentPoint.equals(startPoint) && wi.maxIterations-- > 0) {
 				HashSet<PathSection> psh = toPathSectionHashtable.get(currentPoint);
 				int minDistance = Integer.MAX_VALUE;
