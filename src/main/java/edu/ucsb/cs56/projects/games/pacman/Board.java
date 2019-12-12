@@ -486,7 +486,6 @@ public class Board implements Runnable, EventTrackable {
 			// Required due to heisenbug. Somehow the game type changes to
 			// single, versus, or cooperative before the characters are
 			// fully initialized
-			System.out.println("Initial game type " + gt);
 			Thread.sleep(1000);
 			while (doRun) {
 				gameStep++;

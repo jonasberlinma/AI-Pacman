@@ -1,5 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +38,19 @@ public class AIModelDeepLearning extends AIModel {
 //	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE1distance", "MOVE1direction",
 //			"MOVE2distance", "MOVE2direction", "KEY_PRESSkey" };
 
-	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
-			"MOVE99pelletDistance", "KEY_PRESSkey" };
+//	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
+//			"MOVE99pelletDistance", "KEY_PRESSkey" };
 
+	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection", "MOVE99pelletDistance"};
+
+	
 	private Long modelID = 0l;
 	private int numInputs = theVariables.length;
-	private int numHiddenNodes = 20;
+	private int numHiddenNodes = 10;
 	private int numOutputs = 1;
 	private double learningRate = 0.03;
 	private int batchSize = 64;
-	private int nEpochs = 2000;
+	private int nEpochs = 50;
 	private ArrayList<DataObservation> observations = null;
 	private MultiLayerNetwork network = null;
 	private NormalizerStandardize ns = null;
@@ -56,8 +61,6 @@ public class AIModelDeepLearning extends AIModel {
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(123).weightInit(WeightInit.XAVIER)
 				.updater(new Nesterovs(learningRate, 0.9)).list()
 				.layer(new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes).activation(Activation.TANH).build())
-				.layer(new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes).activation(Activation.TANH)
-						.build())
 				.layer(new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes).activation(Activation.TANH)
 						.build())
 				.layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE).activation(Activation.IDENTITY)
@@ -103,8 +106,8 @@ public class AIModelDeepLearning extends AIModel {
 		for (int i = 0; i < nEpochs; i++) {
 			iterator.reset();
 			network.fit(iterator);
-			test();
 		}
+		test();
 		System.out.println("Iteration count " + network.getIterationCount());
 	}
 
@@ -119,6 +122,8 @@ public class AIModelDeepLearning extends AIModel {
 		ns.transformLabel(dependentVariables);
 
 		INDArray output = network.output(independentVariables);
+		
+		printData("theData.csv", independentVariables, dependentVariables, output);
 
 		double error = dependentVariables.distance2(output.castTo(DataType.DOUBLE))
 				/ Math.sqrt((double) observations.size());
@@ -127,8 +132,15 @@ public class AIModelDeepLearning extends AIModel {
 
 	}
 
-	private void printData(PrintStream out, INDArray independentVariables, INDArray dependentVariables,
+	private void printData(String fileName, INDArray independentVariables, INDArray dependentVariables,
 			INDArray output) {
+		PrintStream out = null;
+		try {
+			out = new PrintStream(new FileOutputStream(fileName));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for (int i = 0; i < theVariables.length; i++) {
 			out.print(theVariables[i] + ",");
 		}

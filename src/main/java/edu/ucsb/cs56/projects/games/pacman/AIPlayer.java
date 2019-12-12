@@ -89,7 +89,7 @@ public abstract class AIPlayer implements Runnable {
 	public abstract LinkedHashMap<String, DataObservation> reportExperience();
 
 	protected void pressKey(int key) {
-		if (lastKey != key) {
+		if (lastKey != key && lastKey != 0) {
 			board.keyReleased(lastKey);
 		}
 		lastKey = key;

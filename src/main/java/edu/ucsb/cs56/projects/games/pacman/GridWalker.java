@@ -281,10 +281,11 @@ public class GridWalker {
 	HashSet<PathSection> getPossiblePaths(Point point) {
 		return fromPathSectionHashtable.get(point);
 	}
+
 	ArrayList<Direction> getPossibleDirections(int x, int y) {
 		HashSet<PathSection> ps = getPossiblePaths(new Point(x, y));
 		ArrayList<Direction> ret = new ArrayList<Direction>();
-		for(PathSection p : ps) {
+		for (PathSection p : ps) {
 			ret.add(p.getDirection());
 		}
 		return ret;
@@ -311,7 +312,12 @@ public class GridWalker {
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
+		Path pelletPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
+		if (pelletPath == null) {
+			System.err.println("No pellet found from " + fromX + "," + fromY);
+		}
+		
+		return pelletPath;
 	}
 
 	public Path getClosestPillPath(int fromX, int fromY) {

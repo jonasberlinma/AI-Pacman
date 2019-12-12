@@ -21,6 +21,7 @@ public class AIPlayerLearner extends AIPlayer {
 	public AIModel model = null;
 	private int accept = 0;
 	private int iterations = 0;
+	private double lastBestReward = 0;
 
 	public AIPlayerLearner() throws FileNotFoundException {
 		lastScore = 0;
@@ -62,14 +63,14 @@ public class AIPlayerLearner extends AIPlayer {
 			switch (key) {
 			case "S":
 				// Have to put this one here since the gameID is not set until the game starts
-				rc = new RewardCalculator(dataEvent.getGameID(), 5, 0.4d);
+				rc = new RewardCalculator(dataEvent.getGameID(), 10, 0.9d);
 				break;
 			default:
 			}
 			break;
 
 		case MOVE:
-
+			// Move event something on the board changed
 			String playerType = dataEvent.getString("playerType");
 
 			if (playerType != null) {
@@ -77,33 +78,48 @@ public class AIPlayerLearner extends AIPlayer {
 				switch (playerTypeShort) {
 
 				case "GHOST":
-
+					// Ghost moved, just keep an eye on it
 					eventHistory.add(dataEvent);
 					break;
 				case "PACMA":
-					if (iterations++ % 8 == 0)
-						return;
+					// This is the main decision point where we use the model to figure out what to
+					// do
+					// Idea is:
+					// 1. Figure out the possible directions we can go (just avoid running into
+					// walls)
+					// 2. If we have no model just pick a random direction of the possible ones
+					// 3. If we have a model, the for each possible direction
+					// - Use the current state and perturb it into each of the possible states we
+					// can go to
+					// - Score each possible next possible next state
+					// - Find the highest scoring next possible state
+
+					iterations++;
+					
+					// Collect the event so we have complete history
+					eventHistory.add(dataEvent);
+
 					// Get basic info
 					int myX = dataEvent.getInt("x");
 					int myY = dataEvent.getInt("y");
+					// Find the possible directions we can go from where we are
 					HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
 					ArrayList<Direction> possibleDirections = new ArrayList<Direction>();
 					for (PathSection p : ps) {
 						possibleDirections.add(p.getDirection());
 					}
 
-					eventHistory.add(dataEvent);
-
-					// Prep the data
+					// Prep the data converting from game events to complete state observations
 					DataObservation observation = df.getObservation(eventHistory);
-					// Where are we
+
 					// Get a new suggested direction
 					// Find the best possible direction
 					Direction selectedDirection = null;
 					double bestReward = -Double.MAX_VALUE;
-					//if (playerID == 0)
-					//	System.out.println("Checking " + possibleDirections.size() + " directions");
+
+					// Do we have a model or not
 					if (model != null) {
+						// Yes we have a model
 						for (int i = 0; i < possibleDirections.size(); i++) {
 							Direction proposedDirection = possibleDirections.get(i);
 
@@ -111,72 +127,67 @@ public class AIPlayerLearner extends AIPlayer {
 
 							DataObservation proposedState = perturbState(observation, proposedDirection);
 
+							// Score
 							double predictedReward = model.score(proposedState);
 
-					//		if (playerID == 0) {
-					//			observation.dumpComparison(proposedState);
-					//			System.out.println("Score for " + playerID + " " + proposedDirection.toString() + " "
-					//					+ predictedReward);
-					//		}
+							// Pick out the best one
 							if (predictedReward > bestReward) {
 								bestReward = predictedReward;
 								selectedDirection = proposedDirection;
 							}
 						}
-					//	if (playerID == 0)
-					//		System.out.println("Model for " + playerID + " predicts " + selectedDirection);
 					} else {
+						// No model just pick a direction
 						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
-						if (playerID == 0)
-							System.out.println("No model picked " + selectedDirection + " randomly");
 					}
-//					double alpha = lastPredictedReward != 0 ? predictedReward / lastPredictedReward : 1.0;
-					// System.out.println("Alpha " + alpha + " predicted reward " + predictedReward
-					// + " last predicted reward " + lastPredictedReward);
 
-//					lastPredictedReward = predictedReward;
-//					double randomNumber = random.nextDouble();
+					// The score is normalized to 0 with a standard deviation of 1
 
-					double alpha = 1;
-					double randomNumber = 0;
-
-					if (alpha > randomNumber) {
+					double gamma = 0.00000001;					
+					double alpha = (bestReward - lastBestReward) / gamma;
+					lastBestReward = bestReward;
+					double randomNumber = gamma * random.nextDouble();
+					if (alpha < randomNumber) {
+						// If there is no big difference shake things up
+						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
+					} else {
+						// We accepted the models decision
 						accept++;
-						switch (selectedDirection) {
-						case LEFT:
-							pressKey(KeyEvent.VK_LEFT);
-							break;
-						case DOWN:
-							pressKey(KeyEvent.VK_DOWN);
-							break;
-						case RIGHT:
-							pressKey(KeyEvent.VK_RIGHT);
-							break;
-						case UP:
-							pressKey(KeyEvent.VK_UP);
-							break;
-						default:
-						}
-
-						gameStep = dataEvent.getGameStep();
-						score = dataEvent.getInt("score");
-
-						rc.addScore(gameStep, score - lastScore);
-						lastScore = score;
 					}
+
+					// Now press the key for the direction we selected
+					switch (selectedDirection) {
+					case LEFT:
+						pressKey(KeyEvent.VK_LEFT);
+						break;
+					case DOWN:
+						pressKey(KeyEvent.VK_DOWN);
+						break;
+					case RIGHT:
+						pressKey(KeyEvent.VK_RIGHT);
+						break;
+					case UP:
+						pressKey(KeyEvent.VK_UP);
+						break;
+					default:
+					}
+					gameStep = dataEvent.getGameStep();
+					score = dataEvent.getInt("score");
+
+					rc.addScore(gameStep, score - lastScore);
+					lastScore = score;
 					eventHistory.clear();
 					break;
 				default:
-				}
-			}
+				} // Done with Pacman move
+			} // Done with player type not null
 		default:
-
-		}
+		} // Done with event type
 	}
 
 	private DataObservation perturbState(DataObservation observation, Direction proposedDirection) {
 		DataObservation perturbedState = observation.deepClone();
-		observation.put("KEY_PRESSkey", df.standardizeValue(proposedDirection.toString()));
+//		observation.put("KEY_PRESSkey", df.standardizeValue(proposedDirection.toString()));
 		// Score the proposed change
 		String ghostDirection = observation.get("MOVE0direction");
 		if (ghostDirection != null
@@ -189,9 +200,17 @@ public class AIPlayerLearner extends AIPlayer {
 		if (pelletDirection != null
 				&& pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
 			int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
-
 			perturbedState.put("MOVE99pelletDistance", "" + distance);
 		}
+		// String pelletDirection = observation.get("MOVE99pelletDirection");
+		// if (pelletDirection != null
+		// &&
+		// pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString()))
+		// == 0) {
+		// int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
+//
+//			perturbedState.put("MOVE99pelletDistance", "" + distance);
+//		}
 		return perturbedState;
 	}
 

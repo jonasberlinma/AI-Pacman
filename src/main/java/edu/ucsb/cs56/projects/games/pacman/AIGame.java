@@ -19,6 +19,7 @@ public class AIGame implements Runnable {
 			throws FileNotFoundException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		board = new Board(prop, !background);
 		board.setLoopDelay(loopDelay);
+		
 		Class<?> theClass = Class.forName(prop.getProperty("aiPlayerClassName"));
 
 		aiPlayer = (AIPlayer) theClass.newInstance();
