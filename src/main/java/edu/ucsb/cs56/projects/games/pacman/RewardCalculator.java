@@ -34,16 +34,16 @@ public class RewardCalculator {
 		if (measures.size() > 1) {
 			rewardHistory.add(measures.get(0));
 		}
+
 		if (size == measures.size()) {
 			measures.remove(0);
 		}
-		measures.add(new Measure(gameStep, score));
-
 		double reward = 0;
 		for (int i = 0; i < measures.size(); i++) {
 			reward = reward + measures.get(i).score * Math.pow(discountRate, i);
 			measures.get(0).reward = reward;
 		}
+		measures.add(new Measure(gameStep, score));
 	}
 
 	private void finalizeRewards() {

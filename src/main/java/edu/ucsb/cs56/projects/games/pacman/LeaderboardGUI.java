@@ -55,7 +55,7 @@ public class LeaderboardGUI {
 	 */
 	public LeaderboardGUI() {
 		try {
-			pacmanImage = ImageIO.read(getClass().getResource("assets/pacman/right2.png"));
+			pacmanImage = ImageIO.read(getClass().getResource("/assets/pacman/right2.png"));
 			int width = 5 * pacmanImage.getWidth();
 			int height = 5 * pacmanImage.getHeight();
 			Image pac = pacmanImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);

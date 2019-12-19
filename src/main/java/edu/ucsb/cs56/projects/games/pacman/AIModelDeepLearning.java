@@ -41,16 +41,16 @@ public class AIModelDeepLearning extends AIModel {
 //	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
 //			"MOVE99pelletDistance", "KEY_PRESSkey" };
 
-	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection", "MOVE99pelletDistance"};
+	private final String[] theVariables = { "gameID", "gameStep", "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
+			"MOVE99pelletDistance", "MOVE99fruitDirection", "MOVE99fruitDistance" };
 
-	
 	private Long modelID = 0l;
 	private int numInputs = theVariables.length;
-	private int numHiddenNodes = 10;
+	private int numHiddenNodes = 50;
 	private int numOutputs = 1;
-	private double learningRate = 0.03;
-	private int batchSize = 64;
-	private int nEpochs = 50;
+	private double learningRate = 0.01;
+	private int batchSize = 100;
+	private int nEpochs = 500;
 	private ArrayList<DataObservation> observations = null;
 	private MultiLayerNetwork network = null;
 	private NormalizerStandardize ns = null;
@@ -99,7 +99,7 @@ public class AIModelDeepLearning extends AIModel {
 
 	@Override
 	void train() {
-		
+
 		// Call NN training
 
 		DataSetIterator iterator = getTrainingData();
@@ -117,13 +117,13 @@ public class AIModelDeepLearning extends AIModel {
 		INDArray independentVariables = getIndependentVariables();
 		INDArray dependentVariables = getDependentVariables();
 
+		printData("theData.csv", independentVariables, dependentVariables, null);
+
 		ns.transform(independentVariables);
 
 		ns.transformLabel(dependentVariables);
 
 		INDArray output = network.output(independentVariables);
-		
-		printData("theData.csv", independentVariables, dependentVariables, output);
 
 		double error = dependentVariables.distance2(output.castTo(DataType.DOUBLE))
 				/ Math.sqrt((double) observations.size());
@@ -144,12 +144,20 @@ public class AIModelDeepLearning extends AIModel {
 		for (int i = 0; i < theVariables.length; i++) {
 			out.print(theVariables[i] + ",");
 		}
-		out.println("Actual,Predicted");
-		for (int i = 0; i < output.rows(); i++) {
+		if (output != null) {
+			out.println("Actual,Predicted");
+		} else {
+			out.println("Actual");
+		}
+		for (int i = 0; i < dependentVariables.rows(); i++) {
 			for (int j = 0; j < independentVariables.columns(); j++) {
 				out.print(independentVariables.getDouble(i, j) + ",");
 			}
-			out.println(dependentVariables.getDouble(i, 0) + "," + output.getDouble(i, 0));
+			if (output != null) {
+				out.println(dependentVariables.getDouble(i, 0) + "," + output.getDouble(i, 0));
+			} else {
+				out.println(dependentVariables.getDouble(i, 0));
+			}
 		}
 	}
 

@@ -143,10 +143,11 @@ public class AIPlayerLearner extends AIPlayer {
 
 					// The score is normalized to 0 with a standard deviation of 1
 
-					double gamma = 0.00000001;					
+					double gamma = 0.001;					
 					double alpha = (bestReward - lastBestReward) / gamma;
 					lastBestReward = bestReward;
-					double randomNumber = gamma * random.nextDouble();
+					double randomNumber = random.nextDouble();
+					alpha = 0.7;
 					if (alpha < randomNumber) {
 						// If there is no big difference shake things up
 						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
@@ -202,15 +203,11 @@ public class AIPlayerLearner extends AIPlayer {
 			int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
 			perturbedState.put("MOVE99pelletDistance", "" + distance);
 		}
-		// String pelletDirection = observation.get("MOVE99pelletDirection");
-		// if (pelletDirection != null
-		// &&
-		// pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString()))
-		// == 0) {
-		// int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
-//
-//			perturbedState.put("MOVE99pelletDistance", "" + distance);
-//		}
+		String fruitDirection = observation.get("MOVE99fruitDirection");
+		if(fruitDirection != null && fruitDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
+			int distance = Integer.parseInt(observation.get("MOVE99fruitDistance")) - 1;
+			perturbedState.put("MOVE99fruitDistance", "" + distance);
+		}
 		return perturbedState;
 	}
 

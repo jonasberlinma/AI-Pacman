@@ -2,6 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.awt.Image;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -10,7 +11,8 @@ import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 public class AssetController {
 	private static AssetController instance = null;
 
-	public String assetImagePath;
+	private String assetRootPath;
+	private String assetImagePath;
 	private String assetAudioPath;
 	private String assetPacmanImagePath;
 	private String assetMsPacmanImagePath;
@@ -24,10 +26,11 @@ public class AssetController {
 	private Image scaredGhostImage;
 
 	private AssetController() {
-		assetImagePath = "assets/pacman/";
-		assetAudioPath = "assets/audio/";
-		assetPacmanImagePath = "assets/pacman/";
-		assetMsPacmanImagePath = "assets/mspacman/";
+		assetRootPath = "/assets/";
+		assetImagePath = "/assets/pacman/";
+		assetAudioPath = "/assets/audio/";
+		assetPacmanImagePath = "/assets/pacman/";
+		assetMsPacmanImagePath = "/assets/mspacman/";
 		System.out.println("Loading assets");
 		loadPacmanImages();
 		loadGhostImages();
@@ -85,11 +88,11 @@ public class AssetController {
 	public void loadGhostImages() {
 		
 		ghostImage = new Image[2];
-		assetImagePath = "assets/";
+
 		try {
-			ghostImage[0] = ImageIO.read(getClass().getResource(assetImagePath + "ghostred.png"));
-			ghostImage[1] = ImageIO.read(getClass().getResource(assetImagePath + "ghostpink.png"));
-			scaredGhostImage = ImageIO.read(getClass().getResource(assetImagePath + "ghostblue.png"));
+			ghostImage[0] = ImageIO.read(getClass().getResource(assetRootPath + "ghostred.png"));
+			ghostImage[1] = ImageIO.read(getClass().getResource(assetRootPath + "ghostpink.png"));
+			scaredGhostImage = ImageIO.read(getClass().getResource(assetRootPath + "ghostblue.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);

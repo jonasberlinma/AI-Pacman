@@ -51,7 +51,7 @@ public class Grid {
 		this.levelsData = new short[loadableLevels.length][1][1];
 		gridWalkers = new GridWalker[loadableLevels.length];
 		for (int i = 0; i < loadableLevels.length; i++) {
-			GridData level = loadLevel("assets/levels/" + loadableLevels[i]);
+			GridData level = loadLevel("/assets/levels/" + loadableLevels[i]);
 			gridWalkers[i] = new GridWalker(level, screenData);
 			levelsData[i] = level.get2DGridData();
 		}
@@ -67,7 +67,7 @@ public class Grid {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e);
-			System.out.println("Failed to load level data assets.");
+			System.out.println("Failed to load level data assets: " + asset_path);
 			System.exit(2);
 		}
 		return null;

@@ -153,11 +153,14 @@ public class GridWalker {
 		boolean hasPellet() {
 			// return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 32) !=
 			// 0 || (screenData[y][x] & 64) != 0;
-			return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 64) != 0;
+			return (screenData[y][x] & 16) != 0;
 		}
 
 		boolean hasPill() {
 			return (screenData[y][x] & 64) != 0;
+		}
+		boolean hasFruit() {
+			return (screenData[y][x] & 32) != 0;
 		}
 
 	}
@@ -318,6 +321,22 @@ public class GridWalker {
 		}
 		
 		return pelletPath;
+	}	
+	
+	public Path getClosestFruitPath(int fromX, int fromY) {
+		if (!walkerInitialized) {
+			return null;
+		}
+		Point startPoint = getPoint(fromX, fromY);
+
+		if (!startPoint.checkReachable("Start")) {
+			return null;
+		}
+		WalkInstance wi = initDijkstra(startPoint);
+		Point currentPoint = startPoint;
+		Path fruitPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasFruit());
+	 
+		return fruitPath;
 	}
 
 	public Path getClosestPillPath(int fromX, int fromY) {

@@ -177,6 +177,16 @@ public class Board implements Runnable, EventTrackable {
 						de.setKeyValuePair("pelletDirection", "" + pelletPath.getFirstDirection());
 						de.setKeyValuePair("pelletDistance" , "" + pelletPath.getDistance());
 					}
+					Path fruitPath = grid.getGridWalker().getClosestFruitPath(pacman.x/BLOCKSIZE, pacman.y/BLOCKSIZE);
+					// Fruit can be scarce
+					if(fruitPath != null) {
+						de.setKeyValuePair("fruitDirection", "" + fruitPath.getFirstDirection());
+						de.setKeyValuePair("fruitDistance", "" + fruitPath.getDistance());
+					} else {
+						// Just say it is far away
+						de.setKeyValuePair("fruitDirection", "" + 1);
+						de.setKeyValuePair("fruitDistance", "" + 99);
+					}
 					de.setKeyValuePair("UP", dirs.contains(Direction.UP) ? "True" : "False");
 					de.setKeyValuePair("DOWN", dirs.contains(Direction.DOWN) ? "True" : "False");
 					de.setKeyValuePair("LEFT", dirs.contains(Direction.LEFT) ? "True" : "False");
