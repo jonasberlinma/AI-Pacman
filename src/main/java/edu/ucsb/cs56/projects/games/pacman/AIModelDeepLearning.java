@@ -38,19 +38,18 @@ public class AIModelDeepLearning extends AIModel {
 //	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE1distance", "MOVE1direction",
 //			"MOVE2distance", "MOVE2direction", "KEY_PRESSkey" };
 
-//	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
-//			"MOVE99pelletDistance", "KEY_PRESSkey" };
+	private final String[] theVariables = { "MOVE0distance" };
 
-	private final String[] theVariables = { "gameID", "gameStep", "MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
-			"MOVE99pelletDistance", "MOVE99fruitDirection", "MOVE99fruitDistance" };
+//	private final String[] theVariables = {"MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
+//			"MOVE99pelletDistance", "MOVE99fruitDirection", "MOVE99fruitDistance" };
 
 	private Long modelID = 0l;
 	private int numInputs = theVariables.length;
-	private int numHiddenNodes = 50;
+	private int numHiddenNodes = 20;
 	private int numOutputs = 1;
 	private double learningRate = 0.01;
-	private int batchSize = 100;
-	private int nEpochs = 500;
+	private int batchSize = 64;
+	private int nEpochs = 100;
 	private ArrayList<DataObservation> observations = null;
 	private MultiLayerNetwork network = null;
 	private NormalizerStandardize ns = null;
@@ -68,7 +67,7 @@ public class AIModelDeepLearning extends AIModel {
 				.build();
 		network = new MultiLayerNetwork(conf);
 		network.init();
-		network.setListeners(new ScoreIterationListener(1));
+		network.setListeners(new ScoreIterationListener(100));
 	}
 
 	public long getModelID() {
@@ -76,7 +75,7 @@ public class AIModelDeepLearning extends AIModel {
 	}
 
 	@Override
-	double score(DataObservation observation) {
+	synchronized double score(DataObservation observation) {
 		// This will call the NN for scoring
 		// TODO: Remember to do the same data prep as in training
 
@@ -98,7 +97,7 @@ public class AIModelDeepLearning extends AIModel {
 	}
 
 	@Override
-	void train() {
+	synchronized void train() {
 
 		// Call NN training
 
@@ -107,12 +106,12 @@ public class AIModelDeepLearning extends AIModel {
 			iterator.reset();
 			network.fit(iterator);
 		}
-		test();
+		// test();
 		System.out.println("Iteration count " + network.getIterationCount());
 	}
 
 	@Override
-	void test() {
+	synchronized void test() {
 
 		INDArray independentVariables = getIndependentVariables();
 		INDArray dependentVariables = getDependentVariables();
