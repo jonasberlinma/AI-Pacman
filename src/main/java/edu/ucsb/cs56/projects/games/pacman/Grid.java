@@ -44,7 +44,7 @@ public class Grid {
 	 * Constructor for Board object
 	 */
 	public Grid() {
-		setScreenData(new short[Board.NUMBLOCKS][Board.NUMBLOCKS]);
+		setScreenData(new short[Board.getNumblocks()][Board.getNumblocks()]);
 		setMazeColor(new Color(5, 100, 5));
 		setDotColor(new Color(192, 192, 0));
 		setFruitColor(new Color(255, 0, 0));
@@ -82,8 +82,8 @@ public class Grid {
 	 * @return A boolean indicating whether or not the maze is finished
 	 */
 	public boolean checkMaze() {
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				if ((getScreenData()[i][j] & (GridData.GRID_CELL_PELLET ^ GridData.GRID_CELL_POWER_PILL)) != 0)
 					return false;
 			}
@@ -98,8 +98,8 @@ public class Grid {
 	 */
 	public int getPelletNum() {
 		int numOfPellet = 0;
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				if ((getScreenData()[i][j] & GridData.GRID_CELL_PELLET) != 0)
 					numOfPellet++;
 			}
@@ -114,8 +114,8 @@ public class Grid {
 	 */
 	public int getPillNum() {
 		int numOfPill = 0;
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				if ((getScreenData()[i][j] & GridData.GRID_CELL_POWER_PILL) != 0)
 					numOfPill++;
 			}
@@ -131,8 +131,8 @@ public class Grid {
 	 */
 	public int getPelletNumForMap(int numBoardsCleared) {
 		int numOfPellet = 0;
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				if ((this.levelsData[numBoardsCleared % this.levelsData.length][i][j]
 						& GridData.GRID_CELL_PELLET) != 0) {
 					numOfPellet++;
@@ -149,9 +149,9 @@ public class Grid {
 	 */
 	public void levelInit(int numBoardsCleared) {
 		this.currentLevel = numBoardsCleared;
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
 			getScreenData()[i] = Arrays.copyOf(this.levelsData[numBoardsCleared % this.levelsData.length][i],
-					Board.NUMBLOCKS);
+					Board.getNumblocks());
 		}
 	}
 
@@ -180,8 +180,8 @@ public class Grid {
 	 */
 
 	public void randomBlock() {
-		this.x = (int) (Math.random() * Board.NUMBLOCKS);
-		this.y = (int) (Math.random() * Board.NUMBLOCKS);
+		this.x = (int) (Math.random() * Board.getNumblocks());
+		this.y = (int) (Math.random() * Board.getNumblocks());
 	}
 
 	/**
@@ -212,10 +212,10 @@ public class Grid {
 	}
 
 	public void writeGrid(PrintStream gridOut) {
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				gridOut.print("" + getScreenData()[i][j]);
-				if (j < Board.NUMBLOCKS - 1) {
+				if (j < Board.getNumblocks() - 1) {
 					gridOut.print(",");
 				}
 			}

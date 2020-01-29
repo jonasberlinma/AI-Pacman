@@ -36,8 +36,8 @@ public class Node implements Comparable<Node>
 	public Node(int x, int y, int gCost)
 	{
 		//should help to prevent crashes when tunneling
-		this.x = (x + Board.NUMBLOCKS) % Board.NUMBLOCKS;
-		this.y = (y + Board.NUMBLOCKS) % Board.NUMBLOCKS;
+		this.x = (x + Board.getNumblocks()) % Board.getNumblocks();
+		this.y = (y + Board.getNumblocks()) % Board.getNumblocks();
 		this.gCost = gCost;
 		hCost = (int)Math.sqrt(Math.pow(x - tx, 2.0) + Math.pow(y - ty, 2.0));
 		fCost = gCost + hCost;

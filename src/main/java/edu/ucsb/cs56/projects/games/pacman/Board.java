@@ -39,9 +39,9 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 */
 
-	public static final int BLOCKSIZE = 24;
-	public static final int NUMBLOCKS = 17;
-	public static final int SCRSIZE = NUMBLOCKS * BLOCKSIZE;
+	private static final int BLOCKSIZE = 24;
+	private static final int NUMBLOCKS = 17;
+	private static final int SCRSIZE = getNumblocks() * getBlocksize();
 
 	private final int MAX_GHOSTS = 12;
 	private final int MAX_SPEED = 6;
@@ -94,11 +94,11 @@ public class Board implements Runnable, EventTrackable {
 
 		pacmen = new Vector<Character>();
 
-		setPacman(new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PlayerType.PACMAN, grid));
+		setPacman(new PacPlayer(dataInterface, 8 * getBlocksize(), 11 * getBlocksize(), PlayerType.PACMAN, grid));
 		// msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 *
 		// BLOCKSIZE, PacPlayer.MSPACMAN, grid);
-		ghost1 = new Ghost(0, dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
-		ghost2 = new Ghost(1, dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST2, grid);
+		ghost1 = new Ghost(0, dataInterface, 8 * getBlocksize(), 7 * getBlocksize(), 3, PlayerType.GHOST1, grid);
+		ghost2 = new Ghost(1, dataInterface, 9 * getBlocksize(), 7 * getBlocksize(), 3, PlayerType.GHOST2, grid);
 
 		setGhosts(new Vector<Ghost>());
 		numPills = 4;
@@ -170,15 +170,15 @@ public class Board implements Runnable, EventTrackable {
 				if (getPacman().alive) {
 					getPacman().move(grid, this);
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, getPacman());
-					ArrayList<Direction> dirs = grid.getGridWalker().getPossibleDirections(getPacman().x / BLOCKSIZE,
-							getPacman().y / BLOCKSIZE);
-					Path pelletPath = grid.getGridWalker().getClosestPelletPath(getPacman().x / BLOCKSIZE,
-							getPacman().y / BLOCKSIZE);
+					ArrayList<Direction> dirs = grid.getGridWalker().getPossibleDirections(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize());
+					Path pelletPath = grid.getGridWalker().getClosestPelletPath(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize());
 					if (pelletPath != null) {
 						de.setKeyValuePair("pelletDirection", "" + pelletPath.getFirstDirection());
 						de.setKeyValuePair("pelletDistance" , "" + pelletPath.getDistance());
 					}
-					Path fruitPath = grid.getGridWalker().getClosestFruitPath(getPacman().x/BLOCKSIZE, getPacman().y/BLOCKSIZE);
+					Path fruitPath = grid.getGridWalker().getClosestFruitPath(getPacman().x/getBlocksize(), getPacman().y/getBlocksize());
 					// Fruit can be scarce
 					if(fruitPath != null) {
 						de.setKeyValuePair("fruitDirection", "" + fruitPath.getFirstDirection());
@@ -208,8 +208,8 @@ public class Board implements Runnable, EventTrackable {
 			case SINGLEPLAYER:
 				for (Ghost g : getGhosts()) {
 					g.moveAI(grid, pacmen);
-					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(getPacman().x / BLOCKSIZE,
-							getPacman().y / BLOCKSIZE, g.x / BLOCKSIZE, g.y / BLOCKSIZE);
+					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize(), g.x / getBlocksize(), g.y / getBlocksize());
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, g);
 					de.setKeyValuePair("ghostNum", Integer.valueOf(g.ghostNum).toString());
 					if (dd != null) {
@@ -382,11 +382,11 @@ public class Board implements Runnable, EventTrackable {
 				switch (the_type) {
 				case 0:
 					getGhosts().add(
-							new Ghost(i, dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST1));
+							new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random, PlayerType.GHOST1));
 					break;
 				case 1:
 					getGhosts().add(
-							new Ghost(i, dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST2));
+							new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random, PlayerType.GHOST2));
 				}
 
 			}
@@ -603,5 +603,17 @@ public class Board implements Runnable, EventTrackable {
 
 	public void setNumPellet(int numPellet) {
 		this.numPellet = numPellet;
+	}
+
+	public static int getBlocksize() {
+		return BLOCKSIZE;
+	}
+
+	public static int getNumblocks() {
+		return NUMBLOCKS;
+	}
+
+	public static int getScrsize() {
+		return SCRSIZE;
 	}
 }

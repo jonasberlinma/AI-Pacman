@@ -177,15 +177,15 @@ public class Ghost extends Character {
 			dx = reqdx;
 			dy = reqdy;
 		}
-		if (x % Board.BLOCKSIZE == 0 && y % Board.BLOCKSIZE == 0) {
+		if (x % Board.getBlocksize() == 0 && y % Board.getBlocksize() == 0) {
 			//Tunnel effect
-			x = ((x / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
-			y = ((y / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
+			x = ((x / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
+			y = ((y / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
 
-			ch = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+			ch = grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()];
 
 			if((ch & 32) != 0) {
-				grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
+				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 32);
 				board.addScore(-5);
 			}
 
@@ -268,21 +268,21 @@ public class Ghost extends Character {
 	
 			if(count > 0 && hasChoice(grid))
 			{
-				Node bestDir = pathFind(grid, coord[0][0] / Board.BLOCKSIZE, coord[0][1] / Board.BLOCKSIZE);
+				Node bestDir = pathFind(grid, coord[0][0] / Board.getBlocksize(), coord[0][1] / Board.getBlocksize());
 				Node tempDir;
 				for (int i = 1; i < count; i++) //Loop through each pacman
 				{
-					tempDir = pathFind(grid, coord[i][0] / Board.BLOCKSIZE, coord[i][1] / Board.BLOCKSIZE);
+					tempDir = pathFind(grid, coord[i][0] / Board.getBlocksize(), coord[i][1] / Board.getBlocksize());
 					if (tempDir.distance.value < bestDir.distance.value) //If new path is shorter
 						bestDir = tempDir;
 				}
 	
-				if (bestDir.x - this.x / Board.BLOCKSIZE == 0 && bestDir.y - this.y / Board.BLOCKSIZE == 0) //ghost on pacman
+				if (bestDir.x - this.x / Board.getBlocksize() == 0 && bestDir.y - this.y / Board.getBlocksize() == 0) //ghost on pacman
 					moveRandom(grid);
 				else
 				{
-					dx = bestDir.x - this.x / Board.BLOCKSIZE;
-					dy = bestDir.y - this.y / Board.BLOCKSIZE;
+					dx = bestDir.x - this.x / Board.getBlocksize();
+					dy = bestDir.y - this.y / Board.getBlocksize();
 				}
 			}
 			else
@@ -312,7 +312,7 @@ public class Ghost extends Character {
 		PriorityQueue<Node> opened = new PriorityQueue<Node>();
 		HashSet<Node> closed = new HashSet<Node>();
 
-		temp = new Node(this.x / Board.BLOCKSIZE, this.y / Board.BLOCKSIZE, 0); //current location of ghost
+		temp = new Node(this.x / Board.getBlocksize(), this.y / Board.getBlocksize(), 0); //current location of ghost
 		temp.init();
 		temp.setDir(dx, dy);
 		opened.offer(temp);
@@ -370,7 +370,7 @@ public class Ghost extends Character {
 	public void moveRandom(Grid grid)
 	{
 		//Makes sure ghost is in a grid and not in movement
-		if (this.x % Board.BLOCKSIZE == 0 && this.y % Board.BLOCKSIZE == 0)
+		if (this.x % Board.getBlocksize() == 0 && this.y % Board.getBlocksize() == 0)
 		{
 			ArrayList<Point> list = moveList(grid);
 
@@ -389,7 +389,7 @@ public class Ghost extends Character {
 	private ArrayList<Point> moveList(Grid grid)
 	{
 		ArrayList<Point> moves = new ArrayList<Point>();
-		int block = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+		int block = grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()];
 
 		// First condition prevents checks collision with wall
 		// Second condition prevents switching direction abruptly (left -> right) (up -> down)
@@ -407,9 +407,9 @@ public class Ghost extends Character {
 
 	private boolean hasChoice(Grid grid)
 	{
-		if (this.x % Board.BLOCKSIZE == 0 && this.y % Board.BLOCKSIZE == 0)
+		if (this.x % Board.getBlocksize() == 0 && this.y % Board.getBlocksize() == 0)
 		{
-			int block = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+			int block = grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()];
 			int count = (block & 1) == 0 && this.dx != 1 ? 1 : 0;
 			count += (block & 2) == 0 && this.dy != 1 ? 1 : 0;
 			count += (block & 4) == 0 && this.dx != -1 ? 1 : 0;

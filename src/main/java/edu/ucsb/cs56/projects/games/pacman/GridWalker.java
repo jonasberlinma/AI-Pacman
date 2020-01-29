@@ -89,7 +89,7 @@ public class GridWalker {
 	GridWalker(GridData level, short[][] screenData) {
 		grid = level.get2DGridData();
 		this.screenData = screenData;
-		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
+		connectionCheck = new short[Board.getNumblocks()][Board.getNumblocks()];
 		buildGraph();
 		walkerInitialized = true;
 		// printGraph("");
@@ -169,12 +169,12 @@ public class GridWalker {
 		}
 
 		Point stepRight() {
-			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y);
+			Point newPoint = new Point((x + 1) % Board.getNumblocks(), y);
 			return newPoint;
 		}
 
 		Point stepDown() {
-			Point newPoint = new Point(x, (y + 1) % Board.NUMBLOCKS);
+			Point newPoint = new Point(x, (y + 1) % Board.getNumblocks());
 			return newPoint;
 		}
 
@@ -261,8 +261,8 @@ public class GridWalker {
 	}
 
 	public void printGrid(PrintStream out) {
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				short ch = (short) (grid[j][i] & (short) 15);
 				String b = i + "-" + j + "->" + ch + ";";
 				out.print(b);
@@ -507,16 +507,16 @@ public class GridWalker {
 	}
 
 	private void buildGraph() {
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				Point point = new Point(i, j);
 				fromPathSectionHashtable.put(point, new HashSet<PathSection>());
 				toPathSectionHashtable.put(point, new HashSet<PathSection>());
 				allPoints.put(point.getNodeNumber(), point);
 			}
 		}
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 
 				Point fromPoint = allPoints.get(i + "-" + j);
 				if (canWalkDown(fromPoint)) {
@@ -543,8 +543,8 @@ public class GridWalker {
 				}
 			}
 		}
-		for (short i = 0; i < Board.NUMBLOCKS; i += 2) {
-			for (short j = 0; j < Board.NUMBLOCKS; j += 2) {
+		for (short i = 0; i < Board.getNumblocks(); i += 2) {
+			for (short j = 0; j < Board.getNumblocks(); j += 2) {
 				connectionCheck[j][i] = 0;
 			}
 		}
@@ -552,23 +552,23 @@ public class GridWalker {
 		connectionCheck[8][11] = 1;
 
 		for (short iteration = 0; iteration < 15; iteration++) {
-			for (short i = 0; i < Board.NUMBLOCKS; i++) {
-				for (short j = 0; j < Board.NUMBLOCKS; j++) {
+			for (short i = 0; i < Board.getNumblocks(); i++) {
+				for (short j = 0; j < Board.getNumblocks(); j++) {
 					Point point = allPoints.get(i + "-" + j);
 					if (canWalkDown(point))
-						connectionCheck[j][i] += connectionCheck[(j + 1) % Board.NUMBLOCKS][i];
+						connectionCheck[j][i] += connectionCheck[(j + 1) % Board.getNumblocks()][i];
 					if (canWalkUp(point))
-						connectionCheck[j][i] += connectionCheck[(j - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][i];
+						connectionCheck[j][i] += connectionCheck[(j - 1 + Board.getNumblocks()) % Board.getNumblocks()][i];
 					if (canWalkRight(point))
-						connectionCheck[j][i] += connectionCheck[j][(i + 1) % Board.NUMBLOCKS];
+						connectionCheck[j][i] += connectionCheck[j][(i + 1) % Board.getNumblocks()];
 					if (canWalkLeft(point))
-						connectionCheck[j][i] += connectionCheck[j][(i - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS];
+						connectionCheck[j][i] += connectionCheck[j][(i - 1 + Board.getNumblocks()) % Board.getNumblocks()];
 					connectionCheck[j][i] = (short) Math.min(connectionCheck[j][i], 1);
 				}
 			}
 		}
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
+		for (int i = 0; i < Board.getNumblocks(); i++) {
+			for (int j = 0; j < Board.getNumblocks(); j++) {
 				if (connectionCheck[j][i] == 0) {
 					Point p = new Point(i, j);
 					reachablePoints.remove(p);
@@ -583,14 +583,14 @@ public class GridWalker {
 		// Current point
 		short ch = (short) (grid[point.y][point.x] & (short) 15);
 		// Right point from current
-		short ch2 = (short) (grid[point.y][(point.x + 1) % Board.NUMBLOCKS] & (short) 15);
+		short ch2 = (short) (grid[point.y][(point.x + 1) % Board.getNumblocks()] & (short) 15);
 		// Check that we can walk right and back left to current
 		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
 	private boolean canWalkLeft(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] & (short) 15);
+		short ch = (short) (grid[point.y][(point.x - 1 + Board.getNumblocks()) % Board.getNumblocks()] & (short) 15);
 		// Right point from current
 		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
 		// Check that we can walk right and back left to current
@@ -601,14 +601,14 @@ public class GridWalker {
 		// Current point
 		short ch = (short) (grid[point.y][point.x] & (short) 15);
 		// Down point from current
-		short ch2 = (short) (grid[(point.y + 1) % Board.NUMBLOCKS][point.x] & (short) 15);
+		short ch2 = (short) (grid[(point.y + 1) % Board.getNumblocks()][point.x] & (short) 15);
 		// Check that we can walk down and back up to current
 		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
 	}
 
 	private boolean canWalkUp(Point point) {
 		// Current point
-		short ch = (short) (grid[(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.x] & (short) 15);
+		short ch = (short) (grid[(point.y - 1 + Board.getNumblocks()) % Board.getNumblocks()][point.x] & (short) 15);
 		// Down point from current
 		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
 		// Check that we can walk up and back down to current
