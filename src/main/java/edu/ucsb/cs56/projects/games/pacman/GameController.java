@@ -18,6 +18,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class GameController implements Runnable {
 
 	private int nThreads = 0;
+	private boolean noStop = false;
+	private boolean keepRunning = true;
 	private Thread controllerThread;
 	private Vector<AIGame> gameList = new Vector<AIGame>();
 	private int nCompletedGames = 0;
@@ -44,6 +46,7 @@ public class GameController implements Runnable {
 		aiModelTrainer.start();
 		this.prop = prop;
 		this.nThreads = Integer.parseInt(prop.getProperty("nBackgroundPlayers", "0"));
+		this.noStop = Boolean.parseBoolean(prop.getProperty("noStop", "false"));
 
 		controllerThread = new Thread(this, "BackgroundGameController");
 		try {
@@ -77,29 +80,34 @@ public class GameController implements Runnable {
 	public void run() {
 
 		try {
-			startForegroundGame();
-			Thread.sleep(100);
+			while (keepRunning) {
+				startForegroundGame();
+				Thread.sleep(100);
 
-			while (foregroundAIGame.isRunning()) {
+				while (foregroundAIGame.isRunning()) {
 
-				Thread.sleep(10);
-				Iterator<AIGame> i = gameList.iterator();
-				while (i.hasNext()) {
-					AIGame aiGame = i.next();
-					if (!aiGame.isRunning()) {
-						aiGame.join();
-						i.remove();
-						nCompletedGames++;
-						aiGame.report(out);
-						gameResultQueue.put(aiGame.getDataGameResult());
+					Thread.sleep(10);
+					Iterator<AIGame> i = gameList.iterator();
+					while (i.hasNext()) {
+						AIGame aiGame = i.next();
+						if (!aiGame.isRunning()) {
+							aiGame.join();
+							i.remove();
+							nCompletedGames++;
+							aiGame.report(out);
+							gameResultQueue.put(aiGame.getDataGameResult());
+						}
+					}
+
+					if (gameList.size() < nThreads) {
+						AIGame aiGame = new AIGame(prop, 5, true);
+						aiGame.setModel(currentModel);
+						gameList.addElement(aiGame);
+						aiGame.start();
 					}
 				}
-
-				if (gameList.size() < nThreads) {
-					AIGame aiGame = new AIGame(prop, 5, true);
-					aiGame.setModel(currentModel);
-					gameList.addElement(aiGame);
-					aiGame.start();
+				if(!noStop ) {
+					keepRunning = false;
 				}
 			}
 			stop();
@@ -125,13 +133,12 @@ public class GameController implements Runnable {
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
-			
 
 			boardRenderer = new BoardRenderer(foregroundAIGame.getBoard(), this);
 			foregroundAIGame.addBoardRendered(boardRenderer);
 
 			bf = new BoardFrame();
-			
+
 			bf.add(boardRenderer);
 			boardRenderer.callLeaderboardMain();
 

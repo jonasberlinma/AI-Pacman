@@ -196,11 +196,12 @@ public class DataFlipper {
 			value = "0";
 			break;
 		// Key presses and directions
-		case "→":
+		case "←":
 		case "LEFT":
 			value = "1";
 			break;
-		case "←":
+
+		case "→":
 		case "RIGHT":
 			value = "2";
 			break;

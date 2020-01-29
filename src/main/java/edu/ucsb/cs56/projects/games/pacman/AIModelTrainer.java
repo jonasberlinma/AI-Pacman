@@ -29,7 +29,14 @@ public abstract class AIModelTrainer implements Runnable {
 			try {
 				// Pull the next completed game off the queue and hand it to the
 				// trainer
+				// This blocks until an event is available
 				gameCompleteEvent(eventQueue.take());
+				// If there are more events keep pulling them until the queue is empty
+				while (!eventQueue.isEmpty()) {
+					gameCompleteEvent(eventQueue.take());
+				}
+				// Then train
+				doTrain();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -46,12 +53,17 @@ public abstract class AIModelTrainer implements Runnable {
 	}
 
 	/**
-	 * Different types of model trainer implementations should implement this
-	 * method to get data from completed games
+	 * Different types of model trainer implementations should implement this method
+	 * to get data from completed games
 	 * 
 	 * 
 	 */
 	protected abstract void gameCompleteEvent(DataGameResult gameEventLog);
+
+	/**
+	 * Train model
+	 */
+	protected abstract void doTrain();
 
 	/**
 	 * Called by the model trainer implementations to report that a new model is

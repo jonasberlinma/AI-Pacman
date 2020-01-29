@@ -72,7 +72,9 @@ public class PacMan {
 			case "-numGhosts":
 				prop.setProperty("numGhosts", argi.next());
 				break;
-
+			case "-noStop":
+				prop.setProperty("noStop", "true");
+				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
 				System.exit(1);

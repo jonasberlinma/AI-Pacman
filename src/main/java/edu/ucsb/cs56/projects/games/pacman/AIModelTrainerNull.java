@@ -13,4 +13,8 @@ public class AIModelTrainerNull extends AIModelTrainer {
 		} 
 		System.out.println("Training on " + gameEventLog.events.size() + " events");
 	}
+	@Override
+	public void doTrain() {
+		
+	}
 }

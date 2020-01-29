@@ -15,6 +15,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -38,17 +39,18 @@ public class AIModelDeepLearning extends AIModel {
 //	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE1distance", "MOVE1direction",
 //			"MOVE2distance", "MOVE2direction", "KEY_PRESSkey" };
 
-	private final String[] theVariables = { "MOVE0distance" };
+	private final String[] theVariables = { "MOVE0distance", "MOVE1distance", "MOVE2distance", "MOVE99pelletDistance", "MOVE99fruitDistance"};
 
 //	private final String[] theVariables = {"MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
 //			"MOVE99pelletDistance", "MOVE99fruitDirection", "MOVE99fruitDistance" };
 
 	private Long modelID = 0l;
 	private int numInputs = theVariables.length;
-	private int numHiddenNodes = 20;
+	private int numHiddenNodes1 = 10;
+	private int numHiddenNodes2 = 2;
 	private int numOutputs = 1;
-	private double learningRate = 0.01;
-	private int batchSize = 64;
+	private float learningRate = 0.01f;
+	private int batchSize = 200;
 	private int nEpochs = 100;
 	private ArrayList<DataObservation> observations = null;
 	private MultiLayerNetwork network = null;
@@ -56,18 +58,20 @@ public class AIModelDeepLearning extends AIModel {
 
 	AIModelDeepLearning() {
 		modelID = System.currentTimeMillis();
+		
+		Nd4j.setDefaultDataTypes(DataType.FLOAT, DataType.FLOAT);
 
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(123).weightInit(WeightInit.XAVIER)
 				.updater(new Nesterovs(learningRate, 0.9)).list()
-				.layer(new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes).activation(Activation.TANH).build())
-				.layer(new DenseLayer.Builder().nIn(numHiddenNodes).nOut(numHiddenNodes).activation(Activation.TANH)
+				.layer(new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes1).activation(Activation.SIGMOID).build())
+				.layer(new DenseLayer.Builder().nIn(numHiddenNodes1).nOut(numHiddenNodes2).activation(Activation.SIGMOID)
 						.build())
 				.layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE).activation(Activation.IDENTITY)
-						.nIn(numHiddenNodes).nOut(numOutputs).build())
+						.nIn(numHiddenNodes2).nOut(numOutputs).build())
 				.build();
 		network = new MultiLayerNetwork(conf);
 		network.init();
-		network.setListeners(new ScoreIterationListener(100));
+		network.setListeners(new ScoreIterationListener(batchSize));
 	}
 
 	public long getModelID() {
@@ -77,14 +81,14 @@ public class AIModelDeepLearning extends AIModel {
 	@Override
 	synchronized double score(DataObservation observation) {
 		// This will call the NN for scoring
-		// TODO: Remember to do the same data prep as in training
+		// Remember to do the same data prep as in training
 
-		double[][] indep = new double[1][theVariables.length];
+		float[][] indep = new float[1][theVariables.length];
 		indep[0] = getObservation(observation);
-		double[][] dep = new double[1][1];
+		float[][] dep = new float[1][1];
 		DataSet ds = new DataSet(Nd4j.create(indep), Nd4j.create(dep));
 		ns.transform(ds);
-		double theScore = network.output(ds.getFeatures(), false).getDouble(0, 0);
+		float theScore = network.output(ds.getFeatures(), false).getFloat(0, 0);
 		// System.out.println("Score " + theScore);
 		return theScore;
 	}
@@ -116,28 +120,30 @@ public class AIModelDeepLearning extends AIModel {
 		INDArray independentVariables = getIndependentVariables();
 		INDArray dependentVariables = getDependentVariables();
 
-		printData("theData.csv", independentVariables, dependentVariables, null);
-
 		ns.transform(independentVariables);
 
 		ns.transformLabel(dependentVariables);
 
 		INDArray output = network.output(independentVariables);
 
-		double error = dependentVariables.distance2(output.castTo(DataType.DOUBLE))
-				/ Math.sqrt((double) observations.size());
+		float error = (float) (dependentVariables.distance2(output)
+				/ Math.sqrt((float) observations.size()));
 
 		System.out.println("RMS error: " + error);
 
 	}
-
+	public void printData(String fileName) {
+		INDArray independentVariables = getIndependentVariables();
+		INDArray dependentVariables = getDependentVariables();
+		printData(fileName, independentVariables, dependentVariables, null);
+	}
 	private void printData(String fileName, INDArray independentVariables, INDArray dependentVariables,
 			INDArray output) {
 		PrintStream out = null;
 		try {
 			out = new PrintStream(new FileOutputStream(fileName));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Can't open output traing data file: " + fileName);
 			e.printStackTrace();
 		}
 		for (int i = 0; i < theVariables.length; i++) {
@@ -150,12 +156,12 @@ public class AIModelDeepLearning extends AIModel {
 		}
 		for (int i = 0; i < dependentVariables.rows(); i++) {
 			for (int j = 0; j < independentVariables.columns(); j++) {
-				out.print(independentVariables.getDouble(i, j) + ",");
+				out.print(independentVariables.getFloat(i, j) + ",");
 			}
 			if (output != null) {
-				out.println(dependentVariables.getDouble(i, 0) + "," + output.getDouble(i, 0));
+				out.println(dependentVariables.getFloat(i, 0) + "," + output.getFloat(i, 0));
 			} else {
-				out.println(dependentVariables.getDouble(i, 0));
+				out.println(dependentVariables.getFloat(i, 0));
 			}
 		}
 	}
@@ -185,10 +191,10 @@ public class AIModelDeepLearning extends AIModel {
 	private INDArray getIndependentVariables() {
 		// Pull out the values
 
-		double[][] theData = new double[observations.size()][];
+		float[][] theData = new float[observations.size()][];
 		for (int i = 0; i < observations.size(); i++) {
 
-			double[] tmpRow = getObservation(observations.get(i));
+			float[] tmpRow = getObservation(observations.get(i));
 			theData[i] = tmpRow;
 		}
 
@@ -197,12 +203,12 @@ public class AIModelDeepLearning extends AIModel {
 	}
 
 	private INDArray getDependentVariables() {
-		double[][] theTarget = new double[observations.size()][1];
+		float[][] theTarget = new float[observations.size()][1];
 
 		for (int i = 0; i < observations.size(); i++) {
 			String rewardString = observations.get(i).get("reward");
 			if (rewardString != null) {
-				theTarget[i][0] = Double.parseDouble(rewardString);
+				theTarget[i][0] = Float.parseFloat(rewardString);
 			} else {
 				theTarget[i][0] = 0;
 			}
@@ -214,14 +220,14 @@ public class AIModelDeepLearning extends AIModel {
 
 	// Pick out the desired independent variables from the list and create a double
 	// vector
-	private double[] getObservation(DataObservation dataObservation) {
+	private float[] getObservation(DataObservation dataObservation) {
 
-		double[] theRow = new double[theVariables.length];
+		float[] theRow = new float[theVariables.length];
 		for (int i = 0; i < theVariables.length; i++) {
 			String stringValue = dataObservation.get(theVariables[i]);
 			// System.out.println("" + theVariables[i] + "="+stringValue);
 			if (stringValue != null) {
-				theRow[i] = Double.parseDouble(stringValue);
+				theRow[i] = Float.parseFloat(stringValue);
 			} else {
 				theRow[i] = 0;
 			}

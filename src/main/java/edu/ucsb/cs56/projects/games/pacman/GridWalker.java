@@ -13,7 +13,66 @@ import java.util.function.BiFunction;
 
 public class GridWalker {
 	public enum Direction {
-		LEFT, RIGHT, UP, DOWN
+		LEFT, RIGHT, UP, DOWN;
+		public boolean isSame(Direction other) {
+			return this == other;
+		}
+
+		public boolean isOpposite(Direction other) {
+			return this == other.opposite();
+		}
+
+		public Direction opposite() {
+			Direction ret = null;
+			switch (this) {
+			case LEFT:
+				ret = RIGHT;
+				break;
+			case RIGHT:
+				ret = LEFT;
+				break;
+			case UP:
+				ret = DOWN;
+				break;
+			case DOWN:
+				ret = UP;
+				break;
+			}
+			return ret;
+		}
+
+		static Direction parseDirection(String text) {
+			Direction d = null;
+			if (text != null) {
+				switch (text) {
+				case "LEFT":
+				case "←":
+				case "1":
+					d = Direction.LEFT;
+					break;
+				case "RIGHT":
+				case "→":
+				case "2":
+					d = Direction.RIGHT;
+					break;
+				case "DOWN":
+				case "↓":
+				case "3":
+					d = Direction.DOWN;
+					break;
+				case "UP":
+				case "↑":
+				case "4":
+					d = Direction.UP;
+					break;
+				case "0":
+					break;
+				default:
+					System.err.println("Failed to parse direction " + text);
+				}
+			}
+			return d;
+		}
 	};
 
 	private short[][] grid = null;
@@ -159,6 +218,7 @@ public class GridWalker {
 		boolean hasPill() {
 			return (screenData[y][x] & 64) != 0;
 		}
+
 		boolean hasFruit() {
 			return (screenData[y][x] & 32) != 0;
 		}
@@ -319,10 +379,10 @@ public class GridWalker {
 		if (pelletPath == null) {
 			System.err.println("No pellet found from " + fromX + "," + fromY);
 		}
-		
+
 		return pelletPath;
-	}	
-	
+	}
+
 	public Path getClosestFruitPath(int fromX, int fromY) {
 		if (!walkerInitialized) {
 			return null;
@@ -335,7 +395,7 @@ public class GridWalker {
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
 		Path fruitPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasFruit());
-	 
+
 		return fruitPath;
 	}
 

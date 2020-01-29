@@ -63,7 +63,7 @@ public class AIPlayerLearner extends AIPlayer {
 			switch (key) {
 			case "S":
 				// Have to put this one here since the gameID is not set until the game starts
-				rc = new RewardCalculator(dataEvent.getGameID(), 10, 0.9d);
+				rc = new RewardCalculator(dataEvent.getGameID(), 100, 0.99d);
 				break;
 			default:
 			}
@@ -95,7 +95,7 @@ public class AIPlayerLearner extends AIPlayer {
 					// - Find the highest scoring next possible state
 
 					iterations++;
-					
+
 					// Collect the event so we have complete history
 					eventHistory.add(dataEvent);
 
@@ -143,11 +143,11 @@ public class AIPlayerLearner extends AIPlayer {
 
 					// The score is normalized to 0 with a standard deviation of 1
 
-					double gamma = 0.001;					
+					double gamma = 0.001;
 					double alpha = (bestReward - lastBestReward) / gamma;
 					lastBestReward = bestReward;
 					double randomNumber = random.nextDouble();
-					alpha = 0.7;
+					alpha = 0.9;
 					if (alpha < randomNumber) {
 						// If there is no big difference shake things up
 						selectedDirection = possibleDirections.get(random.nextInt(possibleDirections.size()));
@@ -175,7 +175,7 @@ public class AIPlayerLearner extends AIPlayer {
 					gameStep = dataEvent.getGameStep();
 					score = dataEvent.getInt("score");
 
-					rc.addScore(gameStep, score - lastScore);
+					rc.addScore(gameStep - 1, score - lastScore);
 					lastScore = score;
 					eventHistory.clear();
 					break;
@@ -190,24 +190,63 @@ public class AIPlayerLearner extends AIPlayer {
 		DataObservation perturbedState = observation.deepClone();
 //		observation.put("KEY_PRESSkey", df.standardizeValue(proposedDirection.toString()));
 		// Score the proposed change
-		String ghostDirection = observation.get("MOVE0direction");
-		if (ghostDirection != null
-				&& ghostDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
 
-			int distance = Integer.parseInt(observation.get("MOVE0distance")) - 1;
-			perturbedState.put("MOVE0distance", "" + distance);
+		Direction ghost0Direction = Direction.parseDirection(observation.get("MOVE0direction"));
+		int perturbation = 2;
+		if (ghost0Direction != null) {
+			int distance = Integer.parseInt(observation.get("MOVE0distance"));
+
+			if (ghost0Direction.isSame(proposedDirection)) {
+				perturbedState.put("MOVE0distance", "" + (distance - perturbation));
+			} else {
+				perturbedState.put("MOVE0distance", "" + (distance + perturbation));
+			}
 		}
-		String pelletDirection = observation.get("MOVE99pelletDirection");
-		if (pelletDirection != null
-				&& pelletDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
-			int distance = Integer.parseInt(observation.get("MOVE99pelletDistance")) - 1;
-			perturbedState.put("MOVE99pelletDistance", "" + distance);
+
+		Direction ghost1Direction = Direction.parseDirection(observation.get("MOVE1direction"));
+		if (ghost1Direction != null) {
+			int distance = Integer.parseInt(observation.get("MOVE1distance"));
+
+			if (ghost1Direction.isSame(proposedDirection)) {
+				perturbedState.put("MOVE1distance", "" + (distance - perturbation));
+			} else {
+				perturbedState.put("MOVE1distance", "" + (distance + perturbation));
+			}
 		}
-		String fruitDirection = observation.get("MOVE99fruitDirection");
-		if(fruitDirection != null && fruitDirection.compareTo(df.standardizeValue(proposedDirection.toString())) == 0) {
-			int distance = Integer.parseInt(observation.get("MOVE99fruitDistance")) - 1;
-			perturbedState.put("MOVE99fruitDistance", "" + distance);
+		
+		Direction ghost2Direction = Direction.parseDirection(observation.get("MOVE2direction"));
+		if (ghost2Direction != null) {
+			int distance = Integer.parseInt(observation.get("MOVE2distance"));
+
+			if (ghost2Direction.isSame(proposedDirection)) {
+				perturbedState.put("MOVE2distance", "" + (distance - perturbation));
+			} else {
+				perturbedState.put("MOVE2distance", "" + (distance + perturbation));
+			}
 		}
+
+		Direction pelletDirection = Direction.parseDirection(observation.get("MOVE99pelletDirection"));
+		if (pelletDirection != null) {
+			int distance = Integer.parseInt(observation.get("MOVE99pelletDistance"));
+
+			if (pelletDirection.isSame(proposedDirection)) {
+				perturbedState.put("MOVE99pelletDistance", "" + (distance - perturbation));
+			} else {
+				perturbedState.put("MOVE99pelletDistance", "" + (distance + perturbation));
+			}
+		}
+
+		Direction fruitDirection = Direction.parseDirection(observation.get("MOVE99fruitDirection"));
+		if (fruitDirection != null) {
+			int distance = Integer.parseInt(observation.get("MOVE99fruitDistance"));
+
+			if (fruitDirection.isSame(proposedDirection)) {
+				perturbedState.put("MOVE99fruitDistance", "" + (distance - perturbation));
+			} else {
+				perturbedState.put("MOVE99fruitDistance", "" + (distance + perturbation));
+			}
+		}
+
 		return perturbedState;
 	}
 
