@@ -1,5 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-enum GameType {
+public enum GameType {
 	INTRO, HELP, SINGLEPLAYER, COOPERATIVE, VERSUS, LEADERBOARD
 }

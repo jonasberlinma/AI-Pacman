@@ -167,7 +167,7 @@ public abstract class Character implements EventTrackable {
 
 		return hashtable;
 	}
-	PlayerType getPlayerType(){
+	public PlayerType getPlayerType(){
 		return playerType;
 	}
 	public abstract boolean getEdible();

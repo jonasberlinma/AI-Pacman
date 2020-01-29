@@ -182,10 +182,10 @@ public class Ghost extends Character {
 			x = ((x / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
 			y = ((y / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
 
-			ch = grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+			ch = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
 
 			if((ch & 32) != 0) {
-				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
+				grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
 				board.addScore(-5);
 			}
 
@@ -325,7 +325,7 @@ public class Ghost extends Character {
 			if(current.hCost == 0) //if future cost is 0, then it is target node
 				break;
 
-			block = grid.screenData[current.y][current.x];
+			block = grid.getScreenData()[current.y][current.x];
 
 			//If can move, not abrupt, and unvisited, add to opened
 			if((block & 1) == 0 && current.dir != 3) //Can move and not abrupt
@@ -389,7 +389,7 @@ public class Ghost extends Character {
 	private ArrayList<Point> moveList(Grid grid)
 	{
 		ArrayList<Point> moves = new ArrayList<Point>();
-		int block = grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+		int block = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
 
 		// First condition prevents checks collision with wall
 		// Second condition prevents switching direction abruptly (left -> right) (up -> down)
@@ -409,7 +409,7 @@ public class Ghost extends Character {
 	{
 		if (this.x % Board.BLOCKSIZE == 0 && this.y % Board.BLOCKSIZE == 0)
 		{
-			int block = grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+			int block = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
 			int count = (block & 1) == 0 && this.dx != 1 ? 1 : 0;
 			count += (block & 2) == 0 && this.dy != 1 ? 1 : 0;
 			count += (block & 4) == 0 && this.dx != -1 ? 1 : 0;
