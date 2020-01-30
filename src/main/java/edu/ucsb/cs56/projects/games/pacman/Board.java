@@ -66,7 +66,7 @@ public class Board implements Runnable, EventTrackable {
 	private int numPills;
 	private int loopDelay;
 
-	public BoardRenderer boardRenderer = null;
+	public BoardRenderer aboardRenderer = null;
 	private DataInterface dataInterface;
 	private Thread boardThread;
 

@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import edu.ucsb.cs56.projects.games.pacman.Board;
-
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.GameController;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
@@ -336,14 +335,13 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		}
 
 		for (int i = 0; i < board.getPacman().lives; i++) {
-			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8,
-					scrSize + 1, this);
+			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, scrSize + 1, this);
 		}
 
 		if (gt == GameType.COOPERATIVE) {
 			for (int i = 0; i < board.getMsPacman().lives; i++) {
-				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108,
-						scrSize + 1, this);
+				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, scrSize + 1,
+						this);
 			}
 		}
 	}
