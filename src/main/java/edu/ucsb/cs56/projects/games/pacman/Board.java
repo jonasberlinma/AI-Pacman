@@ -66,7 +66,6 @@ public class Board implements Runnable, EventTrackable {
 	private int numPills;
 	private int loopDelay;
 
-	public BoardRenderer aboardRenderer = null;
 	private DataInterface dataInterface;
 	private Thread boardThread;
 
@@ -143,17 +142,15 @@ public class Board implements Runnable, EventTrackable {
 	public GameType getGameType() {
 		return gt;
 	}
-
+	public void setGameType(GameType gameType) {
+		this.gt = gameType;
+	}
 	public int getScore() {
 		return score;
 	}
 
 	public void addScore(int addScore) {
 		score = score + addScore;
-	}
-
-	public void addBoardRenderer(BoardRenderer boardRenderer) {
-		this.boardRenderer = boardRenderer;
 	}
 
 	/**
@@ -274,13 +271,10 @@ public class Board implements Runnable, EventTrackable {
 	 * End the game if remaining lives reaches 0.
 	 */
 	public void gameOver() {
+		gt = GameType.GAME_OVER;
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);
 		dataInterface.setData(de);
-		if (boardRenderer != null)
-			boardRenderer.drawGameOver();
-
-		gt = GameType.INTRO;
 
 		numBoardsCleared = 0;
 		grid.levelInit(0);

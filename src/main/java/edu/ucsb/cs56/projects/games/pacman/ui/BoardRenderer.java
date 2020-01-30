@@ -104,6 +104,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		case HELP:
 			showHelpScreen(g);
 			break;
+		case GAME_OVER:
+			drawGameOver();
+			board.setGameType(GameType.INTRO);
+			break;
 		default:
 			introAudioPlayed = false;
 			drawPacman(g2d, this, board.getPacman());

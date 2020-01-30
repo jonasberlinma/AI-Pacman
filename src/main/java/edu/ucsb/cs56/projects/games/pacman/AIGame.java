@@ -32,7 +32,6 @@ public class AIGame implements Runnable {
 
 	public void addBoardRendered(BoardRenderer boardRenderer) {
 		this.boardRenderer = boardRenderer;
-		board.addBoardRenderer(boardRenderer);
 	}
 
 	public Board getBoard() {
