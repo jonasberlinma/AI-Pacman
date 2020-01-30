@@ -8,6 +8,9 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import edu.ucsb.cs56.projects.games.pacman.ui.BoardFrame;
+import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
+
 /**
  * The GameController controls all game execution, both foreground real-time
  * games and background data collection games
@@ -157,9 +160,11 @@ public class GameController implements Runnable {
 
 	public void setNewModel(AIModel newModel) {
 		nTrainedModels++;
-		foregroundAIGame.setNTrainedModels(nTrainedModels);
 		foregroundAIGame.setModel(newModel);
 		currentModel = newModel;
+	}
+	public int getNTrainedModels() {
+		return this.nTrainedModels;
 	}
 
 	private void loadTrainer(Properties prop) {

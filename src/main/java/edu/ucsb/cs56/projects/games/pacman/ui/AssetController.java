@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.ui;
 
 import java.awt.Image;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import edu.ucsb.cs56.projects.games.pacman.Character;
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 
 public class AssetController {

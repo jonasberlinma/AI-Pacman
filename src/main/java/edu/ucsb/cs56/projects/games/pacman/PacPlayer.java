@@ -18,12 +18,12 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 public class PacPlayer extends Character {
 	
 
-	final int pacanimdelay = 2;
+	private final int pacanimdelay = 2;
 	final int pacmananimcount = 4;
 	private final int pacmanspeed = 4;
-	int pacanimcount = pacanimdelay;
-	int pacanimdir = 1;
-	int pacmananimpos = 0;
+	private int pacanimcount = getPacanimdelay();
+	private int pacanimdir = 1;
+	private int pacmananimpos = 0;
 
 	// need these so that when pacman collides with wall and stops moving
 	// he keeps facing wall instead of facing default position
@@ -103,13 +103,13 @@ public class PacPlayer extends Character {
 				direction = ((direction + 1) % 4) + 1;
 		}
 
-		if (x % Board.BLOCKSIZE == 0 && y % Board.BLOCKSIZE == 0) {
+		if (x % Board.getBlocksize() == 0 && y % Board.getBlocksize() == 0) {
 
 			// Tunnel effect
-			x = ((x / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
-			y = ((y / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
+			x = ((x / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
+			y = ((y / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
 
-			ch = grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
+			ch = grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()];
 
 			// if pellet, eat and increase score
 			if ((ch & 16) != 0) {
@@ -117,7 +117,7 @@ public class PacPlayer extends Character {
 				DataEvent dataEvent = new DataEvent(DataEventType.EAT_PELLET, board, board);
 				dataEvent.setKeyValuePair("score", "" + board.getScore());
 				dataInterface.setData(dataEvent);
-				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 16);
+				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 16);
 				board.playAudio(0);
 				board.addScore(1);
 				speed = 3;
@@ -128,7 +128,7 @@ public class PacPlayer extends Character {
 				DataEvent dataEvent = new DataEvent(DataEventType.EAT_FRUIT, board, board);
 				dataEvent.setKeyValuePair("score", "" + board.getScore());
 				dataInterface.setData(dataEvent);
-				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
+				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 32);
 				board.addScore(10);
 				board.playAudio(1);
 				speed = 3;
@@ -137,7 +137,7 @@ public class PacPlayer extends Character {
 				DataEvent dataEvent = new DataEvent(DataEventType.EAT_PILL, board, board);
 				dataEvent.setKeyValuePair("score", "" + board.getScore());
 				dataInterface.setData(dataEvent);
-				grid.screenData[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 64);
+				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 64);
 				board.playAudio(1);
 				board.addScore(5);
 				speed = 3;
@@ -279,5 +279,33 @@ public class PacPlayer extends Character {
 	@Override
 	public boolean getEdible(){
 		return false;
+	}
+
+	public int getPacmananimpos() {
+		return pacmananimpos;
+	}
+
+	public void setPacmananimpos(int pacmananimpos) {
+		this.pacmananimpos = pacmananimpos;
+	}
+
+	public int getPacanimdelay() {
+		return pacanimdelay;
+	}
+
+	public int getPacanimdir() {
+		return pacanimdir;
+	}
+
+	public void setPacanimdir(int pacanimdir) {
+		this.pacanimdir = pacanimdir;
+	}
+
+	public int getPacanimcount() {
+		return pacanimcount;
+	}
+
+	public void setPacanimcount(int pacanimcount) {
+		this.pacanimcount = pacanimcount;
 	}
 }

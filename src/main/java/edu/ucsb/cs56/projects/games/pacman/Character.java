@@ -133,9 +133,9 @@ public abstract class Character implements EventTrackable {
 		x = x + speed * dx;
 		y = y + speed * dy;
 
-		if (x % Board.BLOCKSIZE == 0 && y % Board.BLOCKSIZE == 0) {
-			x = ((x / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
-			y = ((y / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
+		if (x % Board.getBlocksize() == 0 && y % Board.getBlocksize() == 0) {
+			x = ((x / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
+			y = ((y / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
 		}
 	}
 
@@ -156,8 +156,8 @@ public abstract class Character implements EventTrackable {
 		hashtable.put("ghostNum", "" + ghostNum);
 		hashtable.put("playerType", playerType.name());
 		hashtable.put("characterID", "" + characterID);
-		hashtable.put("x", "" + x / Board.BLOCKSIZE);
-		hashtable.put("y", "" + y / Board.BLOCKSIZE);
+		hashtable.put("x", "" + x / Board.getBlocksize());
+		hashtable.put("y", "" + y / Board.getBlocksize());
 		hashtable.put("dx", "" + dx);
 		hashtable.put("dy", "" + dy);
 		hashtable.put("reqdx", "" + reqdx);
@@ -167,7 +167,7 @@ public abstract class Character implements EventTrackable {
 
 		return hashtable;
 	}
-	PlayerType getPlayerType(){
+	public PlayerType getPlayerType(){
 		return playerType;
 	}
 	public abstract boolean getEdible();

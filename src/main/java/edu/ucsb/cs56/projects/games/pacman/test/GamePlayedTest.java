@@ -1,6 +1,8 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.test;
 
 import org.junit.Test;
+
+import edu.ucsb.cs56.projects.games.pacman.GamePlayed;
 
 import java.util.Date;
 

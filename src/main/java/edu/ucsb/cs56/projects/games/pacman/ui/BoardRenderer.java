@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -18,7 +18,15 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import edu.ucsb.cs56.projects.games.pacman.Board;
+
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
+import edu.ucsb.cs56.projects.games.pacman.GameController;
+import edu.ucsb.cs56.projects.games.pacman.GameType;
+import edu.ucsb.cs56.projects.games.pacman.Ghost;
+import edu.ucsb.cs56.projects.games.pacman.Grid;
+import edu.ucsb.cs56.projects.games.pacman.GridData;
+import edu.ucsb.cs56.projects.games.pacman.PacPlayer;
 
 public class BoardRenderer extends JPanel implements ActionListener {
 
@@ -26,6 +34,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 * 
 	 */
 	private static final long serialVersionUID = 7383414799194976684L;
+
+	private static int blockSize = 0;
+	private static int numBlocks = 0;
+	private static int scrSize = 0;
+
 	private Board board = null;
 	private GameController bgc = null;
 
@@ -44,7 +57,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		timer.stop();
 	}
 
-	BoardRenderer(Board board, GameController bgc) {
+	public BoardRenderer(Board board, GameController bgc) {
 		this.board = board;
 		this.bgc = bgc;
 		addKeyListener(new TAdapter());
@@ -53,7 +66,12 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		setDoubleBuffered(false);
 		AssetController.getInstance();
 
+		blockSize = Board.getBlocksize();
+		numBlocks = Board.getNumblocks();
+		scrSize = Board.getScrsize();
+
 	}
+
 	public void start() {
 		System.out.println("Start");
 		timer = new Timer(40, this);
@@ -89,11 +107,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			break;
 		default:
 			introAudioPlayed = false;
-			drawPacman(g2d, this, board.pacman);
+			drawPacman(g2d, this, board.getPacman());
 
 			if (gt == GameType.COOPERATIVE)
-				drawPacman(g2d, this, board.msPacman);
-			for (Ghost ghost : board.ghosts) {
+				drawPacman(g2d, this, board.getMsPacman());
+			for (Ghost ghost : board.getGhosts()) {
 				drawGhost(g2d, this, ghost);
 			}
 		}
@@ -117,9 +135,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private void showIntroScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
+		g.fillRect(50, scrSize / 2 - 50, scrSize - 100, 90);
 		g.setColor(Color.white);
-		g.drawRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
+		g.drawRect(50, scrSize / 2 - 50, scrSize - 100, 90);
 
 		String s = "Press s for single player";
 		String d = "Press d for Co-Op";
@@ -130,10 +148,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		g.setColor(Color.white);
 		g.setFont(small);
-		g.drawString(s, (Board.SCRSIZE - metr.stringWidth(s)) / 2, Board.SCRSIZE / 2 - metr.getHeight() * 3 / 2);
-		g.drawString(d, (Board.SCRSIZE - metr.stringWidth(d)) / 2, Board.SCRSIZE / 2 - metr.getHeight() / 2);
-		g.drawString(f, (Board.SCRSIZE - metr.stringWidth(f)) / 2, Board.SCRSIZE / 2 + metr.getHeight() / 2);
-		g.drawString(h, (Board.SCRSIZE - metr.stringWidth(h)) / 2, Board.SCRSIZE / 2 + metr.getHeight() * 3 / 2);
+		g.drawString(s, (scrSize - metr.stringWidth(s)) / 2, scrSize / 2 - metr.getHeight() * 3 / 2);
+		g.drawString(d, (scrSize - metr.stringWidth(d)) / 2, scrSize / 2 - metr.getHeight() / 2);
+		g.drawString(f, (scrSize - metr.stringWidth(f)) / 2, scrSize / 2 + metr.getHeight() / 2);
+		g.drawString(h, (scrSize - metr.stringWidth(h)) / 2, scrSize / 2 + metr.getHeight() * 3 / 2);
 		drawHighScores(g);
 	}
 
@@ -148,20 +166,18 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		FontMetrics fm = getFontMetrics(smallFont);
 
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(Board.SCRSIZE / 4, Board.SCRSIZE - (Board.SCRSIZE / 3) - fm.getAscent(), Board.SCRSIZE / 2,
-				Board.BLOCKSIZE * 4);
+		g.fillRect(scrSize / 4, scrSize - (scrSize / 3) - fm.getAscent(), scrSize / 2, blockSize * 4);
 		g.setColor(Color.white);
-		g.drawRect(Board.SCRSIZE / 4, Board.SCRSIZE - (Board.SCRSIZE / 3) - fm.getAscent(), Board.SCRSIZE / 2,
-				Board.BLOCKSIZE * 4);
+		g.drawRect(scrSize / 4, scrSize - (scrSize / 3) - fm.getAscent(), scrSize / 2, blockSize * 4);
 
 		g.setColor(new Color(96, 128, 255));
 		for (int i = 0; i < scores.size(); i++) {
 			if (i < 5)
-				g.drawString((i + 1) + ": " + scores.get(i), Board.SCRSIZE / 4 + Board.BLOCKSIZE,
-						Board.SCRSIZE - (Board.SCRSIZE / 3) + (i * fm.getHeight()));
+				g.drawString((i + 1) + ": " + scores.get(i), scrSize / 4 + blockSize,
+						scrSize - (scrSize / 3) + (i * fm.getHeight()));
 			else if (i < 10)
-				g.drawString((i + 1) + ": " + scores.get(i), Board.SCRSIZE / 2 + Board.BLOCKSIZE,
-						Board.SCRSIZE - (Board.SCRSIZE / 3) + ((i - 5) * fm.getHeight()));
+				g.drawString((i + 1) + ": " + scores.get(i), scrSize / 2 + blockSize,
+						scrSize - (scrSize / 3) + ((i - 5) * fm.getHeight()));
 		}
 	}
 
@@ -173,9 +189,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private void showPauseScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
+		g.fillRect(50, scrSize / 2 - 50, scrSize - 100, 90);
 		g.setColor(Color.white);
-		g.drawRect(50, Board.SCRSIZE / 2 - 50, Board.SCRSIZE - 100, 90);
+		g.drawRect(50, scrSize / 2 - 50, scrSize - 100, 90);
 
 		String a = "Game Paused...";
 		String b = "Press 'p' or 'Pause' to continue";
@@ -186,9 +202,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		g.setColor(Color.white);
 		g.setFont(big);
-		g.drawString(a, (Board.SCRSIZE - metr1.stringWidth(a)) / 2, Board.SCRSIZE / 2 - metr1.getHeight() / 2);
+		g.drawString(a, (scrSize - metr1.stringWidth(a)) / 2, scrSize / 2 - metr1.getHeight() / 2);
 		g.setFont(small);
-		g.drawString(b, (Board.SCRSIZE - metr2.stringWidth(b)) / 2, Board.SCRSIZE / 2 + metr2.getHeight() / 2);
+		g.drawString(b, (scrSize - metr2.stringWidth(b)) / 2, scrSize / 2 + metr2.getHeight() / 2);
 	}
 
 	/**
@@ -245,9 +261,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private void showHelpScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(10, 10, Board.SCRSIZE - 15, Board.SCRSIZE - 15);
+		g.fillRect(10, 10, scrSize - 15, scrSize - 15);
 		g.setColor(Color.white);
-		g.drawRect(10, 10, Board.SCRSIZE - 15, Board.SCRSIZE - 15);
+		g.drawRect(10, 10, scrSize - 15, scrSize - 15);
 
 		int bx = 25, by = 60;
 
@@ -260,7 +276,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		g.setColor(Color.white);
 		g.setFont(big);
-		g.drawString(a, (Board.SCRSIZE - metr1.stringWidth(a)) / 2, 40);
+		g.drawString(a, (scrSize - metr1.stringWidth(a)) / 2, 40);
 		g.setFont(medium);
 		g.drawString("Title Screen", bx, by);
 		g.drawString("In Game", bx + 200, by);
@@ -310,22 +326,24 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		int score = board.getScore();
 		GameType gt = board.getGameType();
 		if (gt == GameType.VERSUS) {
-			String p = "Pellets left: " + (board.numPellet - score);
-			g.drawString(p, Board.SCRSIZE / 2 + 96, Board.SCRSIZE + 16);
+			String p = "Pellets left: " + (board.getNumPellet() - score);
+			g.drawString(p, scrSize / 2 + 96, scrSize + 16);
 		} else {
 			String s = "Score: " + score;
-			g.drawString(s, Board.SCRSIZE / 2 + 136, Board.SCRSIZE + 16);
-			g.drawString("BG Games: " + bgc.getNCompletedGames(), Board.SCRSIZE / 2 - 100, Board.SCRSIZE + 16);
-			g.drawString("Models: " + board.getNTrainedModels(), Board.SCRSIZE / 2 + 20, Board.SCRSIZE + 16);
+			g.drawString(s, scrSize / 2 + 136, scrSize + 16);
+			g.drawString("BG Games: " + bgc.getNCompletedGames(), scrSize / 2 - 100, scrSize + 16);
+			g.drawString("Models: " + bgc.getNTrainedModels(), scrSize / 2 + 20, scrSize + 16);
 		}
 
-		for (int i = 0; i < board.pacman.lives; i++) {
-			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, Board.SCRSIZE + 1, this);
+		for (int i = 0; i < board.getPacman().lives; i++) {
+			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8,
+					scrSize + 1, this);
 		}
-		
+
 		if (gt == GameType.COOPERATIVE) {
-			for (int i = 0; i < board.msPacman.lives; i++) {
-				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, Board.SCRSIZE + 1, this);
+			for (int i = 0; i < board.getMsPacman().lives; i++) {
+				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108,
+						scrSize + 1, this);
 			}
 		}
 	}
@@ -356,29 +374,29 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		doAnimPacman(pacman);
 		AssetController ac = AssetController.getInstance();
 		if (pacman.direction == 1)
-			g2d.drawImage(ac.pacmanLeft[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
-					canvas);
+			g2d.drawImage(ac.pacmanLeft[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
+					pacman.y + 4, canvas);
 		else if (pacman.direction == 2)
-			g2d.drawImage(ac.pacmanUp[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
-					canvas);
+			g2d.drawImage(ac.pacmanUp[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
+					pacman.y + 4, canvas);
 		else if (pacman.direction == 4)
-			g2d.drawImage(ac.pacmanDown[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
-					canvas);
+			g2d.drawImage(ac.pacmanDown[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
+					pacman.y + 4, canvas);
 		else
-			g2d.drawImage(ac.pacmanRight[pacman.playerType.ordinal()][pacman.pacmananimpos], pacman.x + 4, pacman.y + 4,
-					canvas);
+			g2d.drawImage(ac.pacmanRight[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
+					pacman.y + 4, canvas);
 	}
 
 	/**
 	 * Animates the Pacman sprite's direction as well as mouth opening and closing
 	 */
 	private void doAnimPacman(PacPlayer pacman) {
-		pacman.pacanimcount--;
-		if (pacman.pacanimcount <= 0) {
-			pacman.pacanimcount = pacman.pacanimdelay;
-			pacman.pacmananimpos = pacman.pacmananimpos + pacman.pacanimdir;
-			if (pacman.pacmananimpos == (pacman.pacanimcount - 1) || pacman.pacmananimpos == 0)
-				pacman.pacanimdir = -pacman.pacanimdir;
+		pacman.setPacanimcount(pacman.getPacanimcount() - 1);
+		if (pacman.getPacanimcount() <= 0) {
+			pacman.setPacanimcount(pacman.getPacanimdelay());
+			pacman.setPacmananimpos(pacman.getPacmananimpos() + pacman.getPacanimdir());
+			if (pacman.getPacmananimpos() == (pacman.getPacanimcount() - 1) || pacman.getPacmananimpos() == 0)
+				pacman.setPacanimdir(-pacman.getPacanimdir());
 		}
 	}
 
@@ -418,39 +436,39 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
-		for (int i = 0; i < Board.NUMBLOCKS; i++) {
-			for (int j = 0; j < Board.NUMBLOCKS; j++) {
-				y = i * Board.BLOCKSIZE + 3;
-				x = j * Board.BLOCKSIZE + 3;
+		for (int i = 0; i < numBlocks; i++) {
+			for (int j = 0; j < numBlocks; j++) {
+				y = i * blockSize + 3;
+				x = j * blockSize + 3;
 
 				Grid grid = board.getGrid();
-				g2d.setColor(grid.mazeColor);
+				g2d.setColor(grid.getMazeColor());
 
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_BORDER_LEFT) != 0) // draws
-																					// left
-					g2d.drawLine(x, y, x, y + Board.BLOCKSIZE - 1);
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_BORDER_TOP) != 0) // draws
-																					// top
-					g2d.drawLine(x, y, x + Board.BLOCKSIZE - 1, y);
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_BORDER_RIGHT) != 0) // draws
-																					// right
-					g2d.drawLine(x + Board.BLOCKSIZE - 1, y, x + Board.BLOCKSIZE - 1, y + Board.BLOCKSIZE - 1);
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_BORDER_BOTTOM) != 0) // draws
-																						// bottom
-					g2d.drawLine(x, y + Board.BLOCKSIZE - 1, x + Board.BLOCKSIZE - 1, y + Board.BLOCKSIZE - 1);
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_LEFT) != 0) // draws
+					// left
+					g2d.drawLine(x, y, x, y + blockSize - 1);
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_TOP) != 0) // draws
+																						// top
+					g2d.drawLine(x, y, x + blockSize - 1, y);
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_RIGHT) != 0) // draws
+					// right
+					g2d.drawLine(x + blockSize - 1, y, x + blockSize - 1, y + blockSize - 1);
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_BOTTOM) != 0) // draws
+																							// bottom
+					g2d.drawLine(x, y + blockSize - 1, x + blockSize - 1, y + blockSize - 1);
 
-				g2d.setColor(grid.dotColor);
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_PELLET) != 0) // draws
-																				// pellet
+				g2d.setColor(grid.getDotColor());
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_PELLET) != 0) // draws
+																					// pellet
 					g2d.fillRect(x + 11, y + 11, 2, 2);
 
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_POWER_PILL) != 0) // draws
-																					// power
-																					// pill
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_POWER_PILL) != 0) // draws
+																						// power
+																						// pill
 					g2d.fillOval(x + 6, y + 6, 12, 12);
-				g2d.setColor(grid.fruitColor);
-				if ((grid.screenData[i][j] & GridData.GRID_CELL_FRUIT) != 0) // draws
-																				// fruit
+				g2d.setColor(grid.getFruitColor());
+				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_FRUIT) != 0) // draws
+																					// fruit
 					g2d.fillRect(x + 10, y + 10, 4, 4);
 			}
 		}

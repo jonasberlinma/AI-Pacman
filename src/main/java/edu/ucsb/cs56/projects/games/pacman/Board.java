@@ -12,6 +12,7 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
+import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all
@@ -38,31 +39,30 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 */
 
-	public static final int BLOCKSIZE = 24;
-	public static final int NUMBLOCKS = 17;
-	public static final int SCRSIZE = NUMBLOCKS * BLOCKSIZE;
+	private static final int BLOCKSIZE = 24;
+	private static final int NUMBLOCKS = 17;
+	private static final int SCRSIZE = getNumblocks() * getBlocksize();
 
 	private final int MAX_GHOSTS = 12;
 	private final int MAX_SPEED = 6;
 
 	private long gameID = 0;
 	private int gameStep = 0;
-	private int nTrainedModels;
 
 	private int score;
 
 	private Grid grid;
 	private GameType gt = GameType.INTRO;
-	PacPlayer pacman;
-	PacPlayer msPacman;
+	private PacPlayer pacman;
+	private PacPlayer msPacman;
 	Ghost ghost1, ghost2;
 	Vector<Character> pacmen;
-	Vector<Ghost> ghosts;
+	private Vector<Ghost> ghosts;
 	private int startNumGhosts = 0;
 	private int numGhosts = 6;
 	int numBoardsCleared = 0;
 	private int curSpeed = 3;
-	int numPellet;
+	private int numPellet;
 	private int numPills;
 	private int loopDelay;
 
@@ -93,13 +93,13 @@ public class Board implements Runnable, EventTrackable {
 
 		pacmen = new Vector<Character>();
 
-		pacman = new PacPlayer(dataInterface, 8 * BLOCKSIZE, 11 * BLOCKSIZE, PlayerType.PACMAN, grid);
+		setPacman(new PacPlayer(dataInterface, 8 * getBlocksize(), 11 * getBlocksize(), PlayerType.PACMAN, grid));
 		// msPacman = new PacPlayer(dataInterface, 7 * BLOCKSIZE, 11 *
 		// BLOCKSIZE, PacPlayer.MSPACMAN, grid);
-		ghost1 = new Ghost(0, dataInterface, 8 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
-		ghost2 = new Ghost(1, dataInterface, 9 * BLOCKSIZE, 7 * BLOCKSIZE, 3, PlayerType.GHOST2, grid);
+		ghost1 = new Ghost(0, dataInterface, 8 * getBlocksize(), 7 * getBlocksize(), 3, PlayerType.GHOST1, grid);
+		ghost2 = new Ghost(1, dataInterface, 9 * getBlocksize(), 7 * getBlocksize(), 3, PlayerType.GHOST2, grid);
 
-		ghosts = new Vector<Ghost>();
+		setGhosts(new Vector<Ghost>());
 		numPills = 4;
 
 		dataInterface.setData(new DataEvent(DataEventType.INTRO, this, this));
@@ -166,18 +166,18 @@ public class Board implements Runnable, EventTrackable {
 			if (!checkAlive()) {
 				gameOver();
 			} else {
-				if (pacman.alive) {
-					pacman.move(grid, this);
-					DataEvent de = new DataEvent(DataEventType.MOVE, this, pacman);
-					ArrayList<Direction> dirs = grid.getGridWalker().getPossibleDirections(pacman.x / BLOCKSIZE,
-							pacman.y / BLOCKSIZE);
-					Path pelletPath = grid.getGridWalker().getClosestPelletPath(pacman.x / BLOCKSIZE,
-							pacman.y / BLOCKSIZE);
+				if (getPacman().alive) {
+					getPacman().move(grid, this);
+					DataEvent de = new DataEvent(DataEventType.MOVE, this, getPacman());
+					ArrayList<Direction> dirs = grid.getGridWalker().getPossibleDirections(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize());
+					Path pelletPath = grid.getGridWalker().getClosestPelletPath(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize());
 					if (pelletPath != null) {
 						de.setKeyValuePair("pelletDirection", "" + pelletPath.getFirstDirection());
 						de.setKeyValuePair("pelletDistance" , "" + pelletPath.getDistance());
 					}
-					Path fruitPath = grid.getGridWalker().getClosestFruitPath(pacman.x/BLOCKSIZE, pacman.y/BLOCKSIZE);
+					Path fruitPath = grid.getGridWalker().getClosestFruitPath(getPacman().x/getBlocksize(), getPacman().y/getBlocksize());
 					// Fruit can be scarce
 					if(fruitPath != null) {
 						de.setKeyValuePair("fruitDirection", "" + fruitPath.getFirstDirection());
@@ -195,7 +195,7 @@ public class Board implements Runnable, EventTrackable {
 
 					dataInterface.setData(de);
 					if (grid.getPillNum() != numPills) {
-						for (Ghost g : ghosts) {
+						for (Ghost g : getGhosts()) {
 							g.edible = true;
 							g.edibleTimer = 200;
 						}
@@ -205,10 +205,10 @@ public class Board implements Runnable, EventTrackable {
 			}
 			switch (gt) {
 			case SINGLEPLAYER:
-				for (Ghost g : ghosts) {
+				for (Ghost g : getGhosts()) {
 					g.moveAI(grid, pacmen);
-					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(pacman.x / BLOCKSIZE,
-							pacman.y / BLOCKSIZE, g.x / BLOCKSIZE, g.y / BLOCKSIZE);
+					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize(), g.x / getBlocksize(), g.y / getBlocksize());
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, g);
 					de.setKeyValuePair("ghostNum", Integer.valueOf(g.ghostNum).toString());
 					if (dd != null) {
@@ -219,27 +219,27 @@ public class Board implements Runnable, EventTrackable {
 					dataInterface.setData(de);
 				}
 				grid.incrementFruit(numBoardsCleared);
-				detectCollision(ghosts);
+				detectCollision(getGhosts());
 				break;
 			case COOPERATIVE:
-				if (msPacman.alive) {
-					msPacman.move(grid, this);
-					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, msPacman));
+				if (getMsPacman().alive) {
+					getMsPacman().move(grid, this);
+					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, getMsPacman()));
 				}
-				for (Ghost g : ghosts) {
+				for (Ghost g : getGhosts()) {
 					g.moveAI(grid, pacmen);
 					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, g));
 				}
 				grid.incrementFruit(numBoardsCleared);
-				detectCollision(ghosts);
+				detectCollision(getGhosts());
 				break;
 			case VERSUS:
-				for (Ghost g : ghosts) {
+				for (Ghost g : getGhosts()) {
 					g.move(grid, this);
 					dataInterface.setData(new DataEvent(DataEventType.MOVE, this, g));
 				}
 
-				if (score >= numPellet) {
+				if (score >= getNumPellet()) {
 					score = 0;
 					numBoardsCleared++;
 					grid.levelInit(numBoardsCleared);
@@ -247,7 +247,7 @@ public class Board implements Runnable, EventTrackable {
 
 				}
 				grid.incrementFruit(numBoardsCleared);
-				detectCollision(ghosts);
+				detectCollision(getGhosts());
 				break;
 			case HELP:
 				break;
@@ -344,18 +344,18 @@ public class Board implements Runnable, EventTrackable {
 
 		switch (gt) {
 		case SINGLEPLAYER:
-			pacmen.add(pacman);
-			pacman.reset();
+			pacmen.add(getPacman());
+			getPacman().reset();
 			break;
 		case COOPERATIVE:
-			pacmen.add(pacman);
-			pacmen.add(msPacman);
-			pacman.reset();
-			msPacman.reset();
+			pacmen.add(getPacman());
+			pacmen.add(getMsPacman());
+			getPacman().reset();
+			getMsPacman().reset();
 			break;
 		case VERSUS:
-			pacmen.add(pacman);
-			pacman.reset();
+			pacmen.add(getPacman());
+			getPacman().reset();
 			break;
 		default:
 			break;
@@ -368,39 +368,39 @@ public class Board implements Runnable, EventTrackable {
 	 * Initialize Pacman and ghost position/direction
 	 */
 	public void levelContinue() {
-		numPellet = grid.getPelletNum() + grid.getPillNum();
+		setNumPellet(grid.getPelletNum() + grid.getPillNum());
 		numPills = grid.getPillNum();
-		ghosts.clear();
+		getGhosts().clear();
 		if (gt == GameType.VERSUS) {
-			ghosts.add(ghost1);
-			ghosts.add(ghost2);
+			getGhosts().add(ghost1);
+			getGhosts().add(ghost2);
 		} else {
 			for (int i = 0; i < numGhosts; i++) {
 				int random = (int) (Math.random() * curSpeed) + 1;
 				int the_type = i % 2;
 				switch (the_type) {
 				case 0:
-					ghosts.add(
-							new Ghost(i, dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST1));
+					getGhosts().add(
+							new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random, PlayerType.GHOST1));
 					break;
 				case 1:
-					ghosts.add(
-							new Ghost(i, dataInterface, (i + 6) * BLOCKSIZE, 2 * BLOCKSIZE, random, PlayerType.GHOST2));
+					getGhosts().add(
+							new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random, PlayerType.GHOST2));
 				}
 
 			}
 		}
 		switch (gt) {
 		case SINGLEPLAYER:
-			pacman.resetPos();
+			getPacman().resetPos();
 			break;
 		case COOPERATIVE:
-			pacman.resetPos();
-			msPacman.resetPos();
+			getPacman().resetPos();
+			getMsPacman().resetPos();
 			break;
 		case VERSUS:
-			pacman.resetPos();
-			for (Character ghost : ghosts) {
+			getPacman().resetPos();
+			for (Character ghost : getGhosts()) {
 				ghost.resetPos();
 				if (numBoardsCleared == 3)
 					ghost.speed = MAX_SPEED;
@@ -449,14 +449,14 @@ public class Board implements Runnable, EventTrackable {
 				dataInterface.setData(dataEvent);
 				switch (gt) {
 				case SINGLEPLAYER:
-					pacman.keyPressed(key);
+					getPacman().keyPressed(key);
 					break;
 				case COOPERATIVE:
-					pacman.keyPressed(key);
-					msPacman.keyPressed(key);
+					getPacman().keyPressed(key);
+					getMsPacman().keyPressed(key);
 					break;
 				case VERSUS:
-					pacman.keyPressed(key);
+					getPacman().keyPressed(key);
 					ghost1.keyPressed(key);
 					ghost2.keyPressed(key);
 					break;
@@ -473,14 +473,14 @@ public class Board implements Runnable, EventTrackable {
 		dataInterface.setData(dataEvent);
 		switch (gt) {
 		case SINGLEPLAYER:
-			pacman.keyReleased(key);
+			getPacman().keyReleased(key);
 			break;
 		case COOPERATIVE:
-			pacman.keyReleased(key);
-			msPacman.keyReleased(key);
+			getPacman().keyReleased(key);
+			getMsPacman().keyReleased(key);
 			break;
 		case VERSUS:
-			pacman.keyReleased(key);
+			getPacman().keyReleased(key);
 			ghost1.keyReleased(key);
 			ghost2.keyReleased(key);
 			break;
@@ -564,11 +564,47 @@ public class Board implements Runnable, EventTrackable {
 
 	}
 
-	public int getNTrainedModels() {
-		return this.nTrainedModels;
+	public PacPlayer getMsPacman() {
+		return msPacman;
 	}
 
-	public void setNTrainedModels(int nTrainedModels) {
-		this.nTrainedModels = nTrainedModels;
+	public void setMsPacman(PacPlayer msPacman) {
+		this.msPacman = msPacman;
+	}
+
+	public PacPlayer getPacman() {
+		return pacman;
+	}
+
+	public void setPacman(PacPlayer pacman) {
+		this.pacman = pacman;
+	}
+
+	public Vector<Ghost> getGhosts() {
+		return ghosts;
+	}
+
+	public void setGhosts(Vector<Ghost> ghosts) {
+		this.ghosts = ghosts;
+	}
+
+	public int getNumPellet() {
+		return numPellet;
+	}
+
+	public void setNumPellet(int numPellet) {
+		this.numPellet = numPellet;
+	}
+
+	public static int getBlocksize() {
+		return BLOCKSIZE;
+	}
+
+	public static int getNumblocks() {
+		return NUMBLOCKS;
+	}
+
+	public static int getScrsize() {
+		return SCRSIZE;
 	}
 }

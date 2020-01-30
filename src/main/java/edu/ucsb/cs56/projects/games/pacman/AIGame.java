@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 
+import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
+
 public class AIGame implements Runnable {
 
 	private AIPlayer aiPlayer = null;
@@ -79,10 +81,6 @@ public class AIGame implements Runnable {
 	public DataGameResult getDataGameResult() {
 		DataGameResult dgr = new DataGameResult(aiPlayer.getEventLog(), aiPlayer.reportExperience());
 		return dgr;
-	}
-
-	public void setNTrainedModels(int nTrainedModels) {
-		board.setNTrainedModels(nTrainedModels);
 	}
 
 	public void setModel(AIModel newModel) {
