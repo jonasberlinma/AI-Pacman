@@ -103,13 +103,13 @@ public class PacPlayer extends Character {
 				direction = ((direction + 1) % 4) + 1;
 		}
 
-		if (x % Board.getBlocksize() == 0 && y % Board.getBlocksize() == 0) {
+		if (x % Board.getBlocksizeStatic() == 0 && y % Board.getBlocksizeStatic() == 0) {
 
 			// Tunnel effect
-			x = ((x / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
-			y = ((y / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
+			x = ((x / board.getBlocksize() + board.getNumblocks()) % board.getNumblocks()) * board.getBlocksize();
+			y = ((y / board.getBlocksize() + board.getNumblocks()) % board.getNumblocks()) * board.getBlocksize();
 
-			ch = grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()];
+			ch = grid.getScreenData()[y / board.getBlocksize()][x / board.getBlocksize()];
 
 			// if pellet, eat and increase score
 			if ((ch & 16) != 0) {
@@ -117,7 +117,7 @@ public class PacPlayer extends Character {
 				DataEvent dataEvent = new DataEvent(DataEventType.EAT_PELLET, board, board);
 				dataEvent.setKeyValuePair("score", "" + board.getScore());
 				dataInterface.setData(dataEvent);
-				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 16);
+				grid.getScreenData()[y / board.getBlocksize()][x / board.getBlocksize()] = (short) (ch ^ 16);
 				board.playAudio(0);
 				board.addScore(1);
 				speed = 3;
@@ -128,7 +128,7 @@ public class PacPlayer extends Character {
 				DataEvent dataEvent = new DataEvent(DataEventType.EAT_FRUIT, board, board);
 				dataEvent.setKeyValuePair("score", "" + board.getScore());
 				dataInterface.setData(dataEvent);
-				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 32);
+				grid.getScreenData()[y / board.getBlocksize()][x / board.getBlocksize()] = (short) (ch ^ 32);
 				board.addScore(10);
 				board.playAudio(1);
 				speed = 3;
@@ -137,7 +137,7 @@ public class PacPlayer extends Character {
 				DataEvent dataEvent = new DataEvent(DataEventType.EAT_PILL, board, board);
 				dataEvent.setKeyValuePair("score", "" + board.getScore());
 				dataInterface.setData(dataEvent);
-				grid.getScreenData()[y / Board.getBlocksize()][x / Board.getBlocksize()] = (short) (ch ^ 64);
+				grid.getScreenData()[y / board.getBlocksize()][x / board.getBlocksize()] = (short) (ch ^ 64);
 				board.playAudio(1);
 				board.addScore(5);
 				speed = 3;

@@ -33,14 +33,14 @@ import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
  * @author Kekoa Sato
  * @version CS56 F16
  */
-public class Board implements Runnable, EventTrackable {
+public class Board implements Runnable, EventTrackable, BoardInterface {
 	/**
 	 * 
 	 */
 
 	private static final int BLOCKSIZE = 24;
 	private static final int NUMBLOCKS = 17;
-	private static final int SCRSIZE = getNumblocks() * getBlocksize();
+	private static final int SCRSIZE = getNumblocksStatic() * getBlocksizeStatic();
 
 	private final int MAX_GHOSTS = 12;
 	private final int MAX_SPEED = 6;
@@ -244,12 +244,6 @@ public class Board implements Runnable, EventTrackable {
 				}
 				grid.incrementFruit(numBoardsCleared);
 				detectCollision(getGhosts());
-				break;
-			case HELP:
-				break;
-			case INTRO:
-				break;
-			case LEADERBOARD:
 				break;
 			default:
 				break;
@@ -557,47 +551,57 @@ public class Board implements Runnable, EventTrackable {
 
 	}
 
+	@Override
 	public PacPlayer getMsPacman() {
 		return msPacman;
 	}
-
+	@Override
 	public void setMsPacman(PacPlayer msPacman) {
 		this.msPacman = msPacman;
 	}
-
+	@Override
 	public PacPlayer getPacman() {
 		return pacman;
 	}
-
+	@Override
 	public void setPacman(PacPlayer pacman) {
 		this.pacman = pacman;
 	}
-
+	@Override
 	public Vector<Ghost> getGhosts() {
 		return ghosts;
 	}
-
+	@Override
 	public void setGhosts(Vector<Ghost> ghosts) {
 		this.ghosts = ghosts;
 	}
-
+	@Override
 	public int getNumPellet() {
 		return numPellet;
 	}
-
+	@Override
 	public void setNumPellet(int numPellet) {
 		this.numPellet = numPellet;
 	}
-
-	public static int getBlocksize() {
+	public static int getBlocksizeStatic() {
 		return BLOCKSIZE;
 	}
-
-	public static int getNumblocks() {
+	@Override
+	public int getBlocksize() {
+		return BLOCKSIZE;
+	}
+	public static int getNumblocksStatic() {
 		return NUMBLOCKS;
 	}
-
-	public static int getScrsize() {
+	@Override
+	public int getNumblocks() {
+		return NUMBLOCKS;
+	}
+	public static int getScrsizeStatic() {
+		return SCRSIZE;
+	}
+	@Override
+	public int getScrsize() {
 		return SCRSIZE;
 	}
 }

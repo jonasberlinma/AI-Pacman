@@ -70,9 +70,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		setDoubleBuffered(false);
 		AssetController.getInstance();
 
-		blockSize = Board.getBlocksize();
-		numBlocks = Board.getNumblocks();
-		scrSize = Board.getScrsize();
+		blockSize = board.getBlocksize();
+		numBlocks = board.getNumblocks();
+		scrSize = board.getScrsize();
 
 		leaderBoardGui.setLeaderBoardFileName(files);
 		
