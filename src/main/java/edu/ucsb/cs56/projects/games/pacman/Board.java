@@ -48,7 +48,6 @@ public class Board implements Runnable, EventTrackable {
 
 	private long gameID = 0;
 	private int gameStep = 0;
-	private int nTrainedModels;
 
 	private int score;
 
@@ -563,14 +562,6 @@ public class Board implements Runnable, EventTrackable {
 		}
 		return hashtable;
 
-	}
-
-	public int getNTrainedModels() {
-		return this.nTrainedModels;
-	}
-
-	public void setNTrainedModels(int nTrainedModels) {
-		this.nTrainedModels = nTrainedModels;
 	}
 
 	public PacPlayer getMsPacman() {

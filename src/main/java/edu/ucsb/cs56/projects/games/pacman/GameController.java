@@ -160,9 +160,11 @@ public class GameController implements Runnable {
 
 	public void setNewModel(AIModel newModel) {
 		nTrainedModels++;
-		foregroundAIGame.setNTrainedModels(nTrainedModels);
 		foregroundAIGame.setModel(newModel);
 		currentModel = newModel;
+	}
+	public int getNTrainedModels() {
+		return this.nTrainedModels;
 	}
 
 	private void loadTrainer(Properties prop) {

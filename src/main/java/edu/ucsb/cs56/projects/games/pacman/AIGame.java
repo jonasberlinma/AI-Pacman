@@ -83,10 +83,6 @@ public class AIGame implements Runnable {
 		return dgr;
 	}
 
-	public void setNTrainedModels(int nTrainedModels) {
-		board.setNTrainedModels(nTrainedModels);
-	}
-
 	public void setModel(AIModel newModel) {
 		aiPlayer.newModel(newModel);
 
