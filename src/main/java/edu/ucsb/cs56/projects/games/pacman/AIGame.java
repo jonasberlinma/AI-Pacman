@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 
-import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
-
 public class AIGame implements Runnable {
 
 	private AIPlayer aiPlayer = null;
