@@ -33,7 +33,7 @@ public class GameController implements Runnable {
 	// foreground game
 	AIGame foregroundAIGame = null;
 	BoardRenderer boardRenderer = null;
-	BoardFrame bf = null;
+	BoardFrame abf = null;
 
 	// Training
 	private AIModelTrainer aiModelTrainer = null;
@@ -71,7 +71,6 @@ public class GameController implements Runnable {
 		// Turn off the renderer if there is one
 		if (boardRenderer != null) {
 			boardRenderer.stop();
-			bf.dispose();
 		}
 	}
 
@@ -138,12 +137,6 @@ public class GameController implements Runnable {
 			// leaderboard call in Board
 
 			boardRenderer = new BoardRenderer(foregroundAIGame.getBoard(), this);
-			foregroundAIGame.addBoardRendered(boardRenderer);
-
-			bf = new BoardFrame();
-
-			bf.add(boardRenderer);
-			boardRenderer.callLeaderboardMain();
 
 			boardRenderer.start();
 			foregroundAIGame.start();

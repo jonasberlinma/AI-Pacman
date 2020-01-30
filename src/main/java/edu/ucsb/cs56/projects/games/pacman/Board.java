@@ -12,7 +12,6 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
-import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all

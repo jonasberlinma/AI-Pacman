@@ -37,8 +37,12 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static int blockSize = 0;
 	private static int numBlocks = 0;
 	private static int scrSize = 0;
+	
+	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
+
 
 	private Board board = null;
+	private BoardFrame bf = null;
 	private GameController bgc = null;
 
 	private int actionCount = 0;
@@ -52,6 +56,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private boolean introAudioPlayed = false;
 
 	public void stop() {
+		bf.dispose();
 		System.out.println("Stop");
 		timer.stop();
 	}
@@ -69,6 +74,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		numBlocks = Board.getNumblocks();
 		scrSize = Board.getScrsize();
 
+		leaderBoardGui.setLeaderBoardFileName(files);
+		
+		bf = new BoardFrame();
+		bf.add(this);
 	}
 
 	public void start() {
@@ -400,16 +409,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			if (pacman.getPacmananimpos() == (pacman.getPacanimcount() - 1) || pacman.getPacmananimpos() == 0)
 				pacman.setPacanimdir(-pacman.getPacanimdir());
 		}
-	}
-
-	/**
-	 * Calls the leaderboards main method with the command line arguments
-	 *
-	 * @param args - represents the command line arguments
-	 */
-	public void callLeaderboardMain() {
-		String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
-		leaderBoardGui.setLeaderBoardFileName(files);
 	}
 
 	public void drawGameOver() {

@@ -12,7 +12,6 @@ public class AIGame implements Runnable {
 
 	private AIPlayer aiPlayer = null;
 	private Board board = null;
-	private BoardRenderer boardRenderer;
 	private Thread aiGameThread;
 	private boolean isRunning = false;
 	private AIModel currentModel = null;
@@ -28,10 +27,6 @@ public class AIGame implements Runnable {
 		aiPlayer.setBoard(board);
 		aiPlayer.setAIModel(currentModel);
 		aiGameThread = new Thread(this, "AI Game Player 1");
-	}
-
-	public void addBoardRendered(BoardRenderer boardRenderer) {
-		this.boardRenderer = boardRenderer;
 	}
 
 	public Board getBoard() {
@@ -53,9 +48,7 @@ public class AIGame implements Runnable {
 	@Override
 	public void run() {
 		isRunning = true;
-		if (boardRenderer != null) {
-			boardRenderer.callLeaderboardMain();
-		}
+
 		aiPlayer.start();
 		board.start();
 		try {
