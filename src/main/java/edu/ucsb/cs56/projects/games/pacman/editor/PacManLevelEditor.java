@@ -71,7 +71,7 @@ public class PacManLevelEditor extends JFrame {
 
 	// Currently, since Blocks.NUMBLOCKS is hard coded, we will adopt the value
 	// of that into the DEFAULT_GRID_SIZE.
-	private final static Integer DEFAULT_GRID_SIZE = Board.getNumblocks();
+	private final static Integer DEFAULT_GRID_SIZE = Board.getNumblocksStatic();
 
 	public PacManLevelEditor() {
 		initComponents();

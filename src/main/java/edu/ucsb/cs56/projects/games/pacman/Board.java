@@ -12,7 +12,6 @@ import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
-import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all
@@ -34,14 +33,14 @@ import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
  * @author Kekoa Sato
  * @version CS56 F16
  */
-public class Board implements Runnable, EventTrackable {
+public class Board implements Runnable, EventTrackable, BoardInterface {
 	/**
 	 * 
 	 */
 
 	private static final int BLOCKSIZE = 24;
 	private static final int NUMBLOCKS = 17;
-	private static final int SCRSIZE = getNumblocks() * getBlocksize();
+	private static final int SCRSIZE = getNumblocksStatic() * getBlocksizeStatic();
 
 	private final int MAX_GHOSTS = 12;
 	private final int MAX_SPEED = 6;
@@ -55,18 +54,17 @@ public class Board implements Runnable, EventTrackable {
 	private GameType gt = GameType.INTRO;
 	private PacPlayer pacman;
 	private PacPlayer msPacman;
-	Ghost ghost1, ghost2;
-	Vector<Character> pacmen;
+	private Ghost ghost1, ghost2;
+	private Vector<Character> pacmen;
 	private Vector<Ghost> ghosts;
 	private int startNumGhosts = 0;
 	private int numGhosts = 6;
-	int numBoardsCleared = 0;
+	private int numBoardsCleared = 0;
 	private int curSpeed = 3;
 	private int numPellet;
 	private int numPills;
 	private int loopDelay;
 
-	public BoardRenderer boardRenderer = null;
 	private DataInterface dataInterface;
 	private Thread boardThread;
 
@@ -111,11 +109,12 @@ public class Board implements Runnable, EventTrackable {
 	/**
 	 * Start the board
 	 */
-	public void start() {
+
+	protected void start() {
 		boardThread.start();
 	}
 
-	public void stop() {
+	protected void stop() {
 		doRun = false;
 	}
 
@@ -124,36 +123,22 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 * @throws InterruptedException
 	 */
-	public void join() throws InterruptedException {
+	protected void join() throws InterruptedException {
 		boardThread.join();
 	}
 
-	public void setLoopDelay(int loopDelay) {
+	protected void setLoopDelay(int loopDelay) {
 		this.loopDelay = loopDelay;
 	}
 
-	public DataInterface getDataInterface() {
+	protected DataInterface getDataInterface() {
 		return dataInterface;
 	}
 
-	public Grid getGrid() {
-		return grid;
-	}
 
-	public GameType getGameType() {
-		return gt;
-	}
 
-	public int getScore() {
-		return score;
-	}
-
-	public void addScore(int addScore) {
+	protected void addScore(int addScore) {
 		score = score + addScore;
-	}
-
-	public void addBoardRenderer(BoardRenderer boardRenderer) {
-		this.boardRenderer = boardRenderer;
 	}
 
 	/**
@@ -249,12 +234,6 @@ public class Board implements Runnable, EventTrackable {
 				grid.incrementFruit(numBoardsCleared);
 				detectCollision(getGhosts());
 				break;
-			case HELP:
-				break;
-			case INTRO:
-				break;
-			case LEADERBOARD:
-				break;
 			default:
 				break;
 			}
@@ -273,14 +252,11 @@ public class Board implements Runnable, EventTrackable {
 	/**
 	 * End the game if remaining lives reaches 0.
 	 */
-	public void gameOver() {
+	private void gameOver() {
+		gt = GameType.GAME_OVER;
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);
 		dataInterface.setData(de);
-		if (boardRenderer != null)
-			boardRenderer.drawGameOver();
-
-		gt = GameType.INTRO;
 
 		numBoardsCleared = 0;
 		grid.levelInit(0);
@@ -291,7 +267,7 @@ public class Board implements Runnable, EventTrackable {
 	 *
 	 * @param ghosts An array of Ghost
 	 */
-	public void detectCollision(Vector<Ghost> ghosts) {
+	private void detectCollision(Vector<Ghost> ghosts) {
 		for (Character pacman : pacmen) {
 			for (Ghost ghost : ghosts) {
 				if ((Math.abs(pacman.x - ghost.x) < 20 && Math.abs(pacman.y - ghost.y) < 20) && ghost.edible == false) {
@@ -320,10 +296,10 @@ public class Board implements Runnable, EventTrackable {
 	 *
 	 * @return true if any surviving, false if all dead
 	 */
-	public boolean checkAlive() {
+	private boolean checkAlive() {
 		return pacmen.stream().anyMatch(x -> x.alive);
 	}
-
+	@Override
 	public void resetGame() {
 		gt = GameType.INTRO;
 		numBoardsCleared = 0;
@@ -333,7 +309,7 @@ public class Board implements Runnable, EventTrackable {
 	/**
 	 * Initialize game variables
 	 */
-	public void gameInit() {
+	private void gameInit() {
 		grid.levelInit(numBoardsCleared);
 		levelContinue();
 		score = 0;
@@ -367,7 +343,7 @@ public class Board implements Runnable, EventTrackable {
 	/**
 	 * Initialize Pacman and ghost position/direction
 	 */
-	public void levelContinue() {
+	private void levelContinue() {
 		setNumPellet(grid.getPelletNum() + grid.getPillNum());
 		numPills = grid.getPillNum();
 		getGhosts().clear();
@@ -411,6 +387,7 @@ public class Board implements Runnable, EventTrackable {
 		}
 	}
 
+	@Override
 	public void keyPressed(int key) {
 
 		if (gt == GameType.INTRO) {
@@ -467,6 +444,7 @@ public class Board implements Runnable, EventTrackable {
 		}
 	}
 
+	@Override
 	public void keyReleased(int key) {
 		DataEvent dataEvent = new DataEvent(DataEventType.KEY_RELEASE, this, this);
 		dataEvent.setKeyValuePair("key", KeyEvent.getKeyText(key));
@@ -527,7 +505,7 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 * @param audioClipID
 	 */
-	public void playAudio(int audioClipID) {
+	protected void playAudio(int audioClipID) {
 		this.audioClipID = audioClipID;
 	}
 
@@ -536,6 +514,7 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 * @return
 	 */
+	@Override
 	public boolean doPlayAudio() {
 		return audioClipID != -1;
 	}
@@ -545,6 +524,7 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 * @return
 	 */
+	@Override
 	public int getAudioClipID() {
 		int clipID = this.audioClipID;
 		this.audioClipID = -1;
@@ -564,47 +544,73 @@ public class Board implements Runnable, EventTrackable {
 
 	}
 
+	@Override
 	public PacPlayer getMsPacman() {
 		return msPacman;
 	}
 
-	public void setMsPacman(PacPlayer msPacman) {
+	protected void setMsPacman(PacPlayer msPacman) {
 		this.msPacman = msPacman;
 	}
-
+	@Override
 	public PacPlayer getPacman() {
 		return pacman;
 	}
 
-	public void setPacman(PacPlayer pacman) {
+	protected void setPacman(PacPlayer pacman) {
 		this.pacman = pacman;
 	}
-
+	@Override
 	public Vector<Ghost> getGhosts() {
 		return ghosts;
 	}
 
-	public void setGhosts(Vector<Ghost> ghosts) {
+	protected void setGhosts(Vector<Ghost> ghosts) {
 		this.ghosts = ghosts;
 	}
-
+	@Override
 	public int getNumPellet() {
 		return numPellet;
 	}
 
-	public void setNumPellet(int numPellet) {
+	protected void setNumPellet(int numPellet) {
 		this.numPellet = numPellet;
 	}
-
-	public static int getBlocksize() {
+	public static int getBlocksizeStatic() {
 		return BLOCKSIZE;
 	}
-
-	public static int getNumblocks() {
+	@Override
+	public int getBlocksize() {
+		return BLOCKSIZE;
+	}
+	public static int getNumblocksStatic() {
 		return NUMBLOCKS;
 	}
-
-	public static int getScrsize() {
+	@Override
+	public int getNumblocks() {
+		return NUMBLOCKS;
+	}
+	public static int getScrsizeStatic() {
 		return SCRSIZE;
+	}
+	@Override
+	public int getScrsize() {
+		return SCRSIZE;
+	}
+	@Override
+	public GameType getGameType() {
+		return gt;
+	}
+	@Override
+	public void setGameType(GameType gameType) {
+		this.gt = gameType;
+	}
+	@Override
+	public Grid getGrid() {
+		return grid;
+	}
+	@Override
+	public int getScore() {
+		return score;
 	}
 }

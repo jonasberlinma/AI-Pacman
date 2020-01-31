@@ -133,9 +133,9 @@ public abstract class Character implements EventTrackable {
 		x = x + speed * dx;
 		y = y + speed * dy;
 
-		if (x % Board.getBlocksize() == 0 && y % Board.getBlocksize() == 0) {
-			x = ((x / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
-			y = ((y / Board.getBlocksize() + Board.getNumblocks()) % Board.getNumblocks()) * Board.getBlocksize();
+		if (x % Board.getBlocksizeStatic() == 0 && y % Board.getBlocksizeStatic() == 0) {
+			x = ((x / Board.getBlocksizeStatic() + Board.getNumblocksStatic()) % Board.getNumblocksStatic()) * Board.getBlocksizeStatic();
+			y = ((y / Board.getBlocksizeStatic() + Board.getNumblocksStatic()) % Board.getNumblocksStatic()) * Board.getBlocksizeStatic();
 		}
 	}
 
@@ -156,8 +156,8 @@ public abstract class Character implements EventTrackable {
 		hashtable.put("ghostNum", "" + ghostNum);
 		hashtable.put("playerType", playerType.name());
 		hashtable.put("characterID", "" + characterID);
-		hashtable.put("x", "" + x / Board.getBlocksize());
-		hashtable.put("y", "" + y / Board.getBlocksize());
+		hashtable.put("x", "" + x / Board.getBlocksizeStatic());
+		hashtable.put("y", "" + y / Board.getBlocksizeStatic());
 		hashtable.put("dx", "" + dx);
 		hashtable.put("dy", "" + dy);
 		hashtable.put("reqdx", "" + reqdx);

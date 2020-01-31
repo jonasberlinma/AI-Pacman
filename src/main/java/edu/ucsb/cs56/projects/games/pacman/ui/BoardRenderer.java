@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import edu.ucsb.cs56.projects.games.pacman.Board;
-
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.GameController;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
@@ -38,8 +37,12 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static int blockSize = 0;
 	private static int numBlocks = 0;
 	private static int scrSize = 0;
+	
+	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
+
 
 	private Board board = null;
+	private BoardFrame bf = null;
 	private GameController bgc = null;
 
 	private int actionCount = 0;
@@ -53,6 +56,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private boolean introAudioPlayed = false;
 
 	public void stop() {
+		bf.dispose();
 		System.out.println("Stop");
 		timer.stop();
 	}
@@ -66,10 +70,14 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		setDoubleBuffered(false);
 		AssetController.getInstance();
 
-		blockSize = Board.getBlocksize();
-		numBlocks = Board.getNumblocks();
-		scrSize = Board.getScrsize();
+		blockSize = board.getBlocksize();
+		numBlocks = board.getNumblocks();
+		scrSize = board.getScrsize();
 
+		leaderBoardGui.setLeaderBoardFileName(files);
+		
+		bf = new BoardFrame();
+		bf.add(this);
 	}
 
 	public void start() {
@@ -104,6 +112,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			break;
 		case HELP:
 			showHelpScreen(g);
+			break;
+		case GAME_OVER:
+			drawGameOver();
+			board.setGameType(GameType.INTRO);
 			break;
 		default:
 			introAudioPlayed = false;
@@ -336,14 +348,13 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		}
 
 		for (int i = 0; i < board.getPacman().lives; i++) {
-			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8,
-					scrSize + 1, this);
+			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, scrSize + 1, this);
 		}
 
 		if (gt == GameType.COOPERATIVE) {
 			for (int i = 0; i < board.getMsPacman().lives; i++) {
-				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108,
-						scrSize + 1, this);
+				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, scrSize + 1,
+						this);
 			}
 		}
 	}
@@ -398,16 +409,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			if (pacman.getPacmananimpos() == (pacman.getPacanimcount() - 1) || pacman.getPacmananimpos() == 0)
 				pacman.setPacanimdir(-pacman.getPacanimdir());
 		}
-	}
-
-	/**
-	 * Calls the leaderboards main method with the command line arguments
-	 *
-	 * @param args - represents the command line arguments
-	 */
-	public void callLeaderboardMain() {
-		String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
-		leaderBoardGui.setLeaderBoardFileName(files);
 	}
 
 	public void drawGameOver() {
