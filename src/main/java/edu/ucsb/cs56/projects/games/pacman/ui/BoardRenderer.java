@@ -380,7 +380,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawPacman(Graphics2D g2d, JComponent canvas, PacPlayer pacman) {
 		if (pacman.deathTimer % 5 > 3)
 			return; // Flicker while invincibile
-		doAnimPacman(pacman);
+
 		AssetController ac = AssetController.getInstance();
 		if (pacman.direction == 1)
 			g2d.drawImage(ac.pacmanLeft[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
@@ -396,18 +396,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 					pacman.y + 4, canvas);
 	}
 
-	/**
-	 * Animates the Pacman sprite's direction as well as mouth opening and closing
-	 */
-	private void doAnimPacman(PacPlayer pacman) {
-		pacman.setPacanimcount(pacman.getPacanimcount() - 1);
-		if (pacman.getPacanimcount() <= 0) {
-			pacman.setPacanimcount(pacman.getPacanimdelay());
-			pacman.setPacmananimpos(pacman.getPacmananimpos() + pacman.getPacanimdir());
-			if (pacman.getPacmananimpos() == (pacman.getPacanimcount() - 1) || pacman.getPacmananimpos() == 0)
-				pacman.setPacanimdir(-pacman.getPacanimdir());
-		}
-	}
+
 
 	public void drawGameOver() {
 		GameType gt = board.getGameType();

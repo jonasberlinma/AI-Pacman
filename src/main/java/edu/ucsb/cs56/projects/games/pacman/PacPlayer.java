@@ -21,7 +21,7 @@ public class PacPlayer extends Character {
 	private final int pacanimdelay = 2;
 	final int pacmananimcount = 4;
 	private final int pacmanspeed = 4;
-	private int pacanimcount = getPacanimdelay();
+	private int pacanimcount = 2;
 	private int pacanimdir = 1;
 	private int pacmananimpos = 0;
 
@@ -48,6 +48,10 @@ public class PacPlayer extends Character {
 		direction = 3;
 
 
+	}
+	
+	public PacPlayer() {
+	
 	}
 
 	/**

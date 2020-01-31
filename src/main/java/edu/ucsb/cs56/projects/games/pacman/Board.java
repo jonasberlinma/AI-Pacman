@@ -147,6 +147,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	 * @param g2d a Graphics 2D object
 	 */
 	private void playGame() {
+		doAnimPacman(pacman);
 		if (gt == GameType.SINGLEPLAYER || gt == GameType.VERSUS || gt == GameType.COOPERATIVE) {
 			if (!checkAlive()) {
 				gameOver();
@@ -249,6 +250,18 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		}
 	}
 
+	/**
+	 * Animates the Pacman sprite's direction as well as mouth opening and closing
+	 */
+	private void doAnimPacman(PacPlayer pacman) {
+		pacman.setPacanimcount(pacman.getPacanimcount() - 1);
+		if (pacman.getPacanimcount() <= 0) {
+			pacman.setPacanimcount(pacman.getPacanimdelay());
+			pacman.setPacmananimpos(pacman.getPacmananimpos() + pacman.getPacanimdir());
+			if (pacman.getPacmananimpos() == (pacman.getPacanimcount() - 1) || pacman.getPacmananimpos() == 0)
+				pacman.setPacanimdir(-pacman.getPacanimdir());
+		}
+	}
 	/**
 	 * End the game if remaining lives reaches 0.
 	 */

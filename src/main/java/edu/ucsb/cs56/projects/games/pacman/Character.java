@@ -54,6 +54,12 @@ public abstract class Character implements EventTrackable {
 		alive = true;
 		reset();
 	}
+	/**
+	 * Default constructor for data access
+	 */
+	public Character() {
+		
+	}
 
 	/**
 	 * Restores the character's default values.

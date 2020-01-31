@@ -1,13 +1,21 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.io.IOException;
 import java.util.Vector;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BoardServer implements BoardInterface {
 
 	private Board board;
+	private ObjectMapper objectMapper = null;
 
 	public BoardServer(Board board) {
 		this.board = board;
+		objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	@Override
@@ -37,7 +45,21 @@ public class BoardServer implements BoardInterface {
 
 	@Override
 	public PacPlayer getPacman() {
-		return board.getPacman();
+		
+		String json = null;
+		PacPlayer pacPlayer = null;
+		try {
+			json = objectMapper.writeValueAsString(board.getPacman());
+			pacPlayer = objectMapper.readValue(json, PacPlayer.class);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return pacPlayer;
 	}
 
 	@Override
