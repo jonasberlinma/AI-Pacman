@@ -136,7 +136,8 @@ public class GameController implements Runnable {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
 
-			boardRenderer = new BoardRenderer(foregroundAIGame.getBoard(), this);
+			BoardServer boardServer = new BoardServer(foregroundAIGame.getBoard());
+			boardRenderer = new BoardRenderer(boardServer, this);
 
 			boardRenderer.start();
 			foregroundAIGame.start();

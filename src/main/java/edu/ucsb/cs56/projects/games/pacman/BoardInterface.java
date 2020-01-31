@@ -21,14 +21,8 @@ public interface BoardInterface {
 
 	public Vector<Ghost> getGhosts();
 
-	// Get and set the game state (type). This tells us to show different screens
+	// Get the game state (type). This tells us to show different screens
 	public GameType getGameType();
-
-	public void setGameType(GameType gameType);
-
-	// Reset game. Should probably not be here
-	public void resetGame(); // This one is problematic and should be removed in favor of using the escape
-								// key correctly
 
 	// Current number of pellets and score
 	public int getNumPellet();

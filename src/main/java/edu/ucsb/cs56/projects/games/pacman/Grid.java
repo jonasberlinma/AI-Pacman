@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -15,7 +16,11 @@ import java.util.Arrays;
  * @version CS56 F16
  */
 
-public class Grid {
+public class Grid implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public int fruitCounter = 0;
 	public int x;
 	public int y;

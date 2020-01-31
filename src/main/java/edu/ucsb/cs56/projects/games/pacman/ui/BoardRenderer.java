@@ -18,7 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import edu.ucsb.cs56.projects.games.pacman.Board;
+import edu.ucsb.cs56.projects.games.pacman.BoardInterface;
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.GameController;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
@@ -41,7 +41,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
 
 
-	private Board board = null;
+	private BoardInterface board = null;
 	private BoardFrame bf = null;
 	private GameController bgc = null;
 
@@ -61,7 +61,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		timer.stop();
 	}
 
-	public BoardRenderer(Board board, GameController bgc) {
+	public BoardRenderer(BoardInterface board, GameController bgc) {
 		this.board = board;
 		this.bgc = bgc;
 		addKeyListener(new TAdapter());
@@ -115,7 +115,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			break;
 		case GAME_OVER:
 			drawGameOver();
-			board.setGameType(GameType.INTRO);
 			break;
 		default:
 			introAudioPlayed = false;
@@ -251,12 +250,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 					break;
 				case KeyEvent.VK_ESCAPE:
 					if (timer.isRunning()) {
-						board.resetGame();
+						board.keyPressed(KeyEvent.VK_ESCAPE);
 					}
 					break;
 				}
 			}
-
 		}
 
 		@Override
@@ -332,7 +330,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 *
 	 * @param g a Graphics object
 	 */
-	private void drawScore(Graphics g, Board board) {
+	private void drawScore(Graphics g, BoardInterface board) {
 		g.setFont(smallFont);
 		g.setColor(new Color(96, 128, 255));
 		int score = board.getScore();

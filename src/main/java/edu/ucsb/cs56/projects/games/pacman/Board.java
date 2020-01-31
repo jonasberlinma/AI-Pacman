@@ -299,8 +299,8 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	private boolean checkAlive() {
 		return pacmen.stream().anyMatch(x -> x.alive);
 	}
-	@Override
-	public void resetGame() {
+
+	private void resetGame() {
 		gt = GameType.INTRO;
 		numBoardsCleared = 0;
 		grid.levelInit(0);
@@ -418,6 +418,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 			switch (key) {
 			case KeyEvent.VK_ESCAPE:
 				doRun = false;
+				resetGame();
 				break;
 			default:
 				// Normal play mode
@@ -573,7 +574,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		return numPellet;
 	}
 
-	protected void setNumPellet(int numPellet) {
+	private void setNumPellet(int numPellet) {
 		this.numPellet = numPellet;
 	}
 	public static int getBlocksizeStatic() {
@@ -600,10 +601,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	@Override
 	public GameType getGameType() {
 		return gt;
-	}
-	@Override
-	public void setGameType(GameType gameType) {
-		this.gt = gameType;
 	}
 	@Override
 	public Grid getGrid() {
