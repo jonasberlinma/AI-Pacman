@@ -1,6 +1,5 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.awt.Color;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
@@ -33,11 +32,9 @@ public class Grid implements Serializable{
 	 */
 
 	private short[][] screenData;
-	short[][][] levelsData;
+	private short[][][] levelsData;
 	private GridWalker[] gridWalkers = null;
-	private Color mazeColor;
-	private Color dotColor;
-	private Color fruitColor;
+
 	private int currentLevel;
 
 	class Pair {
@@ -50,9 +47,7 @@ public class Grid implements Serializable{
 	 */
 	public Grid() {
 		setScreenData(new short[Board.getNumblocksStatic()][Board.getNumblocksStatic()]);
-		setMazeColor(new Color(5, 100, 5));
-		setDotColor(new Color(192, 192, 0));
-		setFruitColor(new Color(255, 0, 0));
+
 
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
@@ -232,35 +227,11 @@ public class Grid implements Serializable{
 		return gridWalkers[currentLevel];
 	}
 
-	public Color getMazeColor() {
-		return mazeColor;
-	}
-
-	public void setMazeColor(Color mazeColor) {
-		this.mazeColor = mazeColor;
-	}
-
 	public short[][] getScreenData() {
 		return screenData;
 	}
 
 	public void setScreenData(short[][] screenData) {
 		this.screenData = screenData;
-	}
-
-	public Color getFruitColor() {
-		return fruitColor;
-	}
-
-	public void setFruitColor(Color fruitColor) {
-		this.fruitColor = fruitColor;
-	}
-
-	public Color getDotColor() {
-		return dotColor;
-	}
-
-	public void setDotColor(Color dotColor) {
-		this.dotColor = dotColor;
 	}
 }

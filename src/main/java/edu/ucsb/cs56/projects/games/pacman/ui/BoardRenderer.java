@@ -38,6 +38,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static int numBlocks = 0;
 	private static int scrSize = 0;
 	
+	private Color mazeColor = new Color(5, 100, 5);
+	private Color dotColor = new Color(192, 192, 0);
+	private Color fruitColor = new Color(255, 0, 0);
+	
 	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
 
 
@@ -430,7 +434,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 				x = j * blockSize + 3;
 
 				Grid grid = board.getGrid();
-				g2d.setColor(grid.getMazeColor());
+				g2d.setColor(mazeColor);
 
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_LEFT) != 0) // draws
 					// left
@@ -445,7 +449,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 																							// bottom
 					g2d.drawLine(x, y + blockSize - 1, x + blockSize - 1, y + blockSize - 1);
 
-				g2d.setColor(grid.getDotColor());
+				g2d.setColor(dotColor);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_PELLET) != 0) // draws
 																					// pellet
 					g2d.fillRect(x + 11, y + 11, 2, 2);
@@ -454,12 +458,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 																						// power
 																						// pill
 					g2d.fillOval(x + 6, y + 6, 12, 12);
-				g2d.setColor(grid.getFruitColor());
+				g2d.setColor(fruitColor);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_FRUIT) != 0) // draws
 																					// fruit
 					g2d.fillRect(x + 10, y + 10, 4, 4);
 			}
 		}
 	}
-
 }

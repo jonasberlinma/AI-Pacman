@@ -6,16 +6,20 @@ import java.util.Vector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class BoardServer implements BoardInterface {
 
 	private Board board;
 	private ObjectMapper objectMapper = null;
+	private boolean remote;
 
-	public BoardServer(Board board) {
+	public BoardServer(Board board, boolean remote) {
 		this.board = board;
+		this.remote = remote;
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 	}
 
 	@Override
@@ -35,30 +39,67 @@ public class BoardServer implements BoardInterface {
 
 	@Override
 	public Grid getGrid() {
-		return board.getGrid();
+		String json = null;
+		Grid grid = null;
+		if (remote) {
+			try {
+				json = objectMapper.writeValueAsString(board.getGrid());
+				grid = objectMapper.readValue(json, Grid.class);
+				
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			grid = board.getGrid();
+		}
+		return grid;
 	}
 
 	@Override
 	public PacPlayer getMsPacman() {
-		return board.getMsPacman();
+		String json = null;
+		PacPlayer pacPlayer = null;
+		if (remote) {
+			try {
+				json = objectMapper.writeValueAsString(board.getMsPacman());
+				pacPlayer = objectMapper.readValue(json, PacPlayer.class);
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			pacPlayer = board.getMsPacman();
+		}
+
+		return pacPlayer;
 	}
 
 	@Override
 	public PacPlayer getPacman() {
-		
+
 		String json = null;
 		PacPlayer pacPlayer = null;
-		try {
-			json = objectMapper.writeValueAsString(board.getPacman());
-			pacPlayer = objectMapper.readValue(json, PacPlayer.class);
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (remote) {
+			try {
+				json = objectMapper.writeValueAsString(board.getPacman());
+				pacPlayer = objectMapper.readValue(json, PacPlayer.class);
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			pacPlayer = board.getPacman();
 		}
-		
 		return pacPlayer;
 	}
 
