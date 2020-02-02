@@ -45,7 +45,6 @@ public class BoardServer implements BoardInterface {
 			try {
 				json = objectMapper.writeValueAsString(board.getGrid());
 				grid = objectMapper.readValue(json, Grid.class);
-				
 			} catch (JsonProcessingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

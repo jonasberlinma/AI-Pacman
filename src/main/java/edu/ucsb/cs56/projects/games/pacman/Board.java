@@ -83,6 +83,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		numGhosts = startNumGhosts;
 
 		grid = new Grid();
+		grid.load();
 
 		gt = GameType.INTRO;
 		grid.levelInit(0);
@@ -135,8 +136,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		return dataInterface;
 	}
 
-
-
 	protected void addScore(int addScore) {
 		score = score + addScore;
 	}
@@ -155,17 +154,18 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 				if (getPacman().alive) {
 					getPacman().move(grid, this);
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, getPacman());
-					ArrayList<Direction> dirs = grid.getGridWalker().getPossibleDirections(getPacman().x / getBlocksize(),
-							getPacman().y / getBlocksize());
+					ArrayList<Direction> dirs = grid.getGridWalker()
+							.getPossibleDirections(getPacman().x / getBlocksize(), getPacman().y / getBlocksize());
 					Path pelletPath = grid.getGridWalker().getClosestPelletPath(getPacman().x / getBlocksize(),
 							getPacman().y / getBlocksize());
 					if (pelletPath != null) {
 						de.setKeyValuePair("pelletDirection", "" + pelletPath.getFirstDirection());
-						de.setKeyValuePair("pelletDistance" , "" + pelletPath.getDistance());
+						de.setKeyValuePair("pelletDistance", "" + pelletPath.getDistance());
 					}
-					Path fruitPath = grid.getGridWalker().getClosestFruitPath(getPacman().x/getBlocksize(), getPacman().y/getBlocksize());
+					Path fruitPath = grid.getGridWalker().getClosestFruitPath(getPacman().x / getBlocksize(),
+							getPacman().y / getBlocksize());
 					// Fruit can be scarce
-					if(fruitPath != null) {
+					if (fruitPath != null) {
 						de.setKeyValuePair("fruitDirection", "" + fruitPath.getFirstDirection());
 						de.setKeyValuePair("fruitDistance", "" + fruitPath.getDistance());
 					} else {
@@ -193,8 +193,9 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 			case SINGLEPLAYER:
 				for (Ghost g : getGhosts()) {
 					g.moveAI(grid, pacmen);
-					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(getPacman().x / getBlocksize(),
-							getPacman().y / getBlocksize(), g.x / getBlocksize(), g.y / getBlocksize());
+					DirectionDistance dd = grid.getGridWalker().getShortestPathDirectionDistance(
+							getPacman().x / getBlocksize(), getPacman().y / getBlocksize(), g.x / getBlocksize(),
+							g.y / getBlocksize());
 					DataEvent de = new DataEvent(DataEventType.MOVE, this, g);
 					de.setKeyValuePair("ghostNum", Integer.valueOf(g.ghostNum).toString());
 					if (dd != null) {
@@ -262,6 +263,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 				pacman.setPacanimdir(-pacman.getPacanimdir());
 		}
 	}
+
 	/**
 	 * End the game if remaining lives reaches 0.
 	 */
@@ -369,12 +371,12 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 				int the_type = i % 2;
 				switch (the_type) {
 				case 0:
-					getGhosts().add(
-							new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random, PlayerType.GHOST1));
+					getGhosts().add(new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random,
+							PlayerType.GHOST1));
 					break;
 				case 1:
-					getGhosts().add(
-							new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random, PlayerType.GHOST2));
+					getGhosts().add(new Ghost(i, dataInterface, (i + 6) * getBlocksize(), 2 * getBlocksize(), random,
+							PlayerType.GHOST2));
 				}
 
 			}
@@ -566,6 +568,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	protected void setMsPacman(PacPlayer msPacman) {
 		this.msPacman = msPacman;
 	}
+
 	@Override
 	public PacPlayer getPacman() {
 		return pacman;
@@ -574,6 +577,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	protected void setPacman(PacPlayer pacman) {
 		this.pacman = pacman;
 	}
+
 	@Override
 	public Vector<Ghost> getGhosts() {
 		return ghosts;
@@ -582,6 +586,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	protected void setGhosts(Vector<Ghost> ghosts) {
 		this.ghosts = ghosts;
 	}
+
 	@Override
 	public int getNumPellet() {
 		return numPellet;
@@ -590,35 +595,44 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	private void setNumPellet(int numPellet) {
 		this.numPellet = numPellet;
 	}
+
 	public static int getBlocksizeStatic() {
 		return BLOCKSIZE;
 	}
+
 	@Override
 	public int getBlocksize() {
 		return BLOCKSIZE;
 	}
+
 	public static int getNumblocksStatic() {
 		return NUMBLOCKS;
 	}
+
 	@Override
 	public int getNumblocks() {
 		return NUMBLOCKS;
 	}
+
 	public static int getScrsizeStatic() {
 		return SCRSIZE;
 	}
+
 	@Override
 	public int getScrsize() {
 		return SCRSIZE;
 	}
+
 	@Override
 	public GameType getGameType() {
 		return gt;
 	}
+
 	@Override
 	public Grid getGrid() {
 		return grid;
 	}
+
 	@Override
 	public int getScore() {
 		return score;

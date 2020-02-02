@@ -86,7 +86,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	public void start() {
 		System.out.println("Start");
-		timer = new Timer(40, this);
+		timer = new Timer(100, this);
 		timer.start();
 	}
 

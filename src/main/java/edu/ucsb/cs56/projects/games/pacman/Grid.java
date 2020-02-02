@@ -20,9 +20,9 @@ public class Grid implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public int fruitCounter = 0;
-	public int x;
-	public int y;
+	private int fruitCounter = 0;
+	private int x;
+	private int y;
 
 	/*
 	 * check this link to implement the ghost AI movement at intersection. Revise
@@ -46,8 +46,10 @@ public class Grid implements Serializable{
 	 * Constructor for Board object
 	 */
 	public Grid() {
-		setScreenData(new short[Board.getNumblocksStatic()][Board.getNumblocksStatic()]);
 
+	}
+	public void load() {
+		screenData = new short[Board.getNumblocksStatic()][Board.getNumblocksStatic()];
 
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
@@ -229,9 +231,5 @@ public class Grid implements Serializable{
 
 	public short[][] getScreenData() {
 		return screenData;
-	}
-
-	public void setScreenData(short[][] screenData) {
-		this.screenData = screenData;
 	}
 }
