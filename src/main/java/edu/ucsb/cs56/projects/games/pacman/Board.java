@@ -551,13 +551,7 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	public LinkedHashMap<String, String> getData(DataEvent.DataEventType dataEvent) {
 		LinkedHashMap<String, String> hashtable = new LinkedHashMap<String, String>();
 
-		switch (dataEvent) {
-		case MOVE:
-			break;
-		default:
-		}
 		return hashtable;
-
 	}
 
 	@Override
