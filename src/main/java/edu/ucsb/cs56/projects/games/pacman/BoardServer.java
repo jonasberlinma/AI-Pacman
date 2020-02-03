@@ -23,21 +23,6 @@ public class BoardServer implements BoardInterface {
 	}
 
 	@Override
-	public int getBlocksize() {
-		return board.getBlocksize();
-	}
-
-	@Override
-	public int getNumblocks() {
-		return board.getNumblocks();
-	}
-
-	@Override
-	public int getScrsize() {
-		return board.getScrsize();
-	}
-
-	@Override
 	public Grid getGrid() {
 		String json = null;
 		Grid grid = null;

@@ -15,7 +15,7 @@ import java.util.Arrays;
  * @version CS56 F16
  */
 
-public class Grid implements Serializable{
+public class Grid implements Serializable {
 	/**
 	 * 
 	 */
@@ -48,8 +48,9 @@ public class Grid implements Serializable{
 	public Grid() {
 
 	}
+
 	public void load() {
-		screenData = new short[Board.getNumblocksStatic()][Board.getNumblocksStatic()];
+		screenData = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
@@ -84,8 +85,8 @@ public class Grid implements Serializable{
 	 * @return A boolean indicating whether or not the maze is finished
 	 */
 	public boolean checkMaze() {
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((getScreenData()[i][j] & (GridData.GRID_CELL_PELLET ^ GridData.GRID_CELL_POWER_PILL)) != 0)
 					return false;
 			}
@@ -100,8 +101,8 @@ public class Grid implements Serializable{
 	 */
 	public int getPelletNum() {
 		int numOfPellet = 0;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((getScreenData()[i][j] & GridData.GRID_CELL_PELLET) != 0)
 					numOfPellet++;
 			}
@@ -116,8 +117,8 @@ public class Grid implements Serializable{
 	 */
 	public int getPillNum() {
 		int numOfPill = 0;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((getScreenData()[i][j] & GridData.GRID_CELL_POWER_PILL) != 0)
 					numOfPill++;
 			}
@@ -133,8 +134,8 @@ public class Grid implements Serializable{
 	 */
 	public int getPelletNumForMap(int numBoardsCleared) {
 		int numOfPellet = 0;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((this.levelsData[numBoardsCleared % this.levelsData.length][i][j]
 						& GridData.GRID_CELL_PELLET) != 0) {
 					numOfPellet++;
@@ -151,9 +152,9 @@ public class Grid implements Serializable{
 	 */
 	public void levelInit(int numBoardsCleared) {
 		this.currentLevel = numBoardsCleared;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			getScreenData()[i] = Arrays.copyOf(this.levelsData[numBoardsCleared % this.levelsData.length][i],
-					Board.getNumblocksStatic());
+					Board.NUMBLOCKS);
 		}
 	}
 
@@ -182,8 +183,8 @@ public class Grid implements Serializable{
 	 */
 
 	public void randomBlock() {
-		this.x = (int) (Math.random() * Board.getNumblocksStatic());
-		this.y = (int) (Math.random() * Board.getNumblocksStatic());
+		this.x = (int) (Math.random() * Board.NUMBLOCKS);
+		this.y = (int) (Math.random() * Board.NUMBLOCKS);
 	}
 
 	/**
@@ -200,7 +201,8 @@ public class Grid implements Serializable{
 					if (((getScreenData()[this.x][this.y] & GridData.GRID_CELL_PELLET) == 0)
 							&& (this.levelsData[numBoardsCleared % this.levelsData.length][this.x][this.y]
 									& GridData.GRID_CELL_PELLET) != 0) {
-						getScreenData()[this.x][this.y] = (short) (getScreenData()[this.x][this.y] | GridData.GRID_CELL_FRUIT);
+						getScreenData()[this.x][this.y] = (short) (getScreenData()[this.x][this.y]
+								| GridData.GRID_CELL_FRUIT);
 						break;
 					}
 					this.randomBlock();
@@ -214,10 +216,10 @@ public class Grid implements Serializable{
 	}
 
 	public void writeGrid(PrintStream gridOut) {
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				gridOut.print("" + getScreenData()[i][j]);
-				if (j < Board.getNumblocksStatic() - 1) {
+				if (j < Board.NUMBLOCKS - 1) {
 					gridOut.print(",");
 				}
 			}

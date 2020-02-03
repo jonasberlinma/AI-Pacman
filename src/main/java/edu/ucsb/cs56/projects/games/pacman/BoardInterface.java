@@ -4,13 +4,6 @@ import java.util.Vector;
 
 public interface BoardInterface {
 
-	// This is basic board size and should not be here
-	public int getBlocksize();
-
-	public int getNumblocks();
-
-	public int getScrsize();
-
 	// Get the basic grid the characters are running around
 	public Grid getGrid();
 
