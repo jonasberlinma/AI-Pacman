@@ -18,7 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import edu.ucsb.cs56.projects.games.pacman.Board;
+import edu.ucsb.cs56.projects.games.pacman.BoardInterface;
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.GameController;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
@@ -34,14 +34,19 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private static final long serialVersionUID = 7383414799194976684L;
 
-	private static int blockSize = 0;
-	private static int numBlocks = 0;
-	private static int scrSize = 0;
+	// These constants exist in both Board and BoardRenderer
+	private static final int BLOCKSIZE = 24;
+	private static final int NUMBLOCKS = 17;
+	private static final int SCRSIZE = BLOCKSIZE * NUMBLOCKS;
+	
+	private Color mazeColor = new Color(5, 100, 5);
+	private Color dotColor = new Color(192, 192, 0);
+	private Color fruitColor = new Color(255, 0, 0);
 	
 	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
 
 
-	private Board board = null;
+	private BoardInterface board = null;
 	private BoardFrame bf = null;
 	private GameController bgc = null;
 
@@ -61,7 +66,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		timer.stop();
 	}
 
-	public BoardRenderer(Board board, GameController bgc) {
+	public BoardRenderer(BoardInterface board, GameController bgc) {
 		this.board = board;
 		this.bgc = bgc;
 		addKeyListener(new TAdapter());
@@ -69,10 +74,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		setBackground(Color.black);
 		setDoubleBuffered(false);
 		AssetController.getInstance();
-
-		blockSize = board.getBlocksize();
-		numBlocks = board.getNumblocks();
-		scrSize = board.getScrsize();
 
 		leaderBoardGui.setLeaderBoardFileName(files);
 		
@@ -82,7 +83,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	public void start() {
 		System.out.println("Start");
-		timer = new Timer(40, this);
+		timer = new Timer(100, this);
 		timer.start();
 	}
 
@@ -115,7 +116,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			break;
 		case GAME_OVER:
 			drawGameOver();
-			board.setGameType(GameType.INTRO);
 			break;
 		default:
 			introAudioPlayed = false;
@@ -147,9 +147,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private void showIntroScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(50, scrSize / 2 - 50, scrSize - 100, 90);
+		g.fillRect(50, SCRSIZE / 2 - 50, SCRSIZE - 100, 90);
 		g.setColor(Color.white);
-		g.drawRect(50, scrSize / 2 - 50, scrSize - 100, 90);
+		g.drawRect(50, SCRSIZE / 2 - 50, SCRSIZE - 100, 90);
 
 		String s = "Press s for single player";
 		String d = "Press d for Co-Op";
@@ -160,10 +160,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		g.setColor(Color.white);
 		g.setFont(small);
-		g.drawString(s, (scrSize - metr.stringWidth(s)) / 2, scrSize / 2 - metr.getHeight() * 3 / 2);
-		g.drawString(d, (scrSize - metr.stringWidth(d)) / 2, scrSize / 2 - metr.getHeight() / 2);
-		g.drawString(f, (scrSize - metr.stringWidth(f)) / 2, scrSize / 2 + metr.getHeight() / 2);
-		g.drawString(h, (scrSize - metr.stringWidth(h)) / 2, scrSize / 2 + metr.getHeight() * 3 / 2);
+		g.drawString(s, (SCRSIZE - metr.stringWidth(s)) / 2, SCRSIZE / 2 - metr.getHeight() * 3 / 2);
+		g.drawString(d, (SCRSIZE - metr.stringWidth(d)) / 2, SCRSIZE / 2 - metr.getHeight() / 2);
+		g.drawString(f, (SCRSIZE - metr.stringWidth(f)) / 2, SCRSIZE / 2 + metr.getHeight() / 2);
+		g.drawString(h, (SCRSIZE - metr.stringWidth(h)) / 2, SCRSIZE / 2 + metr.getHeight() * 3 / 2);
 		drawHighScores(g);
 	}
 
@@ -178,18 +178,18 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		FontMetrics fm = getFontMetrics(smallFont);
 
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(scrSize / 4, scrSize - (scrSize / 3) - fm.getAscent(), scrSize / 2, blockSize * 4);
+		g.fillRect(SCRSIZE / 4, SCRSIZE - (SCRSIZE / 3) - fm.getAscent(), SCRSIZE / 2, BLOCKSIZE * 4);
 		g.setColor(Color.white);
-		g.drawRect(scrSize / 4, scrSize - (scrSize / 3) - fm.getAscent(), scrSize / 2, blockSize * 4);
+		g.drawRect(SCRSIZE / 4, SCRSIZE - (SCRSIZE / 3) - fm.getAscent(), SCRSIZE / 2, BLOCKSIZE * 4);
 
 		g.setColor(new Color(96, 128, 255));
 		for (int i = 0; i < scores.size(); i++) {
 			if (i < 5)
-				g.drawString((i + 1) + ": " + scores.get(i), scrSize / 4 + blockSize,
-						scrSize - (scrSize / 3) + (i * fm.getHeight()));
+				g.drawString((i + 1) + ": " + scores.get(i), SCRSIZE / 4 + BLOCKSIZE,
+						SCRSIZE - (SCRSIZE / 3) + (i * fm.getHeight()));
 			else if (i < 10)
-				g.drawString((i + 1) + ": " + scores.get(i), scrSize / 2 + blockSize,
-						scrSize - (scrSize / 3) + ((i - 5) * fm.getHeight()));
+				g.drawString((i + 1) + ": " + scores.get(i), SCRSIZE / 2 + BLOCKSIZE,
+						SCRSIZE - (SCRSIZE / 3) + ((i - 5) * fm.getHeight()));
 		}
 	}
 
@@ -201,9 +201,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private void showPauseScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(50, scrSize / 2 - 50, scrSize - 100, 90);
+		g.fillRect(50, SCRSIZE / 2 - 50, SCRSIZE - 100, 90);
 		g.setColor(Color.white);
-		g.drawRect(50, scrSize / 2 - 50, scrSize - 100, 90);
+		g.drawRect(50, SCRSIZE / 2 - 50, SCRSIZE - 100, 90);
 
 		String a = "Game Paused...";
 		String b = "Press 'p' or 'Pause' to continue";
@@ -214,9 +214,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		g.setColor(Color.white);
 		g.setFont(big);
-		g.drawString(a, (scrSize - metr1.stringWidth(a)) / 2, scrSize / 2 - metr1.getHeight() / 2);
+		g.drawString(a, (SCRSIZE - metr1.stringWidth(a)) / 2, SCRSIZE / 2 - metr1.getHeight() / 2);
 		g.setFont(small);
-		g.drawString(b, (scrSize - metr2.stringWidth(b)) / 2, scrSize / 2 + metr2.getHeight() / 2);
+		g.drawString(b, (SCRSIZE - metr2.stringWidth(b)) / 2, SCRSIZE / 2 + metr2.getHeight() / 2);
 	}
 
 	/**
@@ -251,12 +251,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 					break;
 				case KeyEvent.VK_ESCAPE:
 					if (timer.isRunning()) {
-						board.resetGame();
+						board.keyPressed(KeyEvent.VK_ESCAPE);
 					}
 					break;
 				}
 			}
-
 		}
 
 		@Override
@@ -273,9 +272,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 */
 	private void showHelpScreen(Graphics g) {
 		g.setColor(new Color(0, 32, 48));
-		g.fillRect(10, 10, scrSize - 15, scrSize - 15);
+		g.fillRect(10, 10, SCRSIZE - 15, SCRSIZE - 15);
 		g.setColor(Color.white);
-		g.drawRect(10, 10, scrSize - 15, scrSize - 15);
+		g.drawRect(10, 10, SCRSIZE - 15, SCRSIZE - 15);
 
 		int bx = 25, by = 60;
 
@@ -288,7 +287,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		g.setColor(Color.white);
 		g.setFont(big);
-		g.drawString(a, (scrSize - metr1.stringWidth(a)) / 2, 40);
+		g.drawString(a, (SCRSIZE - metr1.stringWidth(a)) / 2, 40);
 		g.setFont(medium);
 		g.drawString("Title Screen", bx, by);
 		g.drawString("In Game", bx + 200, by);
@@ -332,28 +331,28 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 *
 	 * @param g a Graphics object
 	 */
-	private void drawScore(Graphics g, Board board) {
+	private void drawScore(Graphics g, BoardInterface board) {
 		g.setFont(smallFont);
 		g.setColor(new Color(96, 128, 255));
 		int score = board.getScore();
 		GameType gt = board.getGameType();
 		if (gt == GameType.VERSUS) {
 			String p = "Pellets left: " + (board.getNumPellet() - score);
-			g.drawString(p, scrSize / 2 + 96, scrSize + 16);
+			g.drawString(p, SCRSIZE / 2 + 96, SCRSIZE + 16);
 		} else {
 			String s = "Score: " + score;
-			g.drawString(s, scrSize / 2 + 136, scrSize + 16);
-			g.drawString("BG Games: " + bgc.getNCompletedGames(), scrSize / 2 - 100, scrSize + 16);
-			g.drawString("Models: " + bgc.getNTrainedModels(), scrSize / 2 + 20, scrSize + 16);
+			g.drawString(s, SCRSIZE / 2 + 136, SCRSIZE + 16);
+			g.drawString("BG Games: " + bgc.getNCompletedGames(), SCRSIZE / 2 - 100, SCRSIZE + 16);
+			g.drawString("Models: " + bgc.getNTrainedModels(), SCRSIZE / 2 + 20, SCRSIZE + 16);
 		}
 
 		for (int i = 0; i < board.getPacman().lives; i++) {
-			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, scrSize + 1, this);
+			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, SCRSIZE + 1, this);
 		}
 
 		if (gt == GameType.COOPERATIVE) {
 			for (int i = 0; i < board.getMsPacman().lives; i++) {
-				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, scrSize + 1,
+				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, SCRSIZE + 1,
 						this);
 			}
 		}
@@ -382,7 +381,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawPacman(Graphics2D g2d, JComponent canvas, PacPlayer pacman) {
 		if (pacman.deathTimer % 5 > 3)
 			return; // Flicker while invincibile
-		doAnimPacman(pacman);
+
 		AssetController ac = AssetController.getInstance();
 		if (pacman.direction == 1)
 			g2d.drawImage(ac.pacmanLeft[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
@@ -398,18 +397,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 					pacman.y + 4, canvas);
 	}
 
-	/**
-	 * Animates the Pacman sprite's direction as well as mouth opening and closing
-	 */
-	private void doAnimPacman(PacPlayer pacman) {
-		pacman.setPacanimcount(pacman.getPacanimcount() - 1);
-		if (pacman.getPacanimcount() <= 0) {
-			pacman.setPacanimcount(pacman.getPacanimdelay());
-			pacman.setPacmananimpos(pacman.getPacmananimpos() + pacman.getPacanimdir());
-			if (pacman.getPacmananimpos() == (pacman.getPacanimcount() - 1) || pacman.getPacmananimpos() == 0)
-				pacman.setPacanimdir(-pacman.getPacanimdir());
-		}
-	}
+
 
 	public void drawGameOver() {
 		GameType gt = board.getGameType();
@@ -437,28 +425,28 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
-		for (int i = 0; i < numBlocks; i++) {
-			for (int j = 0; j < numBlocks; j++) {
-				y = i * blockSize + 3;
-				x = j * blockSize + 3;
+		for (int i = 0; i < NUMBLOCKS; i++) {
+			for (int j = 0; j < NUMBLOCKS; j++) {
+				y = i * BLOCKSIZE + 3;
+				x = j * BLOCKSIZE + 3;
 
 				Grid grid = board.getGrid();
-				g2d.setColor(grid.getMazeColor());
+				g2d.setColor(mazeColor);
 
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_LEFT) != 0) // draws
 					// left
-					g2d.drawLine(x, y, x, y + blockSize - 1);
+					g2d.drawLine(x, y, x, y + BLOCKSIZE - 1);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_TOP) != 0) // draws
 																						// top
-					g2d.drawLine(x, y, x + blockSize - 1, y);
+					g2d.drawLine(x, y, x + BLOCKSIZE - 1, y);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_RIGHT) != 0) // draws
 					// right
-					g2d.drawLine(x + blockSize - 1, y, x + blockSize - 1, y + blockSize - 1);
+					g2d.drawLine(x + BLOCKSIZE - 1, y, x + BLOCKSIZE - 1, y + BLOCKSIZE - 1);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_BOTTOM) != 0) // draws
 																							// bottom
-					g2d.drawLine(x, y + blockSize - 1, x + blockSize - 1, y + blockSize - 1);
+					g2d.drawLine(x, y + BLOCKSIZE - 1, x + BLOCKSIZE - 1, y + BLOCKSIZE - 1);
 
-				g2d.setColor(grid.getDotColor());
+				g2d.setColor(dotColor);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_PELLET) != 0) // draws
 																					// pellet
 					g2d.fillRect(x + 11, y + 11, 2, 2);
@@ -467,12 +455,11 @@ public class BoardRenderer extends JPanel implements ActionListener {
 																						// power
 																						// pill
 					g2d.fillOval(x + 6, y + 6, 12, 12);
-				g2d.setColor(grid.getFruitColor());
+				g2d.setColor(fruitColor);
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_FRUIT) != 0) // draws
 																					// fruit
 					g2d.fillRect(x + 10, y + 10, 4, 4);
 			}
 		}
 	}
-
 }

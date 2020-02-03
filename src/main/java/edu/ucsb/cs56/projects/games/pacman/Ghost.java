@@ -175,16 +175,15 @@ public class Ghost extends Character {
 			dx = reqdx;
 			dy = reqdy;
 		}
-		if (x % board.getBlocksize() == 0 && y % board.getBlocksize() == 0) {
+		if (x % Board.BLOCKSIZE == 0 && y % Board.BLOCKSIZE == 0) {
 			// Tunnel effect
-			x = ((x / board.getBlocksize() + board.getNumblocks()) % board.getNumblocks()) * board.getBlocksize();
-			y = ((y / board.getBlocksize() + board.getNumblocks()) % board.getNumblocks()) * board.getBlocksize();
+			x = ((x / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
+			y = ((y / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
 
-			ch = grid.getScreenData()[y / board.getBlocksize()][x / board.getBlocksize()];
+			ch = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
 
 			if ((ch & 32) != 0) {
-				grid.getScreenData()[y / board.getBlocksize()][x
-						/ board.getBlocksize()] = (short) (ch ^ 32);
+				grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE] = (short) (ch ^ 32);
 				board.addScore(-5);
 			}
 
@@ -264,23 +263,21 @@ public class Ghost extends Character {
 			}
 
 			if (count > 0 && hasChoice(grid)) {
-				Node bestDir = pathFind(grid, coord[0][0] / Board.getBlocksizeStatic(),
-						coord[0][1] / Board.getBlocksizeStatic());
+				Node bestDir = pathFind(grid, coord[0][0] / Board.BLOCKSIZE, coord[0][1] / Board.BLOCKSIZE);
 				Node tempDir;
 				for (int i = 1; i < count; i++) // Loop through each pacman
 				{
-					tempDir = pathFind(grid, coord[i][0] / Board.getBlocksizeStatic(),
-							coord[i][1] / Board.getBlocksizeStatic());
+					tempDir = pathFind(grid, coord[i][0] / Board.BLOCKSIZE, coord[i][1] / Board.BLOCKSIZE);
 					if (tempDir.distance.value < bestDir.distance.value) // If new path is shorter
 						bestDir = tempDir;
 				}
 
-				if (bestDir.x - this.x / Board.getBlocksizeStatic() == 0
-						&& bestDir.y - this.y / Board.getBlocksizeStatic() == 0) // ghost on pacman
+				if (bestDir.x - this.x / Board.BLOCKSIZE == 0 && bestDir.y - this.y / Board.BLOCKSIZE == 0) // ghost on
+																											// pacman
 					moveRandom(grid);
 				else {
-					dx = bestDir.x - this.x / Board.getBlocksizeStatic();
-					dy = bestDir.y - this.y / Board.getBlocksizeStatic();
+					dx = bestDir.x - this.x / Board.BLOCKSIZE;
+					dy = bestDir.y - this.y / Board.BLOCKSIZE;
 				}
 			} else {
 				moveRandom(grid);
@@ -307,9 +304,9 @@ public class Ghost extends Character {
 		PriorityQueue<Node> opened = new PriorityQueue<Node>();
 		HashSet<Node> closed = new HashSet<Node>();
 
-		temp = new Node(this.x / Board.getBlocksizeStatic(), this.y / Board.getBlocksizeStatic(), 0); // current
-																										// location of
-																										// ghost
+		temp = new Node(this.x / Board.BLOCKSIZE, this.y / Board.BLOCKSIZE, 0); // current
+																				// location of
+																				// ghost
 		temp.init();
 		temp.setDir(dx, dy);
 		opened.offer(temp);
@@ -363,7 +360,7 @@ public class Ghost extends Character {
 	 */
 	public void moveRandom(Grid grid) {
 		// Makes sure ghost is in a grid and not in movement
-		if (this.x % Board.getBlocksizeStatic() == 0 && this.y % Board.getBlocksizeStatic() == 0) {
+		if (this.x % Board.BLOCKSIZE == 0 && this.y % Board.BLOCKSIZE == 0) {
 			ArrayList<Point> list = moveList(grid);
 
 			// randomly pick an available move
@@ -380,7 +377,7 @@ public class Ghost extends Character {
 	 */
 	private ArrayList<Point> moveList(Grid grid) {
 		ArrayList<Point> moves = new ArrayList<Point>();
-		int block = grid.getScreenData()[y / Board.getBlocksizeStatic()][x / Board.getBlocksizeStatic()];
+		int block = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
 
 		// First condition prevents checks collision with wall
 		// Second condition prevents switching direction abruptly (left -> right) (up ->
@@ -398,8 +395,8 @@ public class Ghost extends Character {
 	}
 
 	private boolean hasChoice(Grid grid) {
-		if (this.x % Board.getBlocksizeStatic() == 0 && this.y % Board.getBlocksizeStatic() == 0) {
-			int block = grid.getScreenData()[y / Board.getBlocksizeStatic()][x / Board.getBlocksizeStatic()];
+		if (this.x % Board.BLOCKSIZE == 0 && this.y % Board.BLOCKSIZE == 0) {
+			int block = grid.getScreenData()[y / Board.BLOCKSIZE][x / Board.BLOCKSIZE];
 			int count = (block & 1) == 0 && this.dx != 1 ? 1 : 0;
 			count += (block & 2) == 0 && this.dy != 1 ? 1 : 0;
 			count += (block & 4) == 0 && this.dx != -1 ? 1 : 0;

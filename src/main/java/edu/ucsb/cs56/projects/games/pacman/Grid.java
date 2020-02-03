@@ -1,9 +1,9 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
-import java.awt.Color;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -15,10 +15,14 @@ import java.util.Arrays;
  * @version CS56 F16
  */
 
-public class Grid {
-	public int fruitCounter = 0;
-	public int x;
-	public int y;
+public class Grid implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int fruitCounter = 0;
+	private int x;
+	private int y;
 
 	/*
 	 * check this link to implement the ghost AI movement at intersection. Revise
@@ -28,11 +32,9 @@ public class Grid {
 	 */
 
 	private short[][] screenData;
-	short[][][] levelsData;
+	private short[][][] levelsData;
 	private GridWalker[] gridWalkers = null;
-	private Color mazeColor;
-	private Color dotColor;
-	private Color fruitColor;
+
 	private int currentLevel;
 
 	class Pair {
@@ -44,10 +46,11 @@ public class Grid {
 	 * Constructor for Board object
 	 */
 	public Grid() {
-		setScreenData(new short[Board.getNumblocksStatic()][Board.getNumblocksStatic()]);
-		setMazeColor(new Color(5, 100, 5));
-		setDotColor(new Color(192, 192, 0));
-		setFruitColor(new Color(255, 0, 0));
+
+	}
+
+	public void load() {
+		screenData = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 
 		String[] loadableLevels = { "level1.data", "level2.data", "level3.data", "level4.data", "level5.data" };
 		this.levelsData = new short[loadableLevels.length][1][1];
@@ -82,8 +85,8 @@ public class Grid {
 	 * @return A boolean indicating whether or not the maze is finished
 	 */
 	public boolean checkMaze() {
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((getScreenData()[i][j] & (GridData.GRID_CELL_PELLET ^ GridData.GRID_CELL_POWER_PILL)) != 0)
 					return false;
 			}
@@ -98,8 +101,8 @@ public class Grid {
 	 */
 	public int getPelletNum() {
 		int numOfPellet = 0;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((getScreenData()[i][j] & GridData.GRID_CELL_PELLET) != 0)
 					numOfPellet++;
 			}
@@ -114,8 +117,8 @@ public class Grid {
 	 */
 	public int getPillNum() {
 		int numOfPill = 0;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((getScreenData()[i][j] & GridData.GRID_CELL_POWER_PILL) != 0)
 					numOfPill++;
 			}
@@ -131,8 +134,8 @@ public class Grid {
 	 */
 	public int getPelletNumForMap(int numBoardsCleared) {
 		int numOfPellet = 0;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				if ((this.levelsData[numBoardsCleared % this.levelsData.length][i][j]
 						& GridData.GRID_CELL_PELLET) != 0) {
 					numOfPellet++;
@@ -149,9 +152,9 @@ public class Grid {
 	 */
 	public void levelInit(int numBoardsCleared) {
 		this.currentLevel = numBoardsCleared;
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			getScreenData()[i] = Arrays.copyOf(this.levelsData[numBoardsCleared % this.levelsData.length][i],
-					Board.getNumblocksStatic());
+					Board.NUMBLOCKS);
 		}
 	}
 
@@ -180,8 +183,8 @@ public class Grid {
 	 */
 
 	public void randomBlock() {
-		this.x = (int) (Math.random() * Board.getNumblocksStatic());
-		this.y = (int) (Math.random() * Board.getNumblocksStatic());
+		this.x = (int) (Math.random() * Board.NUMBLOCKS);
+		this.y = (int) (Math.random() * Board.NUMBLOCKS);
 	}
 
 	/**
@@ -198,7 +201,8 @@ public class Grid {
 					if (((getScreenData()[this.x][this.y] & GridData.GRID_CELL_PELLET) == 0)
 							&& (this.levelsData[numBoardsCleared % this.levelsData.length][this.x][this.y]
 									& GridData.GRID_CELL_PELLET) != 0) {
-						getScreenData()[this.x][this.y] = (short) (getScreenData()[this.x][this.y] | GridData.GRID_CELL_FRUIT);
+						getScreenData()[this.x][this.y] = (short) (getScreenData()[this.x][this.y]
+								| GridData.GRID_CELL_FRUIT);
 						break;
 					}
 					this.randomBlock();
@@ -212,10 +216,10 @@ public class Grid {
 	}
 
 	public void writeGrid(PrintStream gridOut) {
-		for (int i = 0; i < Board.getNumblocksStatic(); i++) {
-			for (int j = 0; j < Board.getNumblocksStatic(); j++) {
+		for (int i = 0; i < Board.NUMBLOCKS; i++) {
+			for (int j = 0; j < Board.NUMBLOCKS; j++) {
 				gridOut.print("" + getScreenData()[i][j]);
-				if (j < Board.getNumblocksStatic() - 1) {
+				if (j < Board.NUMBLOCKS - 1) {
 					gridOut.print(",");
 				}
 			}
@@ -227,35 +231,7 @@ public class Grid {
 		return gridWalkers[currentLevel];
 	}
 
-	public Color getMazeColor() {
-		return mazeColor;
-	}
-
-	public void setMazeColor(Color mazeColor) {
-		this.mazeColor = mazeColor;
-	}
-
 	public short[][] getScreenData() {
 		return screenData;
-	}
-
-	public void setScreenData(short[][] screenData) {
-		this.screenData = screenData;
-	}
-
-	public Color getFruitColor() {
-		return fruitColor;
-	}
-
-	public void setFruitColor(Color fruitColor) {
-		this.fruitColor = fruitColor;
-	}
-
-	public Color getDotColor() {
-		return dotColor;
-	}
-
-	public void setDotColor(Color dotColor) {
-		this.dotColor = dotColor;
 	}
 }

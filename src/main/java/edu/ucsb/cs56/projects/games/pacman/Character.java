@@ -54,6 +54,12 @@ public abstract class Character implements EventTrackable {
 		alive = true;
 		reset();
 	}
+	/**
+	 * Default constructor for data access
+	 */
+	public Character() {
+		
+	}
 
 	/**
 	 * Restores the character's default values.
@@ -133,9 +139,9 @@ public abstract class Character implements EventTrackable {
 		x = x + speed * dx;
 		y = y + speed * dy;
 
-		if (x % Board.getBlocksizeStatic() == 0 && y % Board.getBlocksizeStatic() == 0) {
-			x = ((x / Board.getBlocksizeStatic() + Board.getNumblocksStatic()) % Board.getNumblocksStatic()) * Board.getBlocksizeStatic();
-			y = ((y / Board.getBlocksizeStatic() + Board.getNumblocksStatic()) % Board.getNumblocksStatic()) * Board.getBlocksizeStatic();
+		if (x % Board.BLOCKSIZE == 0 && y % Board.BLOCKSIZE == 0) {
+			x = ((x / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
+			y = ((y / Board.BLOCKSIZE + Board.NUMBLOCKS) % Board.NUMBLOCKS) * Board.BLOCKSIZE;
 		}
 	}
 
@@ -156,8 +162,8 @@ public abstract class Character implements EventTrackable {
 		hashtable.put("ghostNum", "" + ghostNum);
 		hashtable.put("playerType", playerType.name());
 		hashtable.put("characterID", "" + characterID);
-		hashtable.put("x", "" + x / Board.getBlocksizeStatic());
-		hashtable.put("y", "" + y / Board.getBlocksizeStatic());
+		hashtable.put("x", "" + x / Board.BLOCKSIZE);
+		hashtable.put("y", "" + y / Board.BLOCKSIZE);
 		hashtable.put("dx", "" + dx);
 		hashtable.put("dy", "" + dy);
 		hashtable.put("reqdx", "" + reqdx);

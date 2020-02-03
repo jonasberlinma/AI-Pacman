@@ -129,14 +129,16 @@ public class GameController implements Runnable {
 
 	private void startForegroundGame() throws NumberFormatException, FileNotFoundException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
-
+		
 		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay", "40")), true);
+		boolean remote = Boolean.parseBoolean(prop.getProperty("remote", "false"));
 
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
 
-			boardRenderer = new BoardRenderer(foregroundAIGame.getBoard(), this);
+			BoardServer boardServer = new BoardServer(foregroundAIGame.getBoard(), remote);
+			boardRenderer = new BoardRenderer(boardServer, this);
 
 			boardRenderer.start();
 			foregroundAIGame.start();
