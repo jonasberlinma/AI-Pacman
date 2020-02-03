@@ -33,7 +33,7 @@ import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
  * @author Kekoa Sato
  * @version CS56 F16
  */
-public class Board implements Runnable, EventTrackable, BoardInterface {
+public class Board implements Runnable, EventTrackable {
 	/**
 	 * 
 	 */
@@ -400,7 +400,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		}
 	}
 
-	@Override
 	public void keyPressed(int key) {
 
 		if (gt == GameType.INTRO) {
@@ -458,7 +457,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		}
 	}
 
-	@Override
 	public void keyReleased(int key) {
 		DataEvent dataEvent = new DataEvent(DataEventType.KEY_RELEASE, this, this);
 		dataEvent.setKeyValuePair("key", KeyEvent.getKeyText(key));
@@ -528,7 +526,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	 * 
 	 * @return
 	 */
-	@Override
 	public boolean doPlayAudio() {
 		return audioClipID != -1;
 	}
@@ -538,7 +535,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	 * 
 	 * @return
 	 */
-	@Override
 	public int getAudioClipID() {
 		int clipID = this.audioClipID;
 		this.audioClipID = -1;
@@ -552,7 +548,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		return hashtable;
 	}
 
-	@Override
 	public PacPlayer getMsPacman() {
 		return msPacman;
 	}
@@ -561,7 +556,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.msPacman = msPacman;
 	}
 
-	@Override
 	public PacPlayer getPacman() {
 		return pacman;
 	}
@@ -570,7 +564,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.pacman = pacman;
 	}
 
-	@Override
 	public Vector<Ghost> getGhosts() {
 		return ghosts;
 	}
@@ -579,7 +572,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.ghosts = ghosts;
 	}
 
-	@Override
 	public int getNumPellet() {
 		return numPellet;
 	}
@@ -588,17 +580,14 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.numPellet = numPellet;
 	}
 
-	@Override
 	public GameType getGameType() {
 		return gt;
 	}
 
-	@Override
 	public Grid getGrid() {
 		return grid;
 	}
 
-	@Override
 	public int getScore() {
 		return score;
 	}

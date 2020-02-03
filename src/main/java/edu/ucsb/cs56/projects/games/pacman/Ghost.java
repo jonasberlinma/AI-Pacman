@@ -41,6 +41,10 @@ public class Ghost extends Character {
 		prev_speed = speed;
 		edibleTimer = 1;
 	}
+	
+	public Ghost() {
+		
+	}
 
 	/**
 	 * Handles character's death

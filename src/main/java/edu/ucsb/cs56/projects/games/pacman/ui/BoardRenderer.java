@@ -18,9 +18,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import edu.ucsb.cs56.projects.games.pacman.BoardInterface;
+import edu.ucsb.cs56.projects.games.pacman.GameInterface;
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
-import edu.ucsb.cs56.projects.games.pacman.GameController;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
 import edu.ucsb.cs56.projects.games.pacman.Ghost;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
@@ -38,17 +37,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static final int BLOCKSIZE = 24;
 	private static final int NUMBLOCKS = 17;
 	private static final int SCRSIZE = BLOCKSIZE * NUMBLOCKS;
-	
+
 	private Color mazeColor = new Color(5, 100, 5);
 	private Color dotColor = new Color(192, 192, 0);
 	private Color fruitColor = new Color(255, 0, 0);
-	
-	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
 
+	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser",
+			"pacmanleaderboardversus.ser" };
 
-	private BoardInterface board = null;
+	private GameInterface board = null;
 	private BoardFrame bf = null;
-	private GameController bgc = null;
 
 	private int actionCount = 0;
 
@@ -66,9 +64,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		timer.stop();
 	}
 
-	public BoardRenderer(BoardInterface board, GameController bgc) {
+	public BoardRenderer(GameInterface board) {
 		this.board = board;
-		this.bgc = bgc;
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
@@ -76,7 +73,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		AssetController.getInstance();
 
 		leaderBoardGui.setLeaderBoardFileName(files);
-		
+
 		bf = new BoardFrame();
 		bf.add(this);
 	}
@@ -331,7 +328,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 *
 	 * @param g a Graphics object
 	 */
-	private void drawScore(Graphics g, BoardInterface board) {
+	private void drawScore(Graphics g, GameInterface board) {
 		g.setFont(smallFont);
 		g.setColor(new Color(96, 128, 255));
 		int score = board.getScore();
@@ -342,8 +339,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		} else {
 			String s = "Score: " + score;
 			g.drawString(s, SCRSIZE / 2 + 136, SCRSIZE + 16);
-			g.drawString("BG Games: " + bgc.getNCompletedGames(), SCRSIZE / 2 - 100, SCRSIZE + 16);
-			g.drawString("Models: " + bgc.getNTrainedModels(), SCRSIZE / 2 + 20, SCRSIZE + 16);
+			g.drawString("BG Games: " + board.getNCompletedGames(), SCRSIZE / 2 - 100, SCRSIZE + 16);
+			g.drawString("Models: " + board.getNTrainedModels(), SCRSIZE / 2 + 20, SCRSIZE + 16);
 		}
 
 		for (int i = 0; i < board.getPacman().lives; i++) {
@@ -396,8 +393,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			g2d.drawImage(ac.pacmanRight[pacman.getPlayerType().ordinal()][pacman.getPacmananimpos()], pacman.x + 4,
 					pacman.y + 4, canvas);
 	}
-
-
 
 	public void drawGameOver() {
 		GameType gt = board.getGameType();

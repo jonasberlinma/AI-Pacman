@@ -75,9 +75,6 @@ public class PacMan {
 			case "-noStop":
 				prop.setProperty("noStop", "true");
 				break;
-			case "-remote":
-				prop.setProperty("remote", "true");
-				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
 				System.exit(1);

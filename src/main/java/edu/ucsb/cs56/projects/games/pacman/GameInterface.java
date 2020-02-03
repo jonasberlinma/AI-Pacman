@@ -2,7 +2,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.util.Vector;
 
-public interface BoardInterface {
+public interface GameInterface {
 
 	// Get the basic grid the characters are running around
 	public Grid getGrid();
@@ -31,4 +31,10 @@ public interface BoardInterface {
 	public boolean doPlayAudio();
 
 	public int getAudioClipID();
+
+	// Overall status of games
+
+	public int getNCompletedGames();
+
+	public int getNTrainedModels();
 }
