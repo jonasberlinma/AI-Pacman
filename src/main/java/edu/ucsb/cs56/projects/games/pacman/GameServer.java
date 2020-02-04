@@ -190,14 +190,17 @@ public class GameServer implements GameInterface, Runnable {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket(port);
+			System.out.println("Waiting for connect on port: " + port);
 			Socket clientSocket = serverSocket.accept();
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			String command = null;
-			while ((command = in.readLine()) != null) {
+			String commandLine = null;
+			while ((commandLine = in.readLine()) != null) {
+				System.out.println("Server received: " + commandLine);
 				String json = null;
 				try {
-					switch (command) {
+					String[] command=commandLine.split("=");
+					switch (command[0]) {
 					case "grid":
 						json = objectMapper.writeValueAsString(board.getGrid());
 						break;
@@ -220,8 +223,12 @@ public class GameServer implements GameInterface, Runnable {
 						json = this.getJSONFromInt(board.getScore());
 						break;
 					case "keyPressed":
+						board.keyPressed(Integer.parseInt(command[1]));
+						json = "";
 						break;
 					case "keyReleased":
+						board.keyReleased(Integer.parseInt(command[1]));
+						json = "";
 						break;
 					case "doPlayAudio":
 						json = this.getJSONFromBoolean(board.doPlayAudio());
@@ -242,7 +249,9 @@ public class GameServer implements GameInterface, Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				out.write(json);
+				out.println(json);
+				out.flush();
+				System.out.println("Server sent: " + json);
 			}
 		} catch (IOException e1) {
 			System.err.println("Unable to open socket on port: " + port);
@@ -255,5 +264,15 @@ public class GameServer implements GameInterface, Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Stopping");
+		board.stop();
+		try {
+			board.join();
+		} catch (InterruptedException e) {
+		}
+		bgc.stop();
+		bgc.join();
+		
+		System.exit(0);
 	}
 }

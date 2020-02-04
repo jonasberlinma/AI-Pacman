@@ -27,12 +27,13 @@ public class GameClient implements GameInterface {
 			socket = new Socket(host, port);
 			out = new PrintWriter(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			System.out.println("Connected to: " + host);
 		} catch (UnknownHostException e) {
 			System.err.println("Can't connect to: " + host);
 			e.printStackTrace();
 			System.exit(1);
 		} catch (IOException e) {
-			System.err.println("Unable to open input or output streat to: " + host);
+			System.err.println("Unable to open input or output stream to: " + host);
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -170,9 +171,12 @@ public class GameClient implements GameInterface {
 	}
 	private String getRemoteJSON(String command) {
 		out.println(command);
+		out.flush();
+		System.out.println("Client sent: " + command);
 		String json = null;
 		try {
 			json = in.readLine();
+			System.out.println("Client received: " + json);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

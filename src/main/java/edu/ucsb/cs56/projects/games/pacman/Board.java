@@ -270,9 +270,13 @@ public class Board implements Runnable, EventTrackable {
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);
 		dataInterface.setData(de);
-
-		numBoardsCleared = 0;
-		grid.levelInit(0);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		//numBoardsCleared = 0;
+		//grid.levelInit(0);
 	}
 
 	/**

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -48,8 +49,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private GameInterface board = null;
 	private BoardFrame bf = null;
 
-	private int actionCount = 0;
-
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
 
 	private ScoreLoader sl = new ScoreLoader("highScores.txt");
@@ -66,6 +65,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	public BoardRenderer(GameInterface board) {
 		this.board = board;
+
+	}
+
+	protected void createUI() {
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
@@ -76,6 +79,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 		bf = new BoardFrame();
 		bf.add(this);
+		bf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void start() {
@@ -86,10 +90,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (actionCount++ > 10) {
-			this.validate();
-			this.repaint();
-		}
+		this.validate();
+		this.repaint();
 	}
 
 	@Override
@@ -235,24 +237,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
 			board.keyPressed(key);
-			GameType gt = board.getGameType();
-			if (gt != GameType.INTRO && gt != GameType.HELP) {
-				switch (key) {
-				case KeyEvent.VK_PAUSE:
-				case KeyEvent.VK_P:
-					if (timer.isRunning()) {
-						timer.stop();
-						repaint();
-					} else
-						timer.start();
-					break;
-				case KeyEvent.VK_ESCAPE:
-					if (timer.isRunning()) {
-						board.keyPressed(KeyEvent.VK_ESCAPE);
-					}
-					break;
-				}
-			}
 		}
 
 		@Override
@@ -342,13 +326,14 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			g.drawString("BG Games: " + board.getNCompletedGames(), SCRSIZE / 2 - 100, SCRSIZE + 16);
 			g.drawString("Models: " + board.getNTrainedModels(), SCRSIZE / 2 + 20, SCRSIZE + 16);
 		}
-
-		for (int i = 0; i < board.getPacman().lives; i++) {
+		int pacmanLives = board.getPacman().lives;
+		for (int i = 0; i < pacmanLives; i++) {
 			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, SCRSIZE + 1, this);
 		}
 
 		if (gt == GameType.COOPERATIVE) {
-			for (int i = 0; i < board.getMsPacman().lives; i++) {
+			int msPacmanLives = board.getMsPacman().lives;
+			for (int i = 0; i < msPacmanLives; i++) {
 				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, SCRSIZE + 1,
 						this);
 			}
@@ -409,6 +394,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		else if (gt == GameType.VERSUS)
 			leaderBoardGui.showEndGameScreen(score, d, 3);
 		// gt = GameType.INTRO;
+		timer.stop();
 
 	}
 
@@ -420,12 +406,13 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
+		Grid grid = board.getGrid();
 		for (int i = 0; i < NUMBLOCKS; i++) {
 			for (int j = 0; j < NUMBLOCKS; j++) {
 				y = i * BLOCKSIZE + 3;
 				x = j * BLOCKSIZE + 3;
 
-				Grid grid = board.getGrid();
+
 				g2d.setColor(mazeColor);
 
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_LEFT) != 0) // draws
