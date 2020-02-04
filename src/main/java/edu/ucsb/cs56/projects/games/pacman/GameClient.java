@@ -18,8 +18,9 @@ public class GameClient implements GameInterface {
 	private Socket socket;
 	private PrintWriter out;
 	private BufferedReader in;
+	private boolean verbose = false;
 
-	public GameClient(int port) {
+	public GameClient(int port, boolean verbose) {
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -159,11 +160,15 @@ public class GameClient implements GameInterface {
 	private String getRemoteJSON(String command) {
 		out.println(command);
 		out.flush();
-		System.out.println("Client sent: " + command);
+		if (verbose) {
+			System.out.println("Client sent: " + command);
+		}
 		String json = null;
 		try {
 			json = in.readLine();
-			System.out.println("Client received: " + json);
+			if (verbose) {
+				System.out.println("Client received: " + json);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

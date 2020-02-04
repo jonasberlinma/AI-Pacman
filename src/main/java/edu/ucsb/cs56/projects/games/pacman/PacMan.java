@@ -75,6 +75,12 @@ public class PacMan {
 			case "-noStop":
 				prop.setProperty("noStop", "true");
 				break;
+			case "-port":
+				prop.setProperty("port", argi.next());
+				break;
+			case "-verbose":
+				prop.setProperty("verbose", "true");
+				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
 				System.exit(1);
