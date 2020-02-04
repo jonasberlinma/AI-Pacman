@@ -122,11 +122,6 @@ public class GameServer implements GameInterface, Runnable {
 	}
 
 	@Override
-	public boolean doPlayAudio() {
-		return board.doPlayAudio();
-	}
-
-	@Override
 	public int getAudioClipID() {
 		String json = this.getJSONFromInt(board.getAudioClipID());
 		int audioClipID = this.getIntFromJSON(json);
@@ -152,16 +147,6 @@ public class GameServer implements GameInterface, Runnable {
 		String ret = null;
 		try {
 			ret = objectMapper.writeValueAsString(new Integer(value));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		return ret;
-	}
-
-	private String getJSONFromBoolean(boolean value) {
-		String ret = null;
-		try {
-			ret = objectMapper.writeValueAsString(new Boolean(value));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
@@ -229,9 +214,6 @@ public class GameServer implements GameInterface, Runnable {
 					case "keyReleased":
 						board.keyReleased(Integer.parseInt(command[1]));
 						json = "";
-						break;
-					case "doPlayAudio":
-						json = this.getJSONFromBoolean(board.doPlayAudio());
 						break;
 					case "audioClipID":
 						json = this.getJSONFromInt(board.getAudioClipID());

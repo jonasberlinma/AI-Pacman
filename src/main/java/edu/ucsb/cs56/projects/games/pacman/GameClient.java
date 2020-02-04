@@ -96,10 +96,12 @@ public class GameClient implements GameInterface {
 	public GameType getGameType() {
 		String json = getRemoteJSON("gameType");
 		GameType gameType = null;
-		try {
-			gameType = objectMapper.readValue(json, GameType.class);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (json != null) {
+			try {
+				gameType = objectMapper.readValue(json, GameType.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return gameType;
 	}
@@ -124,13 +126,6 @@ public class GameClient implements GameInterface {
 	@Override
 	public void keyReleased(int key) {
 		getRemoteJSON("keyReleased=" + key);
-	}
-
-	@Override
-	public boolean doPlayAudio() {
-		String json = getRemoteJSON("doPlayAudio");
-		boolean doPlayAudio = getBooleanFromJSON(json);
-		return doPlayAudio;
 	}
 
 	@Override
@@ -160,15 +155,7 @@ public class GameClient implements GameInterface {
 		}
 		return ret;
 	}
-	private boolean getBooleanFromJSON(String json) {
-		Boolean ret = false;
-		try {
-			ret = objectMapper.readValue(json, Boolean.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return ret;
-	}
+
 	private String getRemoteJSON(String command) {
 		out.println(command);
 		out.flush();

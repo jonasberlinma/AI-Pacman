@@ -28,8 +28,6 @@ public interface GameInterface {
 	public void keyReleased(int key);
 
 	// Check if we are supposed to play audio (set by game events)
-	public boolean doPlayAudio();
-
 	public int getAudioClipID();
 
 	// Overall status of games

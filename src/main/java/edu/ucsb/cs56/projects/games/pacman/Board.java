@@ -266,6 +266,7 @@ public class Board implements Runnable, EventTrackable {
 	 * End the game if remaining lives reaches 0.
 	 */
 	private void gameOver() {
+		System.out.println("GameOver called in Board");
 		gt = GameType.GAME_OVER;
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);
@@ -314,7 +315,8 @@ public class Board implements Runnable, EventTrackable {
 	 * @return true if any surviving, false if all dead
 	 */
 	private boolean checkAlive() {
-		return pacmen.stream().anyMatch(x -> x.alive);
+		boolean isAlive = pacmen.stream().anyMatch(x -> x.alive);
+		return isAlive;
 	}
 
 	private void resetGame() {
@@ -523,15 +525,6 @@ public class Board implements Runnable, EventTrackable {
 	 */
 	protected void playAudio(int audioClipID) {
 		this.audioClipID = audioClipID;
-	}
-
-	/**
-	 * Called by renderer to figure if there is a game sound to play
-	 * 
-	 * @return
-	 */
-	public boolean doPlayAudio() {
-		return audioClipID != -1;
 	}
 
 	/**
