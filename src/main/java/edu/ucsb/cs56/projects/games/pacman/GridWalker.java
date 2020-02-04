@@ -3,6 +3,7 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -11,7 +12,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 
-public class GridWalker {
+public class GridWalker implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public enum Direction {
 		LEFT, RIGHT, UP, DOWN;
 		public boolean isSame(Direction other) {
@@ -95,6 +101,10 @@ public class GridWalker {
 		// printGraph("");
 		// System.exit(0);
 	}
+	
+	GridWalker(){
+		
+	}
 
 	protected class PathSection {
 
@@ -105,6 +115,9 @@ public class GridWalker {
 			this.fromPoint = fromPoint;
 			this.toPoint = toPoint;
 			this.length = length;
+		}
+		PathSection(){
+			
 		}
 
 		Direction getDirection() {
@@ -167,6 +180,9 @@ public class GridWalker {
 			this.y = y;
 			nodeNumber = getNodeNumber();
 		}
+		Point(){
+			
+		}
 
 		Point stepRight() {
 			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y);
@@ -225,7 +241,7 @@ public class GridWalker {
 
 	}
 
-	protected class Path {
+	public class Path {
 		private int distance;
 		private boolean edible;
 		ArrayList<PathSection> pathSections = null;
@@ -233,6 +249,9 @@ public class GridWalker {
 		Path(int distance, ArrayList<PathSection> pathSections) {
 			this.distance = distance;
 			this.pathSections = pathSections;
+		}
+		Path(){
+			
 		}
 
 		public Direction getFirstDirection() {
