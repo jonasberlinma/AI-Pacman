@@ -33,7 +33,7 @@ import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
  * @author Kekoa Sato
  * @version CS56 F16
  */
-public class Board implements Runnable, EventTrackable, BoardInterface {
+public class Board implements Runnable, EventTrackable {
 	/**
 	 * 
 	 */
@@ -266,13 +266,18 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	 * End the game if remaining lives reaches 0.
 	 */
 	private void gameOver() {
+		System.out.println("GameOver called in Board");
 		gt = GameType.GAME_OVER;
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);
 		dataInterface.setData(de);
-
-		numBoardsCleared = 0;
-		grid.levelInit(0);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		//numBoardsCleared = 0;
+		//grid.levelInit(0);
 	}
 
 	/**
@@ -310,7 +315,8 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	 * @return true if any surviving, false if all dead
 	 */
 	private boolean checkAlive() {
-		return pacmen.stream().anyMatch(x -> x.alive);
+		boolean isAlive = pacmen.stream().anyMatch(x -> x.alive);
+		return isAlive;
 	}
 
 	private void resetGame() {
@@ -400,7 +406,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		}
 	}
 
-	@Override
 	public void keyPressed(int key) {
 
 		if (gt == GameType.INTRO) {
@@ -458,7 +463,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		}
 	}
 
-	@Override
 	public void keyReleased(int key) {
 		DataEvent dataEvent = new DataEvent(DataEventType.KEY_RELEASE, this, this);
 		dataEvent.setKeyValuePair("key", KeyEvent.getKeyText(key));
@@ -524,21 +528,10 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 	}
 
 	/**
-	 * Called by renderer to figure if there is a game sound to play
-	 * 
-	 * @return
-	 */
-	@Override
-	public boolean doPlayAudio() {
-		return audioClipID != -1;
-	}
-
-	/**
 	 * Called by renderer to figure out what game sound to play
 	 * 
 	 * @return
 	 */
-	@Override
 	public int getAudioClipID() {
 		int clipID = this.audioClipID;
 		this.audioClipID = -1;
@@ -552,7 +545,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		return hashtable;
 	}
 
-	@Override
 	public PacPlayer getMsPacman() {
 		return msPacman;
 	}
@@ -561,7 +553,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.msPacman = msPacman;
 	}
 
-	@Override
 	public PacPlayer getPacman() {
 		return pacman;
 	}
@@ -570,7 +561,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.pacman = pacman;
 	}
 
-	@Override
 	public Vector<Ghost> getGhosts() {
 		return ghosts;
 	}
@@ -579,7 +569,6 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.ghosts = ghosts;
 	}
 
-	@Override
 	public int getNumPellet() {
 		return numPellet;
 	}
@@ -588,17 +577,14 @@ public class Board implements Runnable, EventTrackable, BoardInterface {
 		this.numPellet = numPellet;
 	}
 
-	@Override
 	public GameType getGameType() {
 		return gt;
 	}
 
-	@Override
 	public Grid getGrid() {
 		return grid;
 	}
 
-	@Override
 	public int getScore() {
 		return score;
 	}

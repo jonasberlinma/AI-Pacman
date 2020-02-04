@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import edu.ucsb.cs56.projects.games.pacman.BoardInterface;
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
-import edu.ucsb.cs56.projects.games.pacman.GameController;
+import edu.ucsb.cs56.projects.games.pacman.GameInterface;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
 import edu.ucsb.cs56.projects.games.pacman.Ghost;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
@@ -38,19 +38,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static final int BLOCKSIZE = 24;
 	private static final int NUMBLOCKS = 17;
 	private static final int SCRSIZE = BLOCKSIZE * NUMBLOCKS;
-	
+
 	private Color mazeColor = new Color(5, 100, 5);
 	private Color dotColor = new Color(192, 192, 0);
 	private Color fruitColor = new Color(255, 0, 0);
-	
-	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser", "pacmanleaderboardversus.ser" };
 
+	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser",
+			"pacmanleaderboardversus.ser" };
 
-	private BoardInterface board = null;
+	private GameInterface gameClient = null;
 	private BoardFrame bf = null;
-	private GameController bgc = null;
-
-	private int actionCount = 0;
 
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
 
@@ -60,15 +57,20 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private Timer timer = null;
 	private boolean introAudioPlayed = false;
 
+	private GameType gt;
+	private int score;
+
 	public void stop() {
 		bf.dispose();
 		System.out.println("Stop");
 		timer.stop();
 	}
 
-	public BoardRenderer(BoardInterface board, GameController bgc) {
-		this.board = board;
-		this.bgc = bgc;
+	public BoardRenderer(GameInterface gameClient) {
+		this.gameClient = gameClient;
+	}
+
+	protected void createUI() {
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
@@ -76,9 +78,10 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		AssetController.getInstance();
 
 		leaderBoardGui.setLeaderBoardFileName(files);
-		
+
 		bf = new BoardFrame();
 		bf.add(this);
+		bf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void start() {
@@ -89,20 +92,20 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (actionCount++ > 10) {
-			this.validate();
-			this.repaint();
-		}
+		this.repaint();
 	}
 
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 		Graphics2D g2d = (Graphics2D) g;
-
-		drawMaze(g2d);
-		GameType gt = board.getGameType();
-		drawScore(g, board);
+		gt = gameClient.getGameType();
+		if (gt == null) {
+			gt = GameType.GAME_OVER;
+		} else {
+			drawMaze(g2d);
+			drawScore(g);
+		}
 		switch (gt) {
 		case INTRO:
 			showIntroScreen(g);
@@ -115,24 +118,27 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			showHelpScreen(g);
 			break;
 		case GAME_OVER:
+			timer.stop();
 			drawGameOver();
 			break;
 		default:
 			introAudioPlayed = false;
-			drawPacman(g2d, this, board.getPacman());
+			drawPacman(g2d, this, gameClient.getPacman());
 
 			if (gt == GameType.COOPERATIVE)
-				drawPacman(g2d, this, board.getMsPacman());
-			for (Ghost ghost : board.getGhosts()) {
+				drawPacman(g2d, this, gameClient.getMsPacman());
+			for (Ghost ghost : gameClient.getGhosts()) {
 				drawGhost(g2d, this, ghost);
 			}
 		}
 
-		if (!timer.isRunning())
+		if (gt != GameType.GAME_OVER && !timer.isRunning())
 			showPauseScreen(g);
-
-		if (board.doPlayAudio()) {
-			AssetController.getInstance().playAudio(board.getAudioClipID());
+		if (gt != GameType.GAME_OVER) {
+			int audioClipID;
+			if ((audioClipID = gameClient.getAudioClipID()) != -1) {
+				AssetController.getInstance().playAudio(audioClipID);
+			}
 		}
 
 		Toolkit.getDefaultToolkit().sync();
@@ -237,31 +243,13 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		@Override
 		public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
-			board.keyPressed(key);
-			GameType gt = board.getGameType();
-			if (gt != GameType.INTRO && gt != GameType.HELP) {
-				switch (key) {
-				case KeyEvent.VK_PAUSE:
-				case KeyEvent.VK_P:
-					if (timer.isRunning()) {
-						timer.stop();
-						repaint();
-					} else
-						timer.start();
-					break;
-				case KeyEvent.VK_ESCAPE:
-					if (timer.isRunning()) {
-						board.keyPressed(KeyEvent.VK_ESCAPE);
-					}
-					break;
-				}
-			}
+			gameClient.keyPressed(key);
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
 			int key = e.getKeyCode();
-			board.keyReleased(key);
+			gameClient.keyReleased(key);
 		}
 	}
 
@@ -331,27 +319,27 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	 *
 	 * @param g a Graphics object
 	 */
-	private void drawScore(Graphics g, BoardInterface board) {
+	private void drawScore(Graphics g) {
 		g.setFont(smallFont);
 		g.setColor(new Color(96, 128, 255));
-		int score = board.getScore();
-		GameType gt = board.getGameType();
+		score = gameClient.getScore();
 		if (gt == GameType.VERSUS) {
-			String p = "Pellets left: " + (board.getNumPellet() - score);
+			String p = "Pellets left: " + (gameClient.getNumPellet() - score);
 			g.drawString(p, SCRSIZE / 2 + 96, SCRSIZE + 16);
 		} else {
 			String s = "Score: " + score;
 			g.drawString(s, SCRSIZE / 2 + 136, SCRSIZE + 16);
-			g.drawString("BG Games: " + bgc.getNCompletedGames(), SCRSIZE / 2 - 100, SCRSIZE + 16);
-			g.drawString("Models: " + bgc.getNTrainedModels(), SCRSIZE / 2 + 20, SCRSIZE + 16);
+			g.drawString("BG Games: " + gameClient.getNCompletedGames(), SCRSIZE / 2 - 100, SCRSIZE + 16);
+			g.drawString("Models: " + gameClient.getNTrainedModels(), SCRSIZE / 2 + 20, SCRSIZE + 16);
 		}
-
-		for (int i = 0; i < board.getPacman().lives; i++) {
+		int pacmanLives = gameClient.getPacman().lives;
+		for (int i = 0; i < pacmanLives; i++) {
 			g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.PACMAN), i * 28 + 8, SCRSIZE + 1, this);
 		}
 
 		if (gt == GameType.COOPERATIVE) {
-			for (int i = 0; i < board.getMsPacman().lives; i++) {
+			int msPacmanLives = gameClient.getMsPacman().lives;
+			for (int i = 0; i < msPacmanLives; i++) {
 				g.drawImage(AssetController.getInstance().getLifeImage(PlayerType.MSPACMAN), i * 28 + 108, SCRSIZE + 1,
 						this);
 			}
@@ -397,11 +385,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 					pacman.y + 4, canvas);
 	}
 
-
-
 	public void drawGameOver() {
-		GameType gt = board.getGameType();
-		int score = board.getScore();
+		System.out.println("GameOver called in renderer");
 		if (gt != GameType.VERSUS) {
 			if (score > 1)
 				sl.writeScore(score);
@@ -413,8 +398,6 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			leaderBoardGui.showEndGameScreen(score, d, 2);
 		else if (gt == GameType.VERSUS)
 			leaderBoardGui.showEndGameScreen(score, d, 3);
-		// gt = GameType.INTRO;
-
 	}
 
 	/**
@@ -425,12 +408,12 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
+		Grid grid = gameClient.getGrid();
 		for (int i = 0; i < NUMBLOCKS; i++) {
 			for (int j = 0; j < NUMBLOCKS; j++) {
 				y = i * BLOCKSIZE + 3;
 				x = j * BLOCKSIZE + 3;
 
-				Grid grid = board.getGrid();
 				g2d.setColor(mazeColor);
 
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_BORDER_LEFT) != 0) // draws

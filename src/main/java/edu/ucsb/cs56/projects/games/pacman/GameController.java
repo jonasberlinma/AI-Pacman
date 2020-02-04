@@ -131,17 +131,14 @@ public class GameController implements Runnable {
 			InstantiationException, IllegalAccessException {
 		
 		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay", "40")), true);
-		boolean remote = Boolean.parseBoolean(prop.getProperty("remote", "false"));
-
+		foregroundAIGame.start();
+		
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
 
-			BoardServer boardServer = new BoardServer(foregroundAIGame.getBoard(), remote);
-			boardRenderer = new BoardRenderer(boardServer, this);
-
-			boardRenderer.start();
-			foregroundAIGame.start();
+			GameServer gameServer = new GameServer(foregroundAIGame.getBoard(), this, 8081);
+			gameServer.Start();
 		}
 	}
 
