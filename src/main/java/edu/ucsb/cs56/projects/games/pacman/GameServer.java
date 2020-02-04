@@ -59,7 +59,7 @@ public class GameServer implements Runnable {
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			String commandLine = null;
-			while ((commandLine = in.readLine()) != null) {
+			while (clientSocket.isConnected() && (commandLine = in.readLine()) != null) {
 				if (verbose) {
 					System.out.println("Server received: " + commandLine);
 				}
@@ -136,7 +136,6 @@ public class GameServer implements Runnable {
 		} catch (InterruptedException e) {
 		}
 		bgc.stop();
-		bgc.join();
 
 		System.exit(0);
 	}

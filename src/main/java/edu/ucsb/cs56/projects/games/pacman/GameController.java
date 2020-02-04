@@ -68,6 +68,7 @@ public class GameController implements Runnable {
 	}
 
 	public void stop() {
+		foregroundAIGame.stop();
 		// Turn off the renderer if there is one
 		if (boardRenderer != null) {
 			boardRenderer.stop();

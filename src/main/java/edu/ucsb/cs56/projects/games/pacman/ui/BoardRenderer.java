@@ -74,7 +74,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
-		setDoubleBuffered(false);
+		setDoubleBuffered(true);
 		AssetController.getInstance();
 
 		leaderBoardGui.setLeaderBoardFileName(files);
@@ -86,7 +86,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	public void start() {
 		System.out.println("Start");
-		timer = new Timer(100, this);
+		timer = new Timer(40, this);
 		timer.start();
 	}
 
