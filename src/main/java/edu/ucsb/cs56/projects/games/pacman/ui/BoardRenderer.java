@@ -13,6 +13,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -20,12 +21,15 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
+import edu.ucsb.cs56.projects.games.pacman.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GameInterface;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
 import edu.ucsb.cs56.projects.games.pacman.Ghost;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
 import edu.ucsb.cs56.projects.games.pacman.GridData;
 import edu.ucsb.cs56.projects.games.pacman.PacPlayer;
+import edu.ucsb.cs56.projects.games.pacman.PathSection;
+import edu.ucsb.cs56.projects.games.pacman.Point;
 
 public class BoardRenderer extends JPanel implements ActionListener {
 
@@ -50,6 +54,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private BoardFrame bf = null;
 
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
+	private Font tinyFont = new Font("Helvetica", Font.PLAIN, 11);
 
 	private ScoreLoader sl = new ScoreLoader("highScores.txt");
 	private LeaderboardGUI leaderBoardGui = new LeaderboardGUI();
@@ -59,6 +64,16 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	private GameType gt;
 	private int score;
+
+	private boolean local = false;
+	private int cursorX = 0;
+	private int cursorY = 0;
+	private int markX = 0;
+	private int markY = 0;
+	private Grid grid = null;
+	private ArrayList<PathSection> shortestPath = null;
+	private ArrayList<Direction> directions = null;
+	private LinkedHashMap<String, ArrayList<PathSection>> analysis = null;
 
 	public void stop() {
 		bf.dispose();
@@ -74,7 +89,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		addKeyListener(new TAdapter());
 		setFocusable(true);
 		setBackground(Color.black);
-		setDoubleBuffered(false);
+		setDoubleBuffered(true);
 		AssetController.getInstance();
 
 		leaderBoardGui.setLeaderBoardFileName(files);
@@ -86,7 +101,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	public void start() {
 		System.out.println("Start");
-		timer = new Timer(100, this);
+		timer = new Timer(40, this);
 		timer.start();
 	}
 
@@ -99,48 +114,59 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	public void paint(Graphics g) {
 		super.paint(g);
 		Graphics2D g2d = (Graphics2D) g;
-		gt = gameClient.getGameType();
-		if (gt == null) {
-			gt = GameType.GAME_OVER;
+		if (!local) {
+			gt = gameClient.getGameType();
+			if (gt == null) {
+				gt = GameType.GAME_OVER;
+			} else {
+				drawMaze(g2d);
+				drawScore(g);
+			}
+			switch (gt) {
+			case INTRO:
+				showIntroScreen(g);
+				if (!introAudioPlayed) {
+					AssetController.getInstance().playIntroAudio();
+					introAudioPlayed = true;
+				}
+				break;
+			case HELP:
+				showHelpScreen(g);
+				break;
+			case GAME_OVER:
+				timer.stop();
+				drawGameOver();
+				break;
+			default:
+				introAudioPlayed = false;
+				drawPacman(g2d, this, gameClient.getPacman());
+
+				if (gt == GameType.COOPERATIVE)
+					drawPacman(g2d, this, gameClient.getMsPacman());
+				for (Ghost ghost : gameClient.getGhosts()) {
+					drawGhost(g2d, this, ghost);
+				}
+			}
+
+			if (gt != GameType.GAME_OVER && !timer.isRunning())
+				showPauseScreen(g);
+			if (gt != GameType.GAME_OVER) {
+				int audioClipID;
+				if ((audioClipID = gameClient.getAudioClipID()) != -1) {
+					AssetController.getInstance().playAudio(audioClipID);
+				}
+			}
 		} else {
 			drawMaze(g2d);
-			drawScore(g);
-		}
-		switch (gt) {
-		case INTRO:
-			showIntroScreen(g);
-			if (!introAudioPlayed) {
-				AssetController.getInstance().playIntroAudio();
-				introAudioPlayed = true;
-			}
-			break;
-		case HELP:
-			showHelpScreen(g);
-			break;
-		case GAME_OVER:
-			timer.stop();
-			drawGameOver();
-			break;
-		default:
-			introAudioPlayed = false;
-			drawPacman(g2d, this, gameClient.getPacman());
-
-			if (gt == GameType.COOPERATIVE)
-				drawPacman(g2d, this, gameClient.getMsPacman());
+			drawShortestPath(g2d);
 			for (Ghost ghost : gameClient.getGhosts()) {
 				drawGhost(g2d, this, ghost);
 			}
+			drawMark(g2d);
+			drawCursor(g2d);
+			drawDirections(g2d);
+			drawAnalysis(g2d);
 		}
-
-		if (gt != GameType.GAME_OVER && !timer.isRunning())
-			showPauseScreen(g);
-		if (gt != GameType.GAME_OVER) {
-			int audioClipID;
-			if ((audioClipID = gameClient.getAudioClipID()) != -1) {
-				AssetController.getInstance().playAudio(audioClipID);
-			}
-		}
-
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();
 	}
@@ -243,14 +269,75 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		@Override
 		public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
-			gameClient.keyPressed(key);
+			if (key == KeyEvent.VK_L) {
+				local = true;
+			} else {
+				gameClient.keyPressed(key);
+			}
+			if (local) {
+				switch (key) {
+				case KeyEvent.VK_UP:
+				case KeyEvent.VK_DOWN:
+				case KeyEvent.VK_LEFT:
+				case KeyEvent.VK_RIGHT:
+					moveCursor(key);
+					break;
+				case KeyEvent.VK_SPACE:
+					markX = cursorX;
+					markY = cursorY;
+					break;
+				case KeyEvent.VK_P:
+					shortestPath = gameClient.getShortestPath(cursorX, cursorY, markX, markY);
+					directions = gameClient.getPossibleDirections(cursorX, cursorY);
+					break;
+				case KeyEvent.VK_G:
+					gameClient.putGhost(cursorX, cursorY);
+					break;
+				case KeyEvent.VK_C:
+					gameClient.clear(cursorX, cursorY);
+					break;
+				case KeyEvent.VK_A:
+					analyze();
+				default:
+				}
+			}
 		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
 			int key = e.getKeyCode();
-			gameClient.keyReleased(key);
+			if (!local) {
+				gameClient.keyReleased(key);
+			}
+
 		}
+	}
+
+	private void moveCursor(int key) {
+		switch (key) {
+		case KeyEvent.VK_UP:
+			if (cursorY > 0)
+				cursorY--;
+			break;
+		case KeyEvent.VK_DOWN:
+			if (cursorY < (NUMBLOCKS - 2))
+				cursorY++;
+			break;
+		case KeyEvent.VK_LEFT:
+			if (cursorX > 0)
+				cursorX--;
+			break;
+		case KeyEvent.VK_RIGHT:
+			if (cursorX < (NUMBLOCKS - 1))
+				cursorX++;
+			break;
+		default:
+
+		}
+	}
+
+	private void analyze() {
+		analysis = gameClient.analyze(cursorX, cursorY);
 	}
 
 	/**
@@ -408,7 +495,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
-		Grid grid = gameClient.getGrid();
+		grid = gameClient.getGrid();
 		for (int i = 0; i < NUMBLOCKS; i++) {
 			for (int j = 0; j < NUMBLOCKS; j++) {
 				y = i * BLOCKSIZE + 3;
@@ -442,6 +529,71 @@ public class BoardRenderer extends JPanel implements ActionListener {
 				if ((grid.getScreenData()[i][j] & GridData.GRID_CELL_FRUIT) != 0) // draws
 																					// fruit
 					g2d.fillRect(x + 10, y + 10, 4, 4);
+			}
+		}
+	}
+
+	private void drawRect(Graphics2D g2d, int x, int y, int width, Color color) {
+		g2d.setColor(color);
+		g2d.fillRect((x + 1) * BLOCKSIZE - BLOCKSIZE / 2 - width / 2 + 3,
+				(y + 1) * BLOCKSIZE - BLOCKSIZE / 2 - width / 2 + 3, width, width);
+	}
+
+	private void drawCursor(Graphics2D g2d) {
+		drawRect(g2d, cursorX, cursorY, 12, Color.BLUE);
+		g2d.setFont(tinyFont);
+		g2d.setColor(Color.WHITE);
+		String s = "C: " + cursorX + "," + cursorY;
+		g2d.drawString(s, 4, SCRSIZE + 4);
+	}
+
+	private void drawMark(Graphics2D g2d) {
+		drawRect(g2d, markX, markY, 12, Color.GREEN);
+		g2d.setFont(tinyFont);
+		g2d.setColor(Color.WHITE);
+		String s = "M: " + markX + "," + markY;
+		g2d.drawString(s, 4, SCRSIZE + 20);
+	}
+
+	private void drawPath(Graphics2D g2d, ArrayList<PathSection> path, int size, Color color) {
+		for (PathSection thisSection : path) {
+			Point fromPoint = thisSection.getFromPoint();
+			Point toPoint = thisSection.getToPoint();
+			drawRect(g2d, fromPoint.x, fromPoint.y, size, color);
+			drawRect(g2d, toPoint.x, toPoint.y, size, color);
+		}
+	}
+
+	private void drawShortestPath(Graphics2D g2d) {
+		if (shortestPath != null) {
+			drawPath(g2d, shortestPath, 8, Color.YELLOW);
+			g2d.setColor(Color.WHITE);
+			String s = "Steps: " + shortestPath.size();
+			g2d.setFont(tinyFont);
+			g2d.drawString(s, 50, SCRSIZE + 4);
+		}
+	}
+
+	private void drawDirections(Graphics2D g2d) {
+		g2d.setColor(Color.WHITE);
+		if (directions != null) {
+			String s = "Directions";
+			for (Direction direction : directions) {
+				s = s + " " + direction.toString();
+			}
+			g2d.setFont(tinyFont);
+			g2d.drawString(s, 50, SCRSIZE + 16);
+		}
+	}
+
+	private void drawAnalysis(Graphics2D g2d) {
+		if (analysis != null) {
+			g2d.setFont(tinyFont);
+			int offset = 0;
+			for (String pathName : analysis.keySet()) {
+				drawPath(g2d, analysis.get(pathName), 4, Color.WHITE);
+				g2d.drawString(pathName + ": " + analysis.get(pathName).size(), 250, SCRSIZE - 10 + offset);
+				offset = offset + 12;
 			}
 		}
 	}

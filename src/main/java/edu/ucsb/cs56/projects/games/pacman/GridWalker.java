@@ -12,70 +12,8 @@ import java.util.Iterator;
 import java.util.function.BiFunction;
 
 public class GridWalker {
-	public enum Direction {
-		LEFT, RIGHT, UP, DOWN;
-		public boolean isSame(Direction other) {
-			return this == other;
-		}
 
-		public boolean isOpposite(Direction other) {
-			return this == other.opposite();
-		}
-
-		public Direction opposite() {
-			Direction ret = null;
-			switch (this) {
-			case LEFT:
-				ret = RIGHT;
-				break;
-			case RIGHT:
-				ret = LEFT;
-				break;
-			case UP:
-				ret = DOWN;
-				break;
-			case DOWN:
-				ret = UP;
-				break;
-			}
-			return ret;
-		}
-
-		static Direction parseDirection(String text) {
-			Direction d = null;
-			if (text != null) {
-				switch (text) {
-				case "LEFT":
-				case "←":
-				case "1":
-					d = Direction.LEFT;
-					break;
-				case "RIGHT":
-				case "→":
-				case "2":
-					d = Direction.RIGHT;
-					break;
-				case "DOWN":
-				case "↓":
-				case "3":
-					d = Direction.DOWN;
-					break;
-				case "UP":
-				case "↑":
-				case "4":
-					d = Direction.UP;
-					break;
-				case "0":
-					break;
-				default:
-					System.err.println("Failed to parse direction " + text);
-				}
-			}
-			return d;
-		}
-	};
-
-	private short[][] grid = null;
+	private short[][] levelData = null;
 	private short[][] screenData = null;
 	private short[][] connectionCheck = null;
 
@@ -87,7 +25,7 @@ public class GridWalker {
 	private Hashtable<Point, HashSet<PathSection>> toPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
 
 	GridWalker(GridData level, short[][] screenData) {
-		grid = level.get2DGridData();
+		this.levelData = level.get2DGridData();
 		this.screenData = screenData;
 		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 		buildGraph();
@@ -96,174 +34,14 @@ public class GridWalker {
 		// System.exit(0);
 	}
 
-	protected class PathSection {
-
-		private Point fromPoint, toPoint;
-		private int length;
-
-		PathSection(Point fromPoint, Point toPoint, int length) {
-			this.fromPoint = fromPoint;
-			this.toPoint = toPoint;
-			this.length = length;
-		}
-
-		Direction getDirection() {
-			Direction d = null;
-			// This is for the periodic boundary conditions
-			int xDistance = Math.abs(fromPoint.x - toPoint.x);
-			int yDistance = Math.abs(fromPoint.y - toPoint.y);
-			if (fromPoint.x < toPoint.x) {
-				if (xDistance < 2) {
-					d = Direction.RIGHT;
-				} else {
-					d = Direction.LEFT;
-				}
-			} else if (fromPoint.x > toPoint.x) {
-				if (xDistance < 2) {
-					d = Direction.LEFT;
-				} else {
-					d = Direction.RIGHT;
-				}
-			} else if (fromPoint.y < toPoint.y) {
-				if (yDistance < 2) {
-					d = Direction.DOWN;
-				} else {
-					d = Direction.UP;
-				}
-			} else if (fromPoint.y > toPoint.y) {
-				if (yDistance < 2) {
-					d = Direction.UP;
-				} else {
-					d = Direction.DOWN;
-				}
-			}
-			return d;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			PathSection ps = (PathSection) other;
-			return this.fromPoint.equals(ps.fromPoint) && this.toPoint.equals(ps.toPoint);
-		}
-
-		@Override
-		public int hashCode() {
-			return fromPoint.hashCode() * 31 * toPoint.hashCode();
-		}
-
-		void print(PrintStream out) {
-			out.println("" + fromPoint.nodeNumber + "," + toPoint.nodeNumber + "," + length);
-		}
-	}
-
-	protected class Point {
-
-		int x, y;
-		String nodeNumber = "";
-		// private int distance;
-
-		Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-			nodeNumber = getNodeNumber();
-		}
-
-		Point stepRight() {
-			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y);
-			return newPoint;
-		}
-
-		Point stepDown() {
-			Point newPoint = new Point(x, (y + 1) % Board.NUMBLOCKS);
-			return newPoint;
-		}
-
-		private String getNodeNumber() {
-			return x + "-" + y;
-		}
-
-		@Override
-		public boolean equals(Object point) {
-			Point p = (Point) point;
-			return (this.x == p.x && this.y == p.y);
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 1;
-			hash = hash * 31 + nodeNumber.hashCode() * 4 + x * 8 + y * 16;
-			return hash;
-		}
-
-		void print(PrintStream out) {
-			out.print("" + nodeNumber + "," + nodeNumber);
-		}
-
-		public boolean checkReachable(String type) {
-			boolean reachable = false;
-			if (!reachablePoints.contains(this)) {
-				System.err.println(type + " point not found " + x + "-" + y);
-			} else {
-				reachable = true;
-			}
-			return reachable;
-		}
-
-		boolean hasPellet() {
-			// return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 32) !=
-			// 0 || (screenData[y][x] & 64) != 0;
-			return (screenData[y][x] & 16) != 0;
-		}
-
-		boolean hasPill() {
-			return (screenData[y][x] & 64) != 0;
-		}
-
-		boolean hasFruit() {
-			return (screenData[y][x] & 32) != 0;
-		}
-
-	}
-
-	protected class Path {
-		private int distance;
-		private boolean edible;
-		ArrayList<PathSection> pathSections = null;
-
-		Path(int distance, ArrayList<PathSection> pathSections) {
-			this.distance = distance;
-			this.pathSections = pathSections;
-		}
-
-		public Direction getFirstDirection() {
-			Direction ret = null;
-			if (this.pathSections.size() > 0) {
-				ret = this.pathSections.get(0).getDirection();
-			}
-			return ret;
-		}
-
-		public boolean isSameDirection(Path otherPath) {
-			return this.getFirstDirection().equals(otherPath.getFirstDirection());
-		}
-
-		public int getDistance() {
-			return distance;
-		}
-
-		public boolean getEdible() {
-			return edible;
-		}
-
-		public void setEdible(boolean edible) {
-			this.edible = edible;
-		}
+	public short[][] getScreenData() {
+		return this.screenData;
 	}
 
 	public void printGrid(PrintStream out) {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
-				short ch = (short) (grid[j][i] & (short) 15);
+				short ch = (short) (levelData[j][i] & (short) 15);
 				String b = i + "-" + j + "->" + ch + ";";
 				out.print(b);
 				if ((ch & 8) == 0)
@@ -348,9 +126,12 @@ public class GridWalker {
 	ArrayList<Direction> getPossibleDirections(int x, int y) {
 		HashSet<PathSection> ps = getPossiblePaths(new Point(x, y));
 		ArrayList<Direction> ret = new ArrayList<Direction>();
-		for (PathSection p : ps) {
-			ret.add(p.getDirection());
+		if (ps != null) {
+			for (PathSection p : ps) {
+				ret.add(p.getDirection());
+			}
 		}
+
 		return ret;
 	}
 
@@ -370,12 +151,12 @@ public class GridWalker {
 		}
 		Point startPoint = getPoint(fromX, fromY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		Path pelletPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
+		Path pelletPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet(screenData));
 		if (pelletPath == null) {
 			System.err.println("No pellet found from " + fromX + "," + fromY);
 		}
@@ -389,12 +170,12 @@ public class GridWalker {
 		}
 		Point startPoint = getPoint(fromX, fromY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		Path fruitPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasFruit());
+		Path fruitPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasFruit(screenData));
 
 		return fruitPath;
 	}
@@ -405,12 +186,12 @@ public class GridWalker {
 		}
 		Point startPoint = getPoint(fromX, fromY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPill());
+		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPill(screenData));
 	}
 
 	class DirectionDistance {
@@ -424,7 +205,7 @@ public class GridWalker {
 		if (shortest != null && shortest.getFirstDirection() != null) {
 			dd = new DirectionDistance();
 			dd.direction = shortest.getFirstDirection();
-			dd.distance = shortest.distance;
+			dd.distance = shortest.getDistance();
 		}
 		return dd;
 	}
@@ -436,10 +217,10 @@ public class GridWalker {
 		Point startPoint = getPoint(fromX, fromY);
 		Point endPoint = getPoint(toX, toY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
-		if (!endPoint.checkReachable("End")) {
+		if (!endPoint.checkReachable("End", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
@@ -465,14 +246,14 @@ public class GridWalker {
 				int minDistance = Integer.MAX_VALUE;
 				PathSection minPathSection = null;
 				for (PathSection ps : psh) {
-					if (wi.distance.get(ps.fromPoint) < minDistance) {
-						minDistance = wi.distance.get(ps.fromPoint);
+					if (wi.distance.get(ps.getFromPoint()) < minDistance) {
+						minDistance = wi.distance.get(ps.getFromPoint());
 						minPathSection = ps;
 					}
 				}
 				// Due to some bug some characters decide to step out of bounds
 				if (minPathSection != null) {
-					currentPoint = minPathSection.fromPoint;
+					currentPoint = minPathSection.getFromPoint();
 					shortestPath.add(minPathSection);
 				}
 			}
@@ -486,9 +267,9 @@ public class GridWalker {
 	private void updateDistances(WalkInstance wi, Point thisPoint) {
 		HashSet<PathSection> p = fromPathSectionHashtable.get(thisPoint);
 		for (PathSection i : p) {
-			if (!wi.visitedPoints.contains(i.toPoint)) {
-				if (wi.distance.get(i.toPoint) > (wi.distance.get(thisPoint) + i.length)) {
-					wi.distance.put(i.toPoint, wi.distance.get(thisPoint) + i.length);
+			if (!wi.visitedPoints.contains(i.getToPoint())) {
+				if (wi.distance.get(i.getToPoint()) > (wi.distance.get(thisPoint) + i.getLength())) {
+					wi.distance.put(i.getToPoint(), wi.distance.get(thisPoint) + i.getLength());
 				}
 			}
 		}
@@ -581,36 +362,36 @@ public class GridWalker {
 
 	private boolean canWalkRight(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][point.x] & (short) 15);
+		short ch = (short) (levelData[point.y][point.x] & (short) 15);
 		// Right point from current
-		short ch2 = (short) (grid[point.y][(point.x + 1) % Board.NUMBLOCKS] & (short) 15);
+		short ch2 = (short) (levelData[point.y][(point.x + 1) % Board.NUMBLOCKS] & (short) 15);
 		// Check that we can walk right and back left to current
 		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
 	private boolean canWalkLeft(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] & (short) 15);
+		short ch = (short) (levelData[point.y][(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] & (short) 15);
 		// Right point from current
-		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
+		short ch2 = (short) (levelData[point.y][point.x] & (short) 15);
 		// Check that we can walk right and back left to current
 		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
 	private boolean canWalkDown(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][point.x] & (short) 15);
+		short ch = (short) (levelData[point.y][point.x] & (short) 15);
 		// Down point from current
-		short ch2 = (short) (grid[(point.y + 1) % Board.NUMBLOCKS][point.x] & (short) 15);
+		short ch2 = (short) (levelData[(point.y + 1) % Board.NUMBLOCKS][point.x] & (short) 15);
 		// Check that we can walk down and back up to current
 		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
 	}
 
 	private boolean canWalkUp(Point point) {
 		// Current point
-		short ch = (short) (grid[(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.x] & (short) 15);
+		short ch = (short) (levelData[(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.x] & (short) 15);
 		// Down point from current
-		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
+		short ch2 = (short) (levelData[point.y][point.x] & (short) 15);
 		// Check that we can walk up and back down to current
 		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
 	}

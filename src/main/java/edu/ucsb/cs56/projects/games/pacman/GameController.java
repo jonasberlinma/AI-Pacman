@@ -68,6 +68,7 @@ public class GameController implements Runnable {
 	}
 
 	public void stop() {
+		foregroundAIGame.stop();
 		// Turn off the renderer if there is one
 		if (boardRenderer != null) {
 			boardRenderer.stop();
@@ -136,8 +137,9 @@ public class GameController implements Runnable {
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
-
-			GameServer gameServer = new GameServer(foregroundAIGame.getBoard(), this, 8081);
+			int port = Integer.parseInt(prop.getProperty("port", "8081"));
+			boolean verbose = Boolean.parseBoolean(prop.getProperty("verbose", "false"));
+			GameServer gameServer = new GameServer(foregroundAIGame.getBoard(), this, port, verbose);
 			gameServer.Start();
 		}
 	}

@@ -9,10 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.PathSection;
-
 /**
  * This one tries to avoid all the ghosts by running away from the closest
  * ghost. It seems to work at shorter distance but is not a very good overall
@@ -176,7 +172,7 @@ public class AIPlayerAvoider extends AIPlayer {
 	private Direction getRandomAwayDirection(GridWalker gridWalker) {
 
 		Direction newDirection = null;
-		HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
+		HashSet<PathSection> ps = gridWalker.getPossiblePaths(new Point(myX, myY));
 
 		if (ps != null) {
 			ArrayList<Direction> possibleDirections = new ArrayList<Direction>();

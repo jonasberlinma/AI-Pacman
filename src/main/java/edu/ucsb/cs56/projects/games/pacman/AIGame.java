@@ -34,6 +34,10 @@ public class AIGame implements Runnable {
 	public void start() {
 		aiGameThread.start();
 	}
+	
+	public void stop() {
+		aiPlayer.stop();
+	}
 
 	public void join() throws InterruptedException {
 		aiGameThread.join();

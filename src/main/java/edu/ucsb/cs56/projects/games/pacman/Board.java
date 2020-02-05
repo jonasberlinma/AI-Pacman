@@ -9,9 +9,7 @@ import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all
@@ -38,7 +36,7 @@ public class Board implements Runnable, EventTrackable {
 	 * 
 	 */
 	// These constants exist in both Board and BoardRenderer
-	public static final int BLOCKSIZE = 24; 
+	public static final int BLOCKSIZE = 24;
 	public static final int NUMBLOCKS = 17;
 
 	private final int MAX_GHOSTS = 12;
@@ -276,8 +274,8 @@ public class Board implements Runnable, EventTrackable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		//numBoardsCleared = 0;
-		//grid.levelInit(0);
+		// numBoardsCleared = 0;
+		// grid.levelInit(0);
 	}
 
 	/**
@@ -587,5 +585,63 @@ public class Board implements Runnable, EventTrackable {
 
 	public int getScore() {
 		return score;
+	}
+
+	public Path getShortestPath(int x1, int y1, int x2, int y2) {
+		Path path = getGrid().getGridWalker().getShortestPath(x1, y1, x2, y2);
+		return path;
+	}
+
+	public ArrayList<Direction> getPossibleDirections(int x, int y) {
+		ArrayList<Direction> directions = getGrid().getGridWalker().getPossibleDirections(x, y);
+		return directions;
+	}
+
+	public int putGhost(int x, int y) {
+		Ghost ghost = new Ghost(ghosts.size(), dataInterface, x * BLOCKSIZE, y * BLOCKSIZE, 3, PlayerType.GHOST1, grid);
+		ghosts.add(ghost);
+		return 0;
+	}
+
+	public int clear(int x, int y) {
+		// First remove any ghosts
+		Ghost ghostToRemove = null;
+		for (Ghost ghost : ghosts) {
+			if (ghost.x / BLOCKSIZE == x && ghost.y / BLOCKSIZE == y) {
+				ghostToRemove = ghost;
+			}
+		}
+		if (ghostToRemove != null) {
+			ghosts.remove(ghostToRemove);
+		}
+		// Then remove pellets, pills, and fruit
+		// Yes, the indices have to be backwards
+		getGrid().getScreenData()[y][x] = (short) (getGrid().getScreenData()[y][x] & (short) 15);
+		return 0;
+	}
+
+	public LinkedHashMap<String, ArrayList<PathSection>> analyze(int x, int y) {
+		LinkedHashMap<String, ArrayList<PathSection>> ret = new LinkedHashMap<String, ArrayList<PathSection>>();
+		GridWalker g = grid.getGridWalker();
+
+		for (Ghost ghost : ghosts) {
+			Path ghostPath = g.getShortestPath(x, y, ghost.x / BLOCKSIZE, ghost.y / BLOCKSIZE);
+			if (ghostPath != null)
+				ret.put(ghost.playerType.toString() + "-" + ghost.ghostNum, ghostPath.pathSections);
+		}
+
+		Path pelletPath = g.getClosestPelletPath(x, y);
+		if (pelletPath != null)
+			ret.put("Pellet", pelletPath.pathSections);
+
+		Path pillPath = g.getClosestPillPath(x, y);
+		if (pillPath != null)
+			ret.put("Pill", pillPath.pathSections);
+
+		Path fruitPath = g.getClosestFruitPath(x, y);
+		if (fruitPath != null)
+			ret.put("Fruit", fruitPath.pathSections);
+
+		return ret;
 	}
 }

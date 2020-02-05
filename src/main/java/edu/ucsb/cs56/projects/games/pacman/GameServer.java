@@ -6,140 +6,30 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-public class GameServer implements GameInterface, Runnable {
+public class GameServer implements Runnable {
 
 	private Board board;
 	private GameController bgc;
 	private ObjectMapper objectMapper = null;
 	private int port;
+	private boolean verbose = false;
 
-	public GameServer(Board board, GameController bgc, int port) {
+	public GameServer(Board board, GameController bgc, int port, boolean verbose) {
 		this.board = board;
 		this.bgc = bgc;
 		this.port = port;
+		this.verbose = verbose;
+
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-	}
-
-	@Override
-	public Grid getGrid() {
-		String json = null;
-		Grid grid = null;
-		try {
-			json = objectMapper.writeValueAsString(board.getGrid());
-			grid = objectMapper.readValue(json, Grid.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return grid;
-	}
-
-	@Override
-	public PacPlayer getMsPacman() {
-		String json = null;
-		PacPlayer pacPlayer = null;
-		try {
-			json = objectMapper.writeValueAsString(board.getMsPacman());
-			pacPlayer = objectMapper.readValue(json, PacPlayer.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return pacPlayer;
-	}
-
-	@Override
-	public PacPlayer getPacman() {
-
-		String json = null;
-		PacPlayer pacPlayer = null;
-		try {
-			json = objectMapper.writeValueAsString(board.getPacman());
-			pacPlayer = objectMapper.readValue(json, PacPlayer.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return pacPlayer;
-	}
-
-	@Override
-	public Vector<Ghost> getGhosts() {
-		String json = null;
-		Vector<Ghost> ghosts = null;
-		try {
-			json = objectMapper.writeValueAsString(board.getGhosts());
-			ghosts = objectMapper.readValue(json, new TypeReference<Vector<Ghost>>() {
-			});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return ghosts;
-	}
-
-	@Override
-	public GameType getGameType() {
-		String json = null;
-		GameType gameType = null;
-		try {
-			json = objectMapper.writeValueAsString(board.getGameType());
-			gameType = objectMapper.readValue(json, GameType.class);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return gameType;
-	}
-
-	@Override
-	public int getNumPellet() {
-		String json = this.getJSONFromInt(board.getNumPellet());
-		int numPellets = this.getIntFromJSON(json);
-		return numPellets;
-	}
-
-	@Override
-	public int getScore() {
-		String json = this.getJSONFromInt(board.getScore());
-		int score = this.getIntFromJSON(json);
-		return score;
-	}
-
-	@Override
-	public void keyPressed(int key) {
-		board.keyPressed(key);
-	}
-
-	@Override
-	public void keyReleased(int key) {
-		board.keyReleased(key);
-	}
-
-	@Override
-	public int getAudioClipID() {
-		String json = this.getJSONFromInt(board.getAudioClipID());
-		int audioClipID = this.getIntFromJSON(json);
-		return audioClipID;
-	}
-
-	@Override
-	public int getNCompletedGames() {
-		String json = this.getJSONFromInt(bgc.getNCompletedGames());
-		int nCompletedGames = this.getIntFromJSON(json);
-		return nCompletedGames;
-	}
-
-	@Override
-	public int getNTrainedModels() {
-		String json = this.getJSONFromInt(bgc.getNTrainedModels());
-		int nTrainedModels = this.getIntFromJSON(json);
-		return nTrainedModels;
 	}
 
 	// Helper functions
@@ -148,16 +38,6 @@ public class GameServer implements GameInterface, Runnable {
 		try {
 			ret = objectMapper.writeValueAsString(new Integer(value));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		return ret;
-	}
-
-	private int getIntFromJSON(String json) {
-		Integer ret = 0;
-		try {
-			ret = objectMapper.readValue(json, Integer.class);
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return ret;
@@ -180,11 +60,14 @@ public class GameServer implements GameInterface, Runnable {
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			String commandLine = null;
-			while ((commandLine = in.readLine()) != null) {
-				System.out.println("Server received: " + commandLine);
+			while (clientSocket.isConnected() && (commandLine = in.readLine()) != null) {
+				if (verbose) {
+					System.out.println("Server received: " + commandLine);
+				}
 				String json = null;
 				try {
-					String[] command=commandLine.split("=");
+					String[] parameters = commandLine.split("&");
+					String[] command = parameters[0].split("=");
 					switch (command[0]) {
 					case "grid":
 						json = objectMapper.writeValueAsString(board.getGrid());
@@ -224,7 +107,38 @@ public class GameServer implements GameInterface, Runnable {
 					case "nTrainedModels":
 						json = this.getJSONFromInt(bgc.getNTrainedModels());
 						break;
+					case "path":
+						int x1 = Integer.parseInt(parameters[1].split("=")[1]);
+						int y1 = Integer.parseInt(parameters[2].split("=")[1]);
+						int x2 = Integer.parseInt(parameters[3].split("=")[1]);
+						int y2 = Integer.parseInt(parameters[4].split("=")[1]);
+						Path path = board.getShortestPath(x1, y1, x2, y2);
+						if (path != null)
+							json = objectMapper.writeValueAsString(path.getPathSections());
+						break;
+					case "directions":
+						int x = Integer.parseInt(parameters[1].split("=")[1]);
+						int y = Integer.parseInt(parameters[2].split("=")[1]);
+						ArrayList<Direction> al = board.getPossibleDirections(x, y);
+						json = objectMapper.writeValueAsString(al);
+						break;
+					case "ghost":
+						int xg = Integer.parseInt(parameters[1].split("=")[1]);
+						int yg = Integer.parseInt(parameters[2].split("=")[1]);
+						json = objectMapper.writeValueAsString(board.putGhost(xg, yg));
+						break;
+					case "clear":
+						int xc = Integer.parseInt(parameters[1].split("=")[1]);
+						int yc = Integer.parseInt(parameters[2].split("=")[1]);
+						json = objectMapper.writeValueAsString(board.clear(xc, yc));
+						break;
+					case "analyze":
+						int xa = Integer.parseInt(parameters[1].split("=")[1]);
+						int ya = Integer.parseInt(parameters[2].split("=")[1]);
+						json = objectMapper.writeValueAsString(board.analyze(xa, ya));
+						break;
 					default:
+						System.err.println("Unknown server request: " + command[0]);
 						System.exit(2);
 					}
 				} catch (JsonProcessingException e) {
@@ -233,13 +147,15 @@ public class GameServer implements GameInterface, Runnable {
 				}
 				out.println(json);
 				out.flush();
-				System.out.println("Server sent: " + json);
+				if (verbose) {
+					System.out.println("Server sent: " + json);
+				}
 			}
 		} catch (IOException e1) {
 			System.err.println("Unable to open socket on port: " + port);
 			e1.printStackTrace();
 			System.exit(1);
-		} 
+		}
 		try {
 			serverSocket.close();
 		} catch (IOException e) {
@@ -253,8 +169,7 @@ public class GameServer implements GameInterface, Runnable {
 		} catch (InterruptedException e) {
 		}
 		bgc.stop();
-		bgc.join();
-		
+
 		System.exit(0);
 	}
 }

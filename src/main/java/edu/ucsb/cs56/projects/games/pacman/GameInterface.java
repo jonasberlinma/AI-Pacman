@@ -1,5 +1,7 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 public interface GameInterface {
@@ -35,4 +37,18 @@ public interface GameInterface {
 	public int getNCompletedGames();
 
 	public int getNTrainedModels();
+
+	// Methods in this section are primarily used to study and manipulate the board
+	// in "Local" mode
+	// Shortest point to point path
+	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2);
+
+	public ArrayList<Direction> getPossibleDirections(int x, int y);
+
+	public void putGhost(int x, int y);
+
+	public void clear(int x, int y);
+
+	public LinkedHashMap<String, ArrayList<PathSection>> analyze(int x, int y);
+
 }
