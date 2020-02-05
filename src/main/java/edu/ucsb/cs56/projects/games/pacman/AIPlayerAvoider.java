@@ -9,8 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
-
 /**
  * This one tries to avoid all the ghosts by running away from the closest
  * ghost. It seems to work at shorter distance but is not a very good overall

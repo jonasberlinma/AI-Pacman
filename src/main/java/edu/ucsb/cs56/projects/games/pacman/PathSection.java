@@ -2,8 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.io.PrintStream;
 
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
-
 public class PathSection {
 
 	private Point fromPoint, toPoint;

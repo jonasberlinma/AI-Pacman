@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -77,6 +78,12 @@ public class GameServer implements Runnable {
 						int x2 = Integer.parseInt(parameters[3].split("=")[1]);
 						int y2 = Integer.parseInt(parameters[4].split("=")[1]);		
 						json = objectMapper.writeValueAsString(board.getShortestPath(x1, y1, x2, y2).getPathSections());
+						break;
+					case "directions":
+						int x = Integer.parseInt(parameters[1].split("=")[1]);
+						int y = Integer.parseInt(parameters[2].split("=")[1]);
+						ArrayList<Direction> al = board.getPossibleDirections(x, y);
+						json = objectMapper.writeValueAsString(al);
 						break;
 					case "msPacman":
 						json = objectMapper.writeValueAsString(board.getMsPacman());

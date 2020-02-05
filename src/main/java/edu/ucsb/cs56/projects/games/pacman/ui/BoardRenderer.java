@@ -20,13 +20,13 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
+import edu.ucsb.cs56.projects.games.pacman.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GameInterface;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
 import edu.ucsb.cs56.projects.games.pacman.Ghost;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
 import edu.ucsb.cs56.projects.games.pacman.GridData;
 import edu.ucsb.cs56.projects.games.pacman.PacPlayer;
-import edu.ucsb.cs56.projects.games.pacman.Path;
 import edu.ucsb.cs56.projects.games.pacman.PathSection;
 import edu.ucsb.cs56.projects.games.pacman.Point;
 
@@ -71,6 +71,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private int markY = 0;
 	private Grid grid = null;
 	private ArrayList<PathSection> shortestPath = null;
+	private ArrayList<Direction> directions = null;
 
 	public void stop() {
 		bf.dispose();
@@ -158,6 +159,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			drawPath(g2d);
 			drawMark(g2d);
 			drawCursor(g2d);
+			drawDirections(g2d);
 		}
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();
@@ -325,6 +327,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 
 	private void getShortestPath() {
 		shortestPath = gameClient.getShortestPath(cursorX, cursorY, markX, markY);
+		directions = gameClient.getPossibleDirections(cursorX, cursorY);
 	}
 
 	/**
@@ -550,7 +553,19 @@ public class BoardRenderer extends JPanel implements ActionListener {
 				drawRect(g2d, toPoint.x, toPoint.y, 8, Color.YELLOW);
 			}
 			String s = "Steps: " + shortestPath.size();
+			g2d.setFont(tinyFont);
 			g2d.drawString(s, 50, SCRSIZE + 4);
+		}
+	}
+
+	private void drawDirections(Graphics2D g2d) {
+		if (directions != null) {
+			String s = "Directions";
+			for (Direction direction : directions) {
+				s = s + " " + direction.toString();
+			}
+			g2d.setFont(tinyFont);
+			g2d.drawString(s, 120, SCRSIZE + 4);
 		}
 	}
 }

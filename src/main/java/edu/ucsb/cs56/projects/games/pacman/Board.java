@@ -9,7 +9,6 @@ import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
 
 /**
@@ -590,5 +589,9 @@ public class Board implements Runnable, EventTrackable {
 	public Path getShortestPath(int x1, int y1, int x2, int y2) {
 		Path path = getGrid().getGridWalker().getShortestPath(x1,  y1,  x2,  y2);
 		return path;
+	}
+	public ArrayList<Direction> getPossibleDirections(int x, int y){
+		ArrayList<Direction> directions = getGrid().getGridWalker().getPossibleDirections(x, y);
+		return directions;
 	}
 }

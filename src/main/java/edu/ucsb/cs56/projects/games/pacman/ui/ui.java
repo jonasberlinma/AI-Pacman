@@ -23,6 +23,7 @@ public class ui {
 				break;
 			case "-verbose":
 				verbose = true;
+				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
 				System.exit(1);

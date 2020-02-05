@@ -2,8 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 
 import java.util.ArrayList;
 
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
-
 public class Path {
 	private int distance;
 	private boolean edible;

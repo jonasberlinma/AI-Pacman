@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
-
 public class AIPlayerLearner extends AIPlayer {
 
 	Random random = new Random(System.currentTimeMillis());

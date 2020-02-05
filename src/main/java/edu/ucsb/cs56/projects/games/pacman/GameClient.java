@@ -22,6 +22,7 @@ public class GameClient implements GameInterface {
 	private boolean verbose = false;
 
 	public GameClient(int port, boolean verbose) {
+		this.verbose = verbose;
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -67,6 +68,18 @@ public class GameClient implements GameInterface {
 		return path;
 	}
 
+	@Override
+	public ArrayList<Direction> getPossibleDirections(int x, int y){
+		String json = null;
+		ArrayList<Direction> directions = null;
+		try {
+			json = getRemoteJSON("directions&x=" + x + "&y=" + y);
+			directions = objectMapper.readValue(json, new TypeReference<ArrayList<Direction>>() {});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return directions;
+	}
 	@Override
 	public PacPlayer getMsPacman() {
 		String json = null;

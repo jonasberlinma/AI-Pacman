@@ -10,6 +10,8 @@ public interface GameInterface {
 	
 	// Shortest point to point path
 	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2);
+	
+	public ArrayList<Direction> getPossibleDirections(int x, int y);
 
 	// Get character locations and state
 	public PacPlayer getMsPacman();
