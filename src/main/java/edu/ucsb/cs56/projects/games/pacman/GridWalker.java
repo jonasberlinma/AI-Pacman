@@ -13,7 +13,6 @@ import java.util.function.BiFunction;
 
 public class GridWalker {
 
-
 	private short[][] levelData = null;
 	private short[][] screenData = null;
 	private short[][] connectionCheck = null;
@@ -33,6 +32,10 @@ public class GridWalker {
 		walkerInitialized = true;
 		// printGraph("");
 		// System.exit(0);
+	}
+
+	public short[][] getScreenData() {
+		return this.screenData;
 	}
 
 	public void printGrid(PrintStream out) {
@@ -123,8 +126,10 @@ public class GridWalker {
 	ArrayList<Direction> getPossibleDirections(int x, int y) {
 		HashSet<PathSection> ps = getPossiblePaths(new Point(x, y));
 		ArrayList<Direction> ret = new ArrayList<Direction>();
-		for (PathSection p : ps) {
-			ret.add(p.getDirection());
+		if (ps != null) {
+			for (PathSection p : ps) {
+				ret.add(p.getDirection());
+			}
 		}
 
 		return ret;

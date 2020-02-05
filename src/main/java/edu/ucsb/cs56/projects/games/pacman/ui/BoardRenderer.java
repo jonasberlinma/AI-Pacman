@@ -13,6 +13,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -72,6 +73,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private Grid grid = null;
 	private ArrayList<PathSection> shortestPath = null;
 	private ArrayList<Direction> directions = null;
+	private LinkedHashMap<String, ArrayList<PathSection>> analysis = null;
 
 	public void stop() {
 		bf.dispose();
@@ -156,10 +158,14 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			}
 		} else {
 			drawMaze(g2d);
-			drawPath(g2d);
+			drawShortestPath(g2d);
+			for (Ghost ghost : gameClient.getGhosts()) {
+				drawGhost(g2d, this, ghost);
+			}
 			drawMark(g2d);
 			drawCursor(g2d);
 			drawDirections(g2d);
+			drawAnalysis(g2d);
 		}
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();
@@ -277,11 +283,21 @@ public class BoardRenderer extends JPanel implements ActionListener {
 					moveCursor(key);
 					break;
 				case KeyEvent.VK_SPACE:
-					setMark();
+					markX = cursorX;
+					markY = cursorY;
 					break;
 				case KeyEvent.VK_P:
-					getShortestPath();
+					shortestPath = gameClient.getShortestPath(cursorX, cursorY, markX, markY);
+					directions = gameClient.getPossibleDirections(cursorX, cursorY);
 					break;
+				case KeyEvent.VK_G:
+					gameClient.putGhost(cursorX, cursorY);
+					break;
+				case KeyEvent.VK_C:
+					gameClient.clear(cursorX, cursorY);
+					break;
+				case KeyEvent.VK_A:
+					analyze();
 				default:
 				}
 			}
@@ -320,14 +336,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		}
 	}
 
-	private void setMark() {
-		markX = cursorX;
-		markY = cursorY;
-	}
-
-	private void getShortestPath() {
-		shortestPath = gameClient.getShortestPath(cursorX, cursorY, markX, markY);
-		directions = gameClient.getPossibleDirections(cursorX, cursorY);
+	private void analyze() {
+		analysis = gameClient.analyze(cursorX, cursorY);
 	}
 
 	/**
@@ -530,8 +540,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	}
 
 	private void drawCursor(Graphics2D g2d) {
-		drawRect(g2d, cursorX, cursorY, 12, Color.RED);
+		drawRect(g2d, cursorX, cursorY, 12, Color.BLUE);
 		g2d.setFont(tinyFont);
+		g2d.setColor(Color.WHITE);
 		String s = "C: " + cursorX + "," + cursorY;
 		g2d.drawString(s, 4, SCRSIZE + 4);
 	}
@@ -539,19 +550,24 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMark(Graphics2D g2d) {
 		drawRect(g2d, markX, markY, 12, Color.GREEN);
 		g2d.setFont(tinyFont);
+		g2d.setColor(Color.WHITE);
 		String s = "M: " + markX + "," + markY;
 		g2d.drawString(s, 4, SCRSIZE + 20);
 	}
 
-	private void drawPath(Graphics2D g2d) {
-		if (shortestPath != null) {
+	private void drawPath(Graphics2D g2d, ArrayList<PathSection> path, int size, Color color) {
+		for (PathSection thisSection : path) {
+			Point fromPoint = thisSection.getFromPoint();
+			Point toPoint = thisSection.getToPoint();
+			drawRect(g2d, fromPoint.x, fromPoint.y, size, color);
+			drawRect(g2d, toPoint.x, toPoint.y, size, color);
+		}
+	}
 
-			for (PathSection thisSection : shortestPath) {
-				Point fromPoint = thisSection.getFromPoint();
-				Point toPoint = thisSection.getToPoint();
-				drawRect(g2d, fromPoint.x, fromPoint.y, 8, Color.YELLOW);
-				drawRect(g2d, toPoint.x, toPoint.y, 8, Color.YELLOW);
-			}
+	private void drawShortestPath(Graphics2D g2d) {
+		if (shortestPath != null) {
+			drawPath(g2d, shortestPath, 8, Color.YELLOW);
+			g2d.setColor(Color.WHITE);
 			String s = "Steps: " + shortestPath.size();
 			g2d.setFont(tinyFont);
 			g2d.drawString(s, 50, SCRSIZE + 4);
@@ -559,13 +575,26 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	}
 
 	private void drawDirections(Graphics2D g2d) {
+		g2d.setColor(Color.WHITE);
 		if (directions != null) {
 			String s = "Directions";
 			for (Direction direction : directions) {
 				s = s + " " + direction.toString();
 			}
 			g2d.setFont(tinyFont);
-			g2d.drawString(s, 120, SCRSIZE + 4);
+			g2d.drawString(s, 50, SCRSIZE + 16);
+		}
+	}
+
+	private void drawAnalysis(Graphics2D g2d) {
+		if (analysis != null) {
+			g2d.setFont(tinyFont);
+			int offset = 0;
+			for (String pathName : analysis.keySet()) {
+				drawPath(g2d, analysis.get(pathName), 4, Color.WHITE);
+				g2d.drawString(pathName + ": " + analysis.get(pathName).size(), 250, SCRSIZE - 10 + offset);
+				offset = offset + 12;
+			}
 		}
 	}
 }

@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -54,32 +55,7 @@ public class GameClient implements GameInterface {
 		}
 		return grid;
 	}
-	
-	@Override
-	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2) {
-		String json = null;
-		ArrayList<PathSection> path = null;
-		try {
-			json = getRemoteJSON("path&x1=" + x1 + "&y1=" + y1 + "&x2=" + x2 + "&y2=" + y2);
-			path = objectMapper.readValue(json, new TypeReference<ArrayList<PathSection>>() {});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return path;
-	}
 
-	@Override
-	public ArrayList<Direction> getPossibleDirections(int x, int y){
-		String json = null;
-		ArrayList<Direction> directions = null;
-		try {
-			json = getRemoteJSON("directions&x=" + x + "&y=" + y);
-			directions = objectMapper.readValue(json, new TypeReference<ArrayList<Direction>>() {});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return directions;
-	}
 	@Override
 	public PacPlayer getMsPacman() {
 		String json = null;
@@ -172,6 +148,58 @@ public class GameClient implements GameInterface {
 	public int getNTrainedModels() {
 		String json = getRemoteJSON("nTrainedModels");
 		return this.getIntFromJSON(json);
+	}
+
+	@Override
+	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2) {
+		String json = null;
+		ArrayList<PathSection> path = null;
+		try {
+			json = getRemoteJSON("path&x1=" + x1 + "&y1=" + y1 + "&x2=" + x2 + "&y2=" + y2);
+			if (json != null)
+				path = objectMapper.readValue(json, new TypeReference<ArrayList<PathSection>>() {
+				});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return path;
+	}
+
+	@Override
+	public ArrayList<Direction> getPossibleDirections(int x, int y) {
+		String json = null;
+		ArrayList<Direction> directions = null;
+		try {
+			json = getRemoteJSON("directions&x=" + x + "&y=" + y);
+			directions = objectMapper.readValue(json, new TypeReference<ArrayList<Direction>>() {
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return directions;
+	}
+
+	@Override
+	public void putGhost(int x, int y) {
+		getRemoteJSON("ghost&x=" + x + "&y=" + y);
+	}
+
+	@Override
+	public void clear(int x, int y) {
+		getRemoteJSON("clear&x=" + x + "&y=" + y);
+	}
+
+	@Override
+	public LinkedHashMap<String, ArrayList<PathSection>> analyze(int x, int y) {
+		LinkedHashMap<String, ArrayList<PathSection>> analysis = null;
+		try {
+			String json = getRemoteJSON("analyze&x=" + x + "&y=" + y);
+			analysis = objectMapper.readValue(json, new TypeReference<LinkedHashMap<String, ArrayList<PathSection>>>() {
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return analysis;
 	}
 
 	private int getIntFromJSON(String json) {

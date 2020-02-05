@@ -72,19 +72,6 @@ public class GameServer implements Runnable {
 					case "grid":
 						json = objectMapper.writeValueAsString(board.getGrid());
 						break;
-					case "path":
-						int x1 = Integer.parseInt(parameters[1].split("=")[1]);
-						int y1 = Integer.parseInt(parameters[2].split("=")[1]);
-						int x2 = Integer.parseInt(parameters[3].split("=")[1]);
-						int y2 = Integer.parseInt(parameters[4].split("=")[1]);		
-						json = objectMapper.writeValueAsString(board.getShortestPath(x1, y1, x2, y2).getPathSections());
-						break;
-					case "directions":
-						int x = Integer.parseInt(parameters[1].split("=")[1]);
-						int y = Integer.parseInt(parameters[2].split("=")[1]);
-						ArrayList<Direction> al = board.getPossibleDirections(x, y);
-						json = objectMapper.writeValueAsString(al);
-						break;
 					case "msPacman":
 						json = objectMapper.writeValueAsString(board.getMsPacman());
 						break;
@@ -120,7 +107,38 @@ public class GameServer implements Runnable {
 					case "nTrainedModels":
 						json = this.getJSONFromInt(bgc.getNTrainedModels());
 						break;
+					case "path":
+						int x1 = Integer.parseInt(parameters[1].split("=")[1]);
+						int y1 = Integer.parseInt(parameters[2].split("=")[1]);
+						int x2 = Integer.parseInt(parameters[3].split("=")[1]);
+						int y2 = Integer.parseInt(parameters[4].split("=")[1]);
+						Path path = board.getShortestPath(x1, y1, x2, y2);
+						if (path != null)
+							json = objectMapper.writeValueAsString(path.getPathSections());
+						break;
+					case "directions":
+						int x = Integer.parseInt(parameters[1].split("=")[1]);
+						int y = Integer.parseInt(parameters[2].split("=")[1]);
+						ArrayList<Direction> al = board.getPossibleDirections(x, y);
+						json = objectMapper.writeValueAsString(al);
+						break;
+					case "ghost":
+						int xg = Integer.parseInt(parameters[1].split("=")[1]);
+						int yg = Integer.parseInt(parameters[2].split("=")[1]);
+						json = objectMapper.writeValueAsString(board.putGhost(xg, yg));
+						break;
+					case "clear":
+						int xc = Integer.parseInt(parameters[1].split("=")[1]);
+						int yc = Integer.parseInt(parameters[2].split("=")[1]);
+						json = objectMapper.writeValueAsString(board.clear(xc, yc));
+						break;
+					case "analyze":
+						int xa = Integer.parseInt(parameters[1].split("=")[1]);
+						int ya = Integer.parseInt(parameters[2].split("=")[1]);
+						json = objectMapper.writeValueAsString(board.analyze(xa, ya));
+						break;
 					default:
+						System.err.println("Unknown server request: " + command[0]);
 						System.exit(2);
 					}
 				} catch (JsonProcessingException e) {
