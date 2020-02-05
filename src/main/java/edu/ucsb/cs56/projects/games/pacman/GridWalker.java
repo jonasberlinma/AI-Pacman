@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 public class GridWalker {
 
 
-	private short[][] grid = null;
+	private short[][] levelData = null;
 	private short[][] screenData = null;
 	private short[][] connectionCheck = null;
 
@@ -26,7 +26,7 @@ public class GridWalker {
 	private Hashtable<Point, HashSet<PathSection>> toPathSectionHashtable = new Hashtable<Point, HashSet<PathSection>>();
 
 	GridWalker(GridData level, short[][] screenData) {
-		grid = level.get2DGridData();
+		this.levelData = level.get2DGridData();
 		this.screenData = screenData;
 		connectionCheck = new short[Board.NUMBLOCKS][Board.NUMBLOCKS];
 		buildGraph();
@@ -38,7 +38,7 @@ public class GridWalker {
 	public void printGrid(PrintStream out) {
 		for (int i = 0; i < Board.NUMBLOCKS; i++) {
 			for (int j = 0; j < Board.NUMBLOCKS; j++) {
-				short ch = (short) (grid[j][i] & (short) 15);
+				short ch = (short) (levelData[j][i] & (short) 15);
 				String b = i + "-" + j + "->" + ch + ";";
 				out.print(b);
 				if ((ch & 8) == 0)
@@ -357,36 +357,36 @@ public class GridWalker {
 
 	private boolean canWalkRight(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][point.x] & (short) 15);
+		short ch = (short) (levelData[point.y][point.x] & (short) 15);
 		// Right point from current
-		short ch2 = (short) (grid[point.y][(point.x + 1) % Board.NUMBLOCKS] & (short) 15);
+		short ch2 = (short) (levelData[point.y][(point.x + 1) % Board.NUMBLOCKS] & (short) 15);
 		// Check that we can walk right and back left to current
 		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
 	private boolean canWalkLeft(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] & (short) 15);
+		short ch = (short) (levelData[point.y][(point.x - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS] & (short) 15);
 		// Right point from current
-		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
+		short ch2 = (short) (levelData[point.y][point.x] & (short) 15);
 		// Check that we can walk right and back left to current
 		return ((ch & 4) == 0) && ((ch2 & 1) == 0);
 	}
 
 	private boolean canWalkDown(Point point) {
 		// Current point
-		short ch = (short) (grid[point.y][point.x] & (short) 15);
+		short ch = (short) (levelData[point.y][point.x] & (short) 15);
 		// Down point from current
-		short ch2 = (short) (grid[(point.y + 1) % Board.NUMBLOCKS][point.x] & (short) 15);
+		short ch2 = (short) (levelData[(point.y + 1) % Board.NUMBLOCKS][point.x] & (short) 15);
 		// Check that we can walk down and back up to current
 		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
 	}
 
 	private boolean canWalkUp(Point point) {
 		// Current point
-		short ch = (short) (grid[(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.x] & (short) 15);
+		short ch = (short) (levelData[(point.y - 1 + Board.NUMBLOCKS) % Board.NUMBLOCKS][point.x] & (short) 15);
 		// Down point from current
-		short ch2 = (short) (grid[point.y][point.x] & (short) 15);
+		short ch2 = (short) (levelData[point.y][point.x] & (short) 15);
 		// Check that we can walk up and back down to current
 		return ((ch & 8) == 0) && ((ch2 & 2) == 0);
 	}
