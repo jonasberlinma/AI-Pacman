@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -51,6 +52,19 @@ public class GameClient implements GameInterface {
 			e.printStackTrace();
 		}
 		return grid;
+	}
+	
+	@Override
+	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2) {
+		String json = null;
+		ArrayList<PathSection> path = null;
+		try {
+			json = getRemoteJSON("path&x1=" + x1 + "&y1=" + y1 + "&x2=" + x2 + "&y2=" + y2);
+			path = objectMapper.readValue(json, new TypeReference<ArrayList<PathSection>>() {});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return path;
 	}
 
 	@Override

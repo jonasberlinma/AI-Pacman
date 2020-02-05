@@ -65,10 +65,18 @@ public class GameServer implements Runnable {
 				}
 				String json = null;
 				try {
-					String[] command = commandLine.split("=");
+					String[] parameters = commandLine.split("&");
+					String[] command = parameters[0].split("=");
 					switch (command[0]) {
 					case "grid":
 						json = objectMapper.writeValueAsString(board.getGrid());
+						break;
+					case "path":
+						int x1 = Integer.parseInt(parameters[1].split("=")[1]);
+						int y1 = Integer.parseInt(parameters[2].split("=")[1]);
+						int x2 = Integer.parseInt(parameters[3].split("=")[1]);
+						int y2 = Integer.parseInt(parameters[4].split("=")[1]);		
+						json = objectMapper.writeValueAsString(board.getShortestPath(x1, y1, x2, y2).getPathSections());
 						break;
 					case "msPacman":
 						json = objectMapper.writeValueAsString(board.getMsPacman());

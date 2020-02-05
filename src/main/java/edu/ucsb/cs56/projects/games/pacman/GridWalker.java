@@ -3,7 +3,6 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -12,11 +11,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 
-public class GridWalker implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class GridWalker {
 
 	public enum Direction {
 		LEFT, RIGHT, UP, DOWN;
@@ -100,183 +95,6 @@ public class GridWalker implements Serializable {
 		walkerInitialized = true;
 		// printGraph("");
 		// System.exit(0);
-	}
-	
-	GridWalker(){
-		
-	}
-
-	protected class PathSection {
-
-		private Point fromPoint, toPoint;
-		private int length;
-
-		PathSection(Point fromPoint, Point toPoint, int length) {
-			this.fromPoint = fromPoint;
-			this.toPoint = toPoint;
-			this.length = length;
-		}
-		PathSection(){
-			
-		}
-
-		Direction getDirection() {
-			Direction d = null;
-			// This is for the periodic boundary conditions
-			int xDistance = Math.abs(fromPoint.x - toPoint.x);
-			int yDistance = Math.abs(fromPoint.y - toPoint.y);
-			if (fromPoint.x < toPoint.x) {
-				if (xDistance < 2) {
-					d = Direction.RIGHT;
-				} else {
-					d = Direction.LEFT;
-				}
-			} else if (fromPoint.x > toPoint.x) {
-				if (xDistance < 2) {
-					d = Direction.LEFT;
-				} else {
-					d = Direction.RIGHT;
-				}
-			} else if (fromPoint.y < toPoint.y) {
-				if (yDistance < 2) {
-					d = Direction.DOWN;
-				} else {
-					d = Direction.UP;
-				}
-			} else if (fromPoint.y > toPoint.y) {
-				if (yDistance < 2) {
-					d = Direction.UP;
-				} else {
-					d = Direction.DOWN;
-				}
-			}
-			return d;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			PathSection ps = (PathSection) other;
-			return this.fromPoint.equals(ps.fromPoint) && this.toPoint.equals(ps.toPoint);
-		}
-
-		@Override
-		public int hashCode() {
-			return fromPoint.hashCode() * 31 * toPoint.hashCode();
-		}
-
-		void print(PrintStream out) {
-			out.println("" + fromPoint.nodeNumber + "," + toPoint.nodeNumber + "," + length);
-		}
-	}
-
-	protected class Point {
-
-		int x, y;
-		String nodeNumber = "";
-		// private int distance;
-
-		Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-			nodeNumber = getNodeNumber();
-		}
-		Point(){
-			
-		}
-
-		Point stepRight() {
-			Point newPoint = new Point((x + 1) % Board.NUMBLOCKS, y);
-			return newPoint;
-		}
-
-		Point stepDown() {
-			Point newPoint = new Point(x, (y + 1) % Board.NUMBLOCKS);
-			return newPoint;
-		}
-
-		private String getNodeNumber() {
-			return x + "-" + y;
-		}
-
-		@Override
-		public boolean equals(Object point) {
-			Point p = (Point) point;
-			return (this.x == p.x && this.y == p.y);
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 1;
-			hash = hash * 31 + nodeNumber.hashCode() * 4 + x * 8 + y * 16;
-			return hash;
-		}
-
-		void print(PrintStream out) {
-			out.print("" + nodeNumber + "," + nodeNumber);
-		}
-
-		public boolean checkReachable(String type) {
-			boolean reachable = false;
-			if (!reachablePoints.contains(this)) {
-				System.err.println(type + " point not found " + x + "-" + y);
-			} else {
-				reachable = true;
-			}
-			return reachable;
-		}
-
-		boolean hasPellet() {
-			// return (screenData[y][x] & 16) != 0 || (screenData[y][x] & 32) !=
-			// 0 || (screenData[y][x] & 64) != 0;
-			return (screenData[y][x] & 16) != 0;
-		}
-
-		boolean hasPill() {
-			return (screenData[y][x] & 64) != 0;
-		}
-
-		boolean hasFruit() {
-			return (screenData[y][x] & 32) != 0;
-		}
-
-	}
-
-	public class Path {
-		private int distance;
-		private boolean edible;
-		ArrayList<PathSection> pathSections = null;
-
-		Path(int distance, ArrayList<PathSection> pathSections) {
-			this.distance = distance;
-			this.pathSections = pathSections;
-		}
-		Path(){
-			
-		}
-
-		public Direction getFirstDirection() {
-			Direction ret = null;
-			if (this.pathSections.size() > 0) {
-				ret = this.pathSections.get(0).getDirection();
-			}
-			return ret;
-		}
-
-		public boolean isSameDirection(Path otherPath) {
-			return this.getFirstDirection().equals(otherPath.getFirstDirection());
-		}
-
-		public int getDistance() {
-			return distance;
-		}
-
-		public boolean getEdible() {
-			return edible;
-		}
-
-		public void setEdible(boolean edible) {
-			this.edible = edible;
-		}
 	}
 
 	public void printGrid(PrintStream out) {
@@ -389,12 +207,12 @@ public class GridWalker implements Serializable {
 		}
 		Point startPoint = getPoint(fromX, fromY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		Path pelletPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet());
+		Path pelletPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPellet(screenData));
 		if (pelletPath == null) {
 			System.err.println("No pellet found from " + fromX + "," + fromY);
 		}
@@ -408,12 +226,12 @@ public class GridWalker implements Serializable {
 		}
 		Point startPoint = getPoint(fromX, fromY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		Path fruitPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasFruit());
+		Path fruitPath = walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasFruit(screenData));
 
 		return fruitPath;
 	}
@@ -424,12 +242,12 @@ public class GridWalker implements Serializable {
 		}
 		Point startPoint = getPoint(fromX, fromY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
 		Point currentPoint = startPoint;
-		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPill());
+		return walkPath(wi, currentPoint, startPoint, null, (x, y) -> !x.hasPill(screenData));
 	}
 
 	class DirectionDistance {
@@ -443,7 +261,7 @@ public class GridWalker implements Serializable {
 		if (shortest != null && shortest.getFirstDirection() != null) {
 			dd = new DirectionDistance();
 			dd.direction = shortest.getFirstDirection();
-			dd.distance = shortest.distance;
+			dd.distance = shortest.getDistance();
 		}
 		return dd;
 	}
@@ -455,10 +273,10 @@ public class GridWalker implements Serializable {
 		Point startPoint = getPoint(fromX, fromY);
 		Point endPoint = getPoint(toX, toY);
 
-		if (!startPoint.checkReachable("Start")) {
+		if (!startPoint.checkReachable("Start", reachablePoints)) {
 			return null;
 		}
-		if (!endPoint.checkReachable("End")) {
+		if (!endPoint.checkReachable("End", reachablePoints)) {
 			return null;
 		}
 		WalkInstance wi = initDijkstra(startPoint);
@@ -484,14 +302,14 @@ public class GridWalker implements Serializable {
 				int minDistance = Integer.MAX_VALUE;
 				PathSection minPathSection = null;
 				for (PathSection ps : psh) {
-					if (wi.distance.get(ps.fromPoint) < minDistance) {
-						minDistance = wi.distance.get(ps.fromPoint);
+					if (wi.distance.get(ps.getFromPoint()) < minDistance) {
+						minDistance = wi.distance.get(ps.getFromPoint());
 						minPathSection = ps;
 					}
 				}
 				// Due to some bug some characters decide to step out of bounds
 				if (minPathSection != null) {
-					currentPoint = minPathSection.fromPoint;
+					currentPoint = minPathSection.getFromPoint();
 					shortestPath.add(minPathSection);
 				}
 			}
@@ -505,9 +323,9 @@ public class GridWalker implements Serializable {
 	private void updateDistances(WalkInstance wi, Point thisPoint) {
 		HashSet<PathSection> p = fromPathSectionHashtable.get(thisPoint);
 		for (PathSection i : p) {
-			if (!wi.visitedPoints.contains(i.toPoint)) {
-				if (wi.distance.get(i.toPoint) > (wi.distance.get(thisPoint) + i.length)) {
-					wi.distance.put(i.toPoint, wi.distance.get(thisPoint) + i.length);
+			if (!wi.visitedPoints.contains(i.getToPoint())) {
+				if (wi.distance.get(i.getToPoint()) > (wi.distance.get(thisPoint) + i.getLength())) {
+					wi.distance.put(i.getToPoint(), wi.distance.get(thisPoint) + i.getLength());
 				}
 			}
 		}

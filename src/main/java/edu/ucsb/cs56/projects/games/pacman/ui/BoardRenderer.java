@@ -25,8 +25,10 @@ import edu.ucsb.cs56.projects.games.pacman.GameType;
 import edu.ucsb.cs56.projects.games.pacman.Ghost;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
 import edu.ucsb.cs56.projects.games.pacman.GridData;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.Path;
 import edu.ucsb.cs56.projects.games.pacman.PacPlayer;
+import edu.ucsb.cs56.projects.games.pacman.Path;
+import edu.ucsb.cs56.projects.games.pacman.PathSection;
+import edu.ucsb.cs56.projects.games.pacman.Point;
 
 public class BoardRenderer extends JPanel implements ActionListener {
 
@@ -67,7 +69,8 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private int cursorY = 0;
 	private int markX = 0;
 	private int markY = 0;
-	private Path shortestPath = null;
+	private Grid grid = null;
+	private ArrayList<PathSection> shortestPath = null;
 
 	public void stop() {
 		bf.dispose();
@@ -152,9 +155,9 @@ public class BoardRenderer extends JPanel implements ActionListener {
 			}
 		} else {
 			drawMaze(g2d);
+			drawPath(g2d);
 			drawMark(g2d);
 			drawCursor(g2d);
-			drawPath(g2d);
 		}
 		Toolkit.getDefaultToolkit().sync();
 		g.dispose();
@@ -321,7 +324,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	}
 
 	private void getShortestPath() {
-		//shortestPath = grid.getGridWalker().getShortestPath(cursorX, cursorY, markX, markY);
+		shortestPath = gameClient.getShortestPath(cursorX, cursorY, markX, markY);
 	}
 
 	/**
@@ -479,7 +482,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawMaze(Graphics2D g2d) {
 		int x, y;
 		g2d.setStroke(new BasicStroke(2));
-		Grid grid = gameClient.getGrid();
+		grid = gameClient.getGrid();
 		for (int i = 0; i < NUMBLOCKS; i++) {
 			for (int j = 0; j < NUMBLOCKS; j++) {
 				y = i * BLOCKSIZE + 3;
@@ -518,19 +521,20 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	}
 
 	private void drawRect(Graphics2D g2d, int x, int y, int width, Color color) {
-		g2d.fillRect(x * BLOCKSIZE + width + 2, y * BLOCKSIZE + width + 2, BLOCKSIZE - width - 2,
-				BLOCKSIZE - width - 2);
+		g2d.setColor(color);
+		g2d.fillRect((x + 1) * BLOCKSIZE - BLOCKSIZE / 2 - width / 2 + 3,
+				(y + 1) * BLOCKSIZE - BLOCKSIZE / 2 - width / 2 + 3, width, width);
 	}
 
 	private void drawCursor(Graphics2D g2d) {
-		drawRect(g2d, cursorX, cursorY, 4, Color.RED);
+		drawRect(g2d, cursorX, cursorY, 12, Color.RED);
 		g2d.setFont(tinyFont);
 		String s = "C: " + cursorX + "," + cursorY;
 		g2d.drawString(s, 4, SCRSIZE + 4);
 	}
 
 	private void drawMark(Graphics2D g2d) {
-		drawRect(g2d, markX, markY, 4, Color.GREEN);
+		drawRect(g2d, markX, markY, 12, Color.GREEN);
 		g2d.setFont(tinyFont);
 		String s = "M: " + markX + "," + markY;
 		g2d.drawString(s, 4, SCRSIZE + 20);
@@ -539,6 +543,14 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private void drawPath(Graphics2D g2d) {
 		if (shortestPath != null) {
 
+			for (PathSection thisSection : shortestPath) {
+				Point fromPoint = thisSection.getFromPoint();
+				Point toPoint = thisSection.getToPoint();
+				drawRect(g2d, fromPoint.x, fromPoint.y, 8, Color.YELLOW);
+				drawRect(g2d, toPoint.x, toPoint.y, 8, Color.YELLOW);
+			}
+			String s = "Steps: " + shortestPath.size();
+			g2d.drawString(s, 50, SCRSIZE + 4);
 		}
 	}
 }

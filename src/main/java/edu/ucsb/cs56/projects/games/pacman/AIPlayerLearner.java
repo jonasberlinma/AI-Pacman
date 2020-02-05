@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.Random;
 
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.Direction;
-import edu.ucsb.cs56.projects.games.pacman.GridWalker.PathSection;
 
 public class AIPlayerLearner extends AIPlayer {
 
@@ -103,7 +102,7 @@ public class AIPlayerLearner extends AIPlayer {
 					int myX = dataEvent.getInt("x");
 					int myY = dataEvent.getInt("y");
 					// Find the possible directions we can go from where we are
-					HashSet<PathSection> ps = gridWalker.getPossiblePaths(gridWalker.new Point(myX, myY));
+					HashSet<PathSection> ps = gridWalker.getPossiblePaths(new Point(myX, myY));
 					ArrayList<Direction> possibleDirections = new ArrayList<Direction>();
 					for (PathSection p : ps) {
 						possibleDirections.add(p.getDirection());

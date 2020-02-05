@@ -1,11 +1,15 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 public interface GameInterface {
 
 	// Get the basic grid the characters are running around
 	public Grid getGrid();
+	
+	// Shortest point to point path
+	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2);
 
 	// Get character locations and state
 	public PacPlayer getMsPacman();
