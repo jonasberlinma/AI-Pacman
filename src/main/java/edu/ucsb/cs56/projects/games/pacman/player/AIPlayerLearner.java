@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.player;
 
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
@@ -6,6 +6,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Random;
+
+import edu.ucsb.cs56.projects.games.pacman.Direction;
+import edu.ucsb.cs56.projects.games.pacman.Grid;
+import edu.ucsb.cs56.projects.games.pacman.GridWalker;
+import edu.ucsb.cs56.projects.games.pacman.PathSection;
+import edu.ucsb.cs56.projects.games.pacman.PivotField;
+import edu.ucsb.cs56.projects.games.pacman.Point;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
+import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
+import edu.ucsb.cs56.projects.games.pacman.model.DataFlipper;
 
 public class AIPlayerLearner extends AIPlayer {
 
@@ -248,7 +259,7 @@ public class AIPlayerLearner extends AIPlayer {
 	}
 
 	@Override
-	protected void newModel(AIModel aiModel) {
+	public void newModel(AIModel aiModel) {
 		model = aiModel;
 
 	}

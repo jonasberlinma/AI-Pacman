@@ -1,6 +1,9 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.util.concurrent.ArrayBlockingQueue;
+
+import edu.ucsb.cs56.projects.games.pacman.GameController;
+import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
 
 public abstract class AIModelTrainer implements Runnable {
 
@@ -13,12 +16,12 @@ public abstract class AIModelTrainer implements Runnable {
 		trainingThread = new Thread(this, "Training thread");
 	}
 
-	protected void setController(GameController gameController, ArrayBlockingQueue<DataGameResult> eventQueue) {
+	public void setController(GameController gameController, ArrayBlockingQueue<DataGameResult> eventQueue) {
 		this.eventQueue = eventQueue;
 		this.gameController = gameController;
 	}
 
-	protected void start() {
+	public void start() {
 		doRun = true;
 		trainingThread.start();
 	}

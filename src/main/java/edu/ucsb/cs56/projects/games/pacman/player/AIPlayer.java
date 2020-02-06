@@ -1,7 +1,13 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.player;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+import edu.ucsb.cs56.projects.games.pacman.Board;
+import edu.ucsb.cs56.projects.games.pacman.Grid;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
+import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
 
 public abstract class AIPlayer implements Runnable {
 
@@ -21,7 +27,7 @@ public abstract class AIPlayer implements Runnable {
 		playerID = nextPlayerID++;
 	}
 
-	protected void setAIModel(AIModel aiModel) {
+	public void setAIModel(AIModel aiModel) {
 		// Tell the subclass there is a new model
 		newModel(aiModel);
 	}
@@ -59,7 +65,7 @@ public abstract class AIPlayer implements Runnable {
 		}
 	}
 
-	protected void stop() {
+	public void stop() {
 		// Tell the thread to exit at its earliest convenience
 		doRun = false;
 	}
@@ -78,7 +84,7 @@ public abstract class AIPlayer implements Runnable {
 	 * 
 	 * @param aiModel
 	 */
-	protected abstract void newModel(AIModel aiModel);
+	public abstract void newModel(AIModel aiModel);
 
 	/**
 	 * Player implements should implement this method to report game experience at
@@ -100,7 +106,7 @@ public abstract class AIPlayer implements Runnable {
 		eventCollection.add(dataEvent);
 	}
 
-	protected ArrayList<DataEvent> getEventLog() {
+	public ArrayList<DataEvent> getEventLog() {
 		return eventCollection;
 	}
 

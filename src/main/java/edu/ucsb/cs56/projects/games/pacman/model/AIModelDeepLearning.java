@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -23,6 +23,8 @@ import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 
 public class AIModelDeepLearning extends AIModel {
 
@@ -78,7 +80,7 @@ public class AIModelDeepLearning extends AIModel {
 	}
 
 	@Override
-	synchronized double score(DataObservation observation) {
+	public synchronized double score(DataObservation observation) {
 		// This will call the NN for scoring
 		// Remember to do the same data prep as in training
 

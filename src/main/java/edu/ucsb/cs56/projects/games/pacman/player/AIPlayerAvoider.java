@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.player;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -8,6 +8,16 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.TreeMap;
+
+import edu.ucsb.cs56.projects.games.pacman.Direction;
+import edu.ucsb.cs56.projects.games.pacman.Grid;
+import edu.ucsb.cs56.projects.games.pacman.GridWalker;
+import edu.ucsb.cs56.projects.games.pacman.Path;
+import edu.ucsb.cs56.projects.games.pacman.PathSection;
+import edu.ucsb.cs56.projects.games.pacman.Point;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
+import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
 
 /**
  * This one tries to avoid all the ghosts by running away from the closest
@@ -213,7 +223,7 @@ public class AIPlayerAvoider extends AIPlayer {
 	}
 
 	@Override
-	protected void newModel(AIModel aiModel) {
+	public void newModel(AIModel aiModel) {
 		// Don't use trained models for avoider
 	}
 	@Override

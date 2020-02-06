@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.common;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,14 +28,14 @@ public class DataEvent {
 		this.keyValues.putAll(keyValues);
 	}
 
-	protected Set<String> getKeys() {
+	public Set<String> getKeys() {
 		return keyValues.keySet();
 	}
 
-	protected String getValue(String key) {
+	public String getValue(String key) {
 		return keyValues.get(key);
 	}
-	protected DataEventType getEventType() {
+	public DataEventType getEventType() {
 		return DataEventType.valueOf(this.keyValues.get("eventType"));
 	}
 	public void setKeyValuePair(String key, String value) {

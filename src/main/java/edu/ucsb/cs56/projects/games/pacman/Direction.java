@@ -29,7 +29,7 @@ public enum Direction {
 		return ret;
 	}
 
-	static Direction parseDirection(String text) {
+	public static Direction parseDirection(String text) {
 		Direction d = null;
 		if (text != null) {
 			switch (text) {

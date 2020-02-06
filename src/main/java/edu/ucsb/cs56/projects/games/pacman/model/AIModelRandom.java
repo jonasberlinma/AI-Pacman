@@ -1,7 +1,9 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 
 public class AIModelRandom extends AIModel {
 
@@ -12,7 +14,7 @@ public class AIModelRandom extends AIModel {
 	}
 
 	@Override
-	double score(DataObservation observation) {
+	public double score(DataObservation observation) {
 		return random.nextDouble();
 	}
 

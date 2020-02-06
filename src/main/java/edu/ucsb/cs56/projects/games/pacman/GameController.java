@@ -8,6 +8,9 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
+import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
+import edu.ucsb.cs56.projects.games.pacman.model.AIModelTrainer;
 import edu.ucsb.cs56.projects.games.pacman.ui.BoardFrame;
 import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
 

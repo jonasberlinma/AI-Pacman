@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
+import edu.ucsb.cs56.projects.games.pacman.common.DataInterface;
+
 /**
  * Class representing enemy ghosts in single player mode and player ghosts in
  * multiplayer mode

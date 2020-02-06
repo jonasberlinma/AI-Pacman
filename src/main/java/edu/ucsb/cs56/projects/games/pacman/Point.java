@@ -9,7 +9,7 @@ public class Point {
 	String nodeNumber = "";
 	// private int distance;
 
-	Point(int x, int y) {
+	public Point(int x, int y) {
 		this.x = x;
 		this.y = y;
 		nodeNumber = x + "-" + y;

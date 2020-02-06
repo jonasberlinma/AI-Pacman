@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
+import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
+import edu.ucsb.cs56.projects.games.pacman.player.AIPlayer;
+
 public class AIGame implements Runnable {
 
 	private AIPlayer aiPlayer = null;

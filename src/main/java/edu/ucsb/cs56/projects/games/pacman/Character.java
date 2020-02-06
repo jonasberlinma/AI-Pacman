@@ -5,6 +5,10 @@ import java.io.PrintStream;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataInterface;
+import edu.ucsb.cs56.projects.games.pacman.common.EventTrackable;
+
 /**
  * Class that every character inherits from, including players and AI-controlled
  * enemies.

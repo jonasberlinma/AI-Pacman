@@ -1,4 +1,6 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
+
+import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
 
 public class AIModelTrainerNull extends AIModelTrainer {
 
