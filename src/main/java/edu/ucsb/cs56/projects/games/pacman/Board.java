@@ -267,7 +267,6 @@ public class Board implements Runnable, EventTrackable {
 	 * End the game if remaining lives reaches 0.
 	 */
 	private void gameOver() {
-		System.out.println("GameOver called in Board");
 		gt = GameType.GAME_OVER;
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);

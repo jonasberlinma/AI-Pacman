@@ -66,8 +66,8 @@ public class PacMan {
 			case "-aiPlayerClassName":
 				prop.setProperty("aiPlayerClassName", argi.next());
 				break;
-			case "-aiModelTrainerClassName":
-				prop.setProperty("aiModelTrainerClassName", argi.next());
+			case "-aiModelClassName":
+				prop.setProperty("aiModelClassName", argi.next());
 				break;
 			case "-numGhosts":
 				prop.setProperty("numGhosts", argi.next());
@@ -81,6 +81,12 @@ public class PacMan {
 			case "-verbose":
 				prop.setProperty("verbose", "true");
 				break;
+			case "-username":
+				prop.setProperty("username", argi.next());
+				break;
+			case "-password":
+				prop.setProperty("password", argi.next());
+				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
 				System.exit(1);
@@ -88,16 +94,12 @@ public class PacMan {
 
 		}
 		if (prop.getProperty("autoPlay") == null) {
-			prop.setProperty("aiPlayerClassName", "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull");
-			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
+			prop.setProperty("aiPlayerClassName", "edu.ucsb.cs56.projects.games.pacman.player.AIPlayerNull");
+			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.model.AIModelTrainerNull");
 
 		} else if (prop.getProperty("aiPlayerClassName") == null) {
-			System.err.println("In auto play a player class name has to be specified");
+			System.err.println("In auto play a player class name has to be specified in auto mode");
 			System.exit(1);
-		}
-		if (prop.getProperty("aiModelTrainerClassName") == null) {
-
-			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
 		}
 		if (prop.getProperty("headLess") == null) {
 			prop.setProperty("headLess", Boolean.toString(false));

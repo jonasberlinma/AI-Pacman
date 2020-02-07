@@ -1,11 +1,17 @@
 package edu.ucsb.cs56.projects.games.pacman.common;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-public class DataEvent {
-	public enum DataEventType {
+public class DataEvent implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public enum DataEventType  {
 		NEW_BOARD, INTRO, MOVE, PACMAN_DEATH, EAT_PELLET, EAT_GHOST, EAT_FRUIT, EAT_PILL, GAME_OVER, KEY_RELEASE,
 		KEY_PRESS
 	};

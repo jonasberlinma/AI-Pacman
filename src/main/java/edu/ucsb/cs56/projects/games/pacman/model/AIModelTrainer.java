@@ -1,56 +1,81 @@
 package edu.ucsb.cs56.projects.games.pacman.model;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
-import edu.ucsb.cs56.projects.games.pacman.GameController;
+import com.rabbitmq.client.CancelCallback;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DeliverCallback;
+
 import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
 
-public abstract class AIModelTrainer implements Runnable {
+public abstract class AIModelTrainer {
 
-	private Thread trainingThread = null;
-	private boolean doRun = false;
-	private ArrayBlockingQueue<DataGameResult> eventQueue = null;
-	private GameController gameController = null;
+	private Channel channel;
+	private String modelQueueName;
+	private String gameQueueName;
+	
+	private long lastTrainTime = 0;
+
+	private String eventConsumerTag;
+
+	byte[] eventHistory;
 
 	protected AIModelTrainer() {
-		trainingThread = new Thread(this, "Training thread");
 	}
 
-	public void setController(GameController gameController, ArrayBlockingQueue<DataGameResult> eventQueue) {
-		this.eventQueue = eventQueue;
-		this.gameController = gameController;
+	public void setController(Channel channel, String gameQueueName, String modelQueueName) {
+		this.channel = channel;
+		this.gameQueueName = gameQueueName;
+		this.modelQueueName = modelQueueName;
 	}
 
 	public void start() {
-		doRun = true;
-		trainingThread.start();
+		// Connect to the event queue 
+		DeliverCallback processGame = (consumerTag, delivery) -> {
+			eventHistory = delivery.getBody();
+			processMessage(eventHistory);
+		};
+		CancelCallback cancelCallback = (consumerTag) -> {
+
+		};
+		try {
+			// Auto ack messages
+			eventConsumerTag = channel.basicConsume(gameQueueName, true, processGame, cancelCallback);
+		} catch (IOException e) {
+			System.err.println("Faled to consume event queue");
+			e.printStackTrace();
+		}
+		
+		// Connect to the model queue
+		
 	}
 
-	@Override
-	public void run() {
-		while (doRun) {
-			try {
-				// Pull the next completed game off the queue and hand it to the
-				// trainer
-				// This blocks until an event is available
-				gameCompleteEvent(eventQueue.take());
-				// If there are more events keep pulling them until the queue is empty
-				while (!eventQueue.isEmpty()) {
-					gameCompleteEvent(eventQueue.take());
-				}
-				// Then train
-				doTrain();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+	private void processMessage(byte[] eventHistory) {
+		ByteArrayInputStream bis = new ByteArrayInputStream(eventHistory);
+
+		ObjectInputStream ois;
+		DataGameResult gameResult = null;
+		try {
+			ois = new ObjectInputStream(bis);
+			gameResult = (DataGameResult) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		} 
+
+		gameCompleteEvent(gameResult);
+		if(System.currentTimeMillis() - lastTrainTime > 1000) {
+			doTrain();
+			lastTrainTime = System.currentTimeMillis();
 		}
 	}
 
 	protected void stop() {
-		doRun = false;
 		try {
-			trainingThread.join();
-		} catch (InterruptedException e) {
+			channel.basicCancel(eventConsumerTag);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -74,8 +99,13 @@ public abstract class AIModelTrainer implements Runnable {
 	 * 
 	 * @param newModel
 	 */
-	protected void setNewModel(AIModel newModel) {
-		gameController.setNewModel(newModel);
+	protected void setNewModel(byte[] newModelSerial) {
+        try {
+			channel.basicPublish("", modelQueueName, null, newModelSerial);
+		} catch (IOException e) {
+			System.err.println("Failed to send new model to queue");
+			e.printStackTrace();
+		}
 	}
 
 }

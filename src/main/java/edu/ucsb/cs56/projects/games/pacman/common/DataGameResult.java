@@ -1,10 +1,15 @@
 package edu.ucsb.cs56.projects.games.pacman.common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-public class DataGameResult {
+public class DataGameResult implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public ArrayList<DataEvent> events;
 	public LinkedHashMap<String, DataObservation> experience;
 

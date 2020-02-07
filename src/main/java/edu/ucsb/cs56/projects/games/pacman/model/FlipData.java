@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import edu.ucsb.cs56.projects.games.pacman.PivotField;
-
 public class FlipData {
 
 	public static void main(String[] args) {

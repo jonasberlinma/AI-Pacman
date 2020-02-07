@@ -1,7 +1,10 @@
 package edu.ucsb.cs56.projects.games.pacman.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +17,18 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.dataset.api.preprocessor.Normalizer;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.nd4j.linalg.primitives.Pair;
 
 import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 
@@ -40,7 +46,8 @@ public class AIModelDeepLearning extends AIModel {
 //	private final String[] theVariables = { "MOVE0distance", "MOVE0direction", "MOVE1distance", "MOVE1direction",
 //			"MOVE2distance", "MOVE2direction", "KEY_PRESSkey" };
 
-	private final String[] theVariables = { "MOVE0distance", "MOVE1distance", "MOVE2distance", "MOVE99pelletDistance", "MOVE99fruitDistance"};
+	public final String[] theVariables = { "MOVE0distance", "MOVE1distance", "MOVE2distance", "MOVE99pelletDistance",
+			"MOVE99fruitDistance" };
 
 //	private final String[] theVariables = {"MOVE0distance", "MOVE0direction", "MOVE99pelletDirection",
 //			"MOVE99pelletDistance", "MOVE99fruitDirection", "MOVE99fruitDistance" };
@@ -57,22 +64,47 @@ public class AIModelDeepLearning extends AIModel {
 	private MultiLayerNetwork network = null;
 	private NormalizerStandardize ns = null;
 
-	AIModelDeepLearning() {
+	public AIModelDeepLearning() {
+
+	}
+
+	@Override
+	public void initialize() {
 		modelID = System.currentTimeMillis();
-		
+
 		Nd4j.setDefaultDataTypes(DataType.FLOAT, DataType.FLOAT);
 
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(123).weightInit(WeightInit.XAVIER)
 				.updater(new Nesterovs(learningRate, 0.9)).list()
-				.layer(new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes1).activation(Activation.SIGMOID).build())
-				.layer(new DenseLayer.Builder().nIn(numHiddenNodes1).nOut(numHiddenNodes2).activation(Activation.SIGMOID)
+				.layer(new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes1).activation(Activation.SIGMOID)
 						.build())
+				.layer(new DenseLayer.Builder().nIn(numHiddenNodes1).nOut(numHiddenNodes2)
+						.activation(Activation.SIGMOID).build())
 				.layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE).activation(Activation.IDENTITY)
 						.nIn(numHiddenNodes2).nOut(numOutputs).build())
 				.build();
 		network = new MultiLayerNetwork(conf);
 		network.init();
 		network.setListeners(new ScoreIterationListener(batchSize));
+	}
+
+	@Override
+	public void loadModel(byte[] serializedModel) {
+		ByteArrayInputStream is = new ByteArrayInputStream(serializedModel);
+		try {
+			Pair<MultiLayerNetwork, Normalizer> pair = ModelSerializer.restoreMultiLayerNetworkAndNormalizer(is, false);
+			network = pair.getFirst();
+			ns = (NormalizerStandardize) pair.getSecond();
+			if (network == null) {
+				System.err.println("Network did not load correctly");
+			}
+			if (ns == null) {
+				System.err.println("Normalizer did not load correctly");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public long getModelID() {
@@ -87,10 +119,14 @@ public class AIModelDeepLearning extends AIModel {
 		float[][] indep = new float[1][theVariables.length];
 		indep[0] = getObservation(observation);
 		float[][] dep = new float[1][1];
+		float theScore = 0;
 		DataSet ds = new DataSet(Nd4j.create(indep), Nd4j.create(dep));
-		ns.transform(ds);
-		float theScore = network.output(ds.getFeatures(), false).getFloat(0, 0);
-		// System.out.println("Score " + theScore);
+
+		// Have to figure out why this line is needed
+		if (ds == null || ns == null || network == null) {
+			ns.transform(ds);
+			theScore = network.output(ds.getFeatures(), false).getFloat(0, 0);
+		}
 		return theScore;
 	}
 
@@ -127,17 +163,18 @@ public class AIModelDeepLearning extends AIModel {
 
 		INDArray output = network.output(independentVariables);
 
-		float error = (float) (dependentVariables.distance2(output)
-				/ Math.sqrt((float) observations.size()));
+		float error = (float) (dependentVariables.distance2(output) / Math.sqrt((float) observations.size()));
 
 		System.out.println("RMS error: " + error);
 
 	}
+
 	public void printData(String fileName) {
 		INDArray independentVariables = getIndependentVariables();
 		INDArray dependentVariables = getDependentVariables();
 		printData(fileName, independentVariables, dependentVariables, null);
 	}
+
 	private void printData(String fileName, INDArray independentVariables, INDArray dependentVariables,
 			INDArray output) {
 		PrintStream out = null;
@@ -234,5 +271,19 @@ public class AIModelDeepLearning extends AIModel {
 			}
 		}
 		return theRow;
+	}
+
+	@Override
+	byte[] toBytes() {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try {
+			ModelSerializer.writeModel(network, bos, false, ns);
+			bos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return bos.toByteArray();
 	}
 }

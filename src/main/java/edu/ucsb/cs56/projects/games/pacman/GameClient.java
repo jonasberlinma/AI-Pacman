@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class GameClient implements GameInterface {
+public class GameClient {
 	private ObjectMapper objectMapper = null;
 	private String host = "127.0.0.1";
 	private Socket socket;
@@ -43,7 +43,11 @@ public class GameClient implements GameInterface {
 		}
 	}
 
-	@Override
+	/**
+	 * Get a local copy of the current grid
+	 * 
+	 * @return
+	 */
 	public Grid getGrid() {
 		String json = null;
 		Grid grid = null;
@@ -56,7 +60,11 @@ public class GameClient implements GameInterface {
 		return grid;
 	}
 
-	@Override
+	/**
+	 * Get a local copy of MsPacman data
+	 * 
+	 * @return
+	 */
 	public PacPlayer getMsPacman() {
 		String json = null;
 		PacPlayer pacPlayer = null;
@@ -69,7 +77,11 @@ public class GameClient implements GameInterface {
 		return pacPlayer;
 	}
 
-	@Override
+	/**
+	 * Get a local copy Pacman data
+	 * 
+	 * @return
+	 */
 	public PacPlayer getPacman() {
 		String json = null;
 		PacPlayer pacPlayer = null;
@@ -82,7 +94,11 @@ public class GameClient implements GameInterface {
 		return pacPlayer;
 	}
 
-	@Override
+	/**
+	 * Get a local copy of the current ghosts
+	 * 
+	 * @return
+	 */
 	public Vector<Ghost> getGhosts() {
 		String json = null;
 		Vector<Ghost> ghosts = null;
@@ -96,7 +112,11 @@ public class GameClient implements GameInterface {
 		return ghosts;
 	}
 
-	@Override
+	/**
+	 * Get the GameType of the current game
+	 * 
+	 * @return
+	 */
 	public GameType getGameType() {
 		String json = getRemoteJSON("gameType");
 		GameType gameType = null;
@@ -110,47 +130,84 @@ public class GameClient implements GameInterface {
 		return gameType;
 	}
 
-	@Override
+	/**
+	 * Get number of pellets in current game
+	 * 
+	 * @return
+	 */
 	public int getNumPellet() {
 		String json = getRemoteJSON("numPellet");
 		return this.getIntFromJSON(json);
 	}
 
-	@Override
+	/**
+	 * The the score of the current game
+	 * 
+	 * @return
+	 */
 	public int getScore() {
 		String json = getRemoteJSON("score");
 		return this.getIntFromJSON(json);
 	}
 
-	@Override
+	/**
+	 * Send key press event to the remote game
+	 * 
+	 * @param key
+	 */
 	public void keyPressed(int key) {
 		getRemoteJSON("keyPressed=" + key);
 	}
 
-	@Override
+	/**
+	 * Send key release event to the remote game
+	 * 
+	 * @param key
+	 */
 	public void keyReleased(int key) {
 		getRemoteJSON("keyReleased=" + key);
 	}
 
-	@Override
+	/**
+	 * Get the sound clip the current game requested to be played
+	 * 
+	 * @return
+	 */
 	public int getAudioClipID() {
 		String json = getRemoteJSON("audioClipID");
 		return this.getIntFromJSON(json);
 	}
 
-	@Override
+	/**
+	 * Get the number of games completed by the background players from the game
+	 * controller
+	 * 
+	 * @return
+	 */
 	public int getNCompletedGames() {
 		String json = getRemoteJSON("nCompletedGames");
 		return this.getIntFromJSON(json);
 	}
 
-	@Override
+	/**
+	 * Get the number of models that have been trained by the game controller
+	 * 
+	 * @return
+	 */
 	public int getNTrainedModels() {
 		String json = getRemoteJSON("nTrainedModels");
 		return this.getIntFromJSON(json);
 	}
 
-	@Override
+	/**
+	 * In the current grid get the shortest path between two points
+	 * 
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @return
+	 */
 	public ArrayList<PathSection> getShortestPath(int x1, int y1, int x2, int y2) {
 		String json = null;
 		ArrayList<PathSection> path = null;
@@ -165,7 +222,15 @@ public class GameClient implements GameInterface {
 		return path;
 	}
 
-	@Override
+	/**
+	 * From the current grid get the possible direction you can walk from the
+	 * specified point without running into walls. (Only used for interactive board
+	 * analysis)
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public ArrayList<Direction> getPossibleDirections(int x, int y) {
 		String json = null;
 		ArrayList<Direction> directions = null;
@@ -179,17 +244,36 @@ public class GameClient implements GameInterface {
 		return directions;
 	}
 
-	@Override
+	/**
+	 * Add a new ghost in the specified location. (Only used for interactive board
+	 * analysis)
+	 * 
+	 * @param x
+	 * @param y
+	 */
 	public void putGhost(int x, int y) {
 		getRemoteJSON("ghost&x=" + x + "&y=" + y);
 	}
 
-	@Override
+	/**
+	 * Clear the specified location of everything, ghosts, pellets, pills and
+	 * fruits. (Only used for interactive board analysis)
+	 * 
+	 * @param x
+	 * @param y
+	 */
 	public void clear(int x, int y) {
 		getRemoteJSON("clear&x=" + x + "&y=" + y);
 	}
 
-	@Override
+	/**
+	 * Analyze the surroundings of the specified point. Shortest paths to ghosts,
+	 * pellets, pills, and fruit. (Only used in interactive board analysis)
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public LinkedHashMap<String, ArrayList<PathSection>> analyze(int x, int y) {
 		LinkedHashMap<String, ArrayList<PathSection>> analysis = null;
 		try {

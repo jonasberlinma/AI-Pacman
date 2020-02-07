@@ -22,7 +22,7 @@ import javax.swing.Timer;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
 import edu.ucsb.cs56.projects.games.pacman.Direction;
-import edu.ucsb.cs56.projects.games.pacman.GameInterface;
+import edu.ucsb.cs56.projects.games.pacman.GameClient;
 import edu.ucsb.cs56.projects.games.pacman.GameType;
 import edu.ucsb.cs56.projects.games.pacman.Ghost;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
@@ -50,7 +50,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 	private static String[] files = { "pacmanleaderboardsingle.ser", "pacmanleaderboardcoop.ser",
 			"pacmanleaderboardversus.ser" };
 
-	private GameInterface gameClient = null;
+	private GameClient gameClient = null;
 	private BoardFrame bf = null;
 
 	private Font smallFont = new Font("Helvetica", Font.BOLD, 14);
@@ -81,7 +81,7 @@ public class BoardRenderer extends JPanel implements ActionListener {
 		timer.stop();
 	}
 
-	public BoardRenderer(GameInterface gameClient) {
+	public BoardRenderer(GameClient gameClient) {
 		this.gameClient = gameClient;
 	}
 

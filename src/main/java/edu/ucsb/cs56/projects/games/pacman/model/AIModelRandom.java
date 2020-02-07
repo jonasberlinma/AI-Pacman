@@ -32,5 +32,20 @@ public class AIModelRandom extends AIModel {
 	void test() {
 
 	}
+	
+	@Override
+	byte[] toBytes() {
+		return "".getBytes();
+	}
+
+	@Override
+	public void loadModel(byte[] modelBytes) {
+		
+	}
+
+	@Override
+	public void initialize() {
+		
+	}
 
 }

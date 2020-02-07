@@ -7,7 +7,6 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
-import edu.ucsb.cs56.projects.games.pacman.PivotField;
 import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
 import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 

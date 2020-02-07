@@ -2,7 +2,6 @@ package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.util.ArrayList;
 
-import edu.ucsb.cs56.projects.games.pacman.PivotField;
 import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
 import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 
@@ -44,11 +43,12 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 	}
 
 	@Override
-	public void doTrain() {
+	public synchronized void doTrain() {
 		System.out.println("Total observations " + observationHistory.size());
 		// Train a new model
 
 		AIModelDeepLearning model = new AIModelDeepLearning();
+		model.initialize();
 		model.setDataObservations(observationHistory);
 
 		model.train();
@@ -58,7 +58,7 @@ public class AIModelTrainerDeepLearning extends AIModelTrainer {
 		model.printData("theData.csv");
 		System.out.println("Test done");
 
-		this.setNewModel(model);
+		this.setNewModel(model.toBytes());
 		System.out.println("Sending new model " + model.getModelID());
 	}
 }

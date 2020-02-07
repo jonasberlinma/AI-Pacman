@@ -1,8 +1,9 @@
 package edu.ucsb.cs56.projects.games.pacman.common;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 
-public class DataObservation extends LinkedHashMap<String, String> {
+public class DataObservation extends LinkedHashMap<String, String> implements Serializable {
 
 	/**
 	 * 

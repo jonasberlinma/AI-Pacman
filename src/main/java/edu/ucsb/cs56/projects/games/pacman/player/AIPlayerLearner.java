@@ -11,12 +11,12 @@ import edu.ucsb.cs56.projects.games.pacman.Direction;
 import edu.ucsb.cs56.projects.games.pacman.Grid;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker;
 import edu.ucsb.cs56.projects.games.pacman.PathSection;
-import edu.ucsb.cs56.projects.games.pacman.PivotField;
 import edu.ucsb.cs56.projects.games.pacman.Point;
 import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
 import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
 import edu.ucsb.cs56.projects.games.pacman.model.DataFlipper;
+import edu.ucsb.cs56.projects.games.pacman.model.PivotField;
 
 public class AIPlayerLearner extends AIPlayer {
 
@@ -182,8 +182,9 @@ public class AIPlayerLearner extends AIPlayer {
 					}
 					gameStep = dataEvent.getGameStep();
 					score = dataEvent.getInt("score");
-
+					if(rc != null) {
 					rc.addScore(gameStep - 1, score - lastScore);
+					}
 					lastScore = score;
 					eventHistory.clear();
 					break;

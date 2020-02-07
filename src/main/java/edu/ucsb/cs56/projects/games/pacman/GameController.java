@@ -1,16 +1,22 @@
 package edu.ucsb.cs56.projects.games.pacman;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeoutException;
 
-import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+
 import edu.ucsb.cs56.projects.games.pacman.model.AIModel;
-import edu.ucsb.cs56.projects.games.pacman.model.AIModelTrainer;
 import edu.ucsb.cs56.projects.games.pacman.ui.BoardFrame;
 import edu.ucsb.cs56.projects.games.pacman.ui.BoardRenderer;
 
@@ -39,17 +45,52 @@ public class GameController implements Runnable {
 	BoardFrame abf = null;
 
 	// Training
-	private AIModelTrainer aiModelTrainer = null;
-	private ArrayBlockingQueue<DataGameResult> gameResultQueue;
+	private Connection connection;
+	private Channel channel;
+	private final String MODEL_QUEUE = "model";
+	private final String GAME_QUEUE = "game";
 	private AIModel currentModel;
 	private int nTrainedModels = 0;
 
 	GameController(Properties prop) {
 
-		gameResultQueue = new ArrayBlockingQueue<DataGameResult>(1000);
+		// First create RabbitMQ connection, channel, and queues
+		//
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setHost(prop.getProperty("host"));
+		factory.setUsername(prop.getProperty("username"));
+		factory.setPassword(prop.getProperty("password"));
+		try {
+			connection = factory.newConnection();
+			channel = connection.createChannel();
+			channel.queueDeclare(MODEL_QUEUE, false, false, false, null);
+			channel.queueDeclare(GAME_QUEUE, false, false, false, null);
+		} catch (IOException | TimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// Rabbit MQ delivery callback for 
+		DeliverCallback processNewModel = (consumerTag, delivery) -> {
+			Class<?> theClass;
+			try {
+				theClass = Class.forName(prop.getProperty("aiModelClassName"));
+				currentModel = (AIModel) theClass.newInstance();
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+				System.err.println("Unable to find or load " + prop.getProperty("aiModelClassName"));
+				e.printStackTrace();
+			} 
+			System.out.println("Got model data of size " + delivery.getBody().length);
+			currentModel.loadModel(delivery.getBody());
+			nTrainedModels++;
+		};
+		
+		try {
+			channel.basicConsume(MODEL_QUEUE, true, processNewModel, consumerTag->{});
+		} catch (IOException e1) {
+			System.err.println("Unable to start model consumer in GameController");
+			e1.printStackTrace();
+		}
 
-		loadTrainer(prop);
-		aiModelTrainer.start();
 		this.prop = prop;
 		this.nThreads = Integer.parseInt(prop.getProperty("nBackgroundPlayers", "0"));
 		this.noStop = Boolean.parseBoolean(prop.getProperty("noStop", "false"));
@@ -101,7 +142,14 @@ public class GameController implements Runnable {
 							i.remove();
 							nCompletedGames++;
 							aiGame.report(out);
-							gameResultQueue.put(aiGame.getDataGameResult());
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							ObjectOutputStream oos = new ObjectOutputStream(baos);
+							oos.writeObject(aiGame.getDataGameResult());
+							oos.flush();
+							channel.basicPublish("", GAME_QUEUE, null,
+									baos.toByteArray());
+							oos.close();
+							baos.close();
 						}
 					}
 
@@ -112,7 +160,7 @@ public class GameController implements Runnable {
 						aiGame.start();
 					}
 				}
-				if(!noStop ) {
+				if (!noStop) {
 					keepRunning = false;
 				}
 			}
@@ -128,15 +176,18 @@ public class GameController implements Runnable {
 			e1.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			System.err.println("Failed to publish game results");
+			e.printStackTrace();
 		}
 	}
 
 	private void startForegroundGame() throws NumberFormatException, FileNotFoundException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException {
-		
+
 		foregroundAIGame = new AIGame(prop, Integer.parseInt(prop.getProperty("loopDelay", "40")), true);
 		foregroundAIGame.start();
-		
+
 		if (!Boolean.getBoolean(prop.getProperty("headLess"))) {
 			// This circular dependency can be removed by removing the the
 			// leaderboard call in Board
@@ -155,24 +206,15 @@ public class GameController implements Runnable {
 		}
 	}
 
+
 	public void setNewModel(AIModel newModel) {
 		nTrainedModels++;
 		foregroundAIGame.setModel(newModel);
 		currentModel = newModel;
 	}
+
 	public int getNTrainedModels() {
 		return this.nTrainedModels;
 	}
 
-	private void loadTrainer(Properties prop) {
-		System.out.println("Loading trainer");
-		try {
-			Class<?> theClass = Class.forName(prop.getProperty("aiModelTrainerClassName"));
-			aiModelTrainer = (AIModelTrainer) theClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			System.err.println("Failed to load trainer");
-			e.printStackTrace();
-		}
-		aiModelTrainer.setController(this, gameResultQueue);
-	}
 }
