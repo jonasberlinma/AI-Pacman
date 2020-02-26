@@ -75,17 +75,26 @@ public class PacMan {
 			case "-noStop":
 				prop.setProperty("noStop", "true");
 				break;
-			case "-port":
-				prop.setProperty("port", argi.next());
+			case "-uiport":
+				prop.setProperty("uiport", argi.next());
 				break;
 			case "-verbose":
 				prop.setProperty("verbose", "true");
 				break;
-			case "-username":
-				prop.setProperty("username", argi.next());
+			case "-mqusessl":
+				prop.setProperty("mqusessl", "true");
 				break;
-			case "-password":
-				prop.setProperty("password", argi.next());
+			case "-mqhost":
+				prop.setProperty("mqhost", argi.next());
+				break;
+			case "-mqport":
+				prop.setProperty("mqport", argi.next());
+				break;
+			case "-mqusername":
+				prop.setProperty("mqusername", argi.next());
+				break;
+			case "-mqpassword":
+				prop.setProperty("mqpassword", argi.next());
 				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);

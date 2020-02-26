@@ -16,28 +16,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GameClient {
 	private ObjectMapper objectMapper = null;
-	private String host = "127.0.0.1";
 	private Socket socket;
 	private PrintWriter out;
 	private BufferedReader in;
 	private boolean verbose = false;
 
-	public GameClient(int port, boolean verbose) {
+	public GameClient(String uihost, int uiport, boolean verbose) {
 		this.verbose = verbose;
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		try {
-			socket = new Socket(host, port);
+			socket = new Socket(uihost, uiport);
 			out = new PrintWriter(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			System.out.println("Connected to: " + host);
+			System.out.println("Connected to: " + uihost);
 		} catch (UnknownHostException e) {
-			System.err.println("Can't connect to: " + host);
+			System.err.println("Can't connect to: " + uihost);
 			e.printStackTrace();
 			System.exit(1);
 		} catch (IOException e) {
-			System.err.println("Unable to open input or output stream to: " + host);
+			System.err.println("Unable to open input or output stream to: " + uihost);
 			e.printStackTrace();
 			System.exit(1);
 		}

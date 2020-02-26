@@ -1,6 +1,8 @@
 package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
@@ -20,9 +22,11 @@ public class ModelTrainingController {
 	private static AIModelTrainer aiModelTrainer;
 
 	public static void main(String[] args) {
-		String host = "localhost";
-		String username = null;
-		String password = null;
+		boolean mqusessl = false;
+		String mqhost = "localhost";
+		int mqport = 5671; // SSL port is default
+		String mqusername = null;
+		String mqpassword = null;
 		boolean verbose = false;
 
 		Iterator<String> argi = new Vector<String>(Arrays.asList(args)).iterator();
@@ -30,8 +34,14 @@ public class ModelTrainingController {
 		while (argi.hasNext()) {
 			String theArg = argi.next();
 			switch (theArg) {
-			case "-host":
-				host = argi.next();
+			case "-mqusessl":
+				mqusessl = true;
+				break;
+			case "-mqhost":
+				mqhost = argi.next();
+				break;
+			case "-mqport":
+				mqport = Integer.parseInt(argi.next());
 				break;
 			case "-verbose":
 				verbose = true;
@@ -39,11 +49,11 @@ public class ModelTrainingController {
 			case "-aiModelTrainerClassName":
 				aiModelTrainerClassName = argi.next();
 				break;
-			case "-username":
-				username = argi.next();
+			case "-mqusername":
+				mqusername = argi.next();
 				break;
-			case "-password":
-				password = argi.next();
+			case "-mqpassword":
+				mqpassword = argi.next();
 				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
@@ -54,25 +64,45 @@ public class ModelTrainingController {
 		// First create RabbitMQ connection, channel, and queues
 		//
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost(host);
-		factory.setUsername(username);
-		factory.setPassword(password);
+		factory.setHost(mqhost);
+		factory.setPort(mqport);
+		factory.setUsername(mqusername);
+		factory.setPassword(mqpassword);
 		try {
+			if (mqusessl) {
+				factory.useSslProtocol();
+			}
 			connection = factory.newConnection();
 			channel = connection.createChannel();
 			channel.queueDeclare(MODEL_QUEUE, false, false, false, null);
 			channel.queueDeclare(GAME_QUEUE, false, false, false, null);
-		} catch (IOException | TimeoutException e) {
-			// TODO Auto-generated catch block
+		} catch (IOException e) {
+			System.err.println("MQ IOException " + e.getMessage());
 			e.printStackTrace();
-		} 
-		
-		// Now create create the AIModelTrainer of the specified kind and hand the queue handles
+		} catch (TimeoutException e) {
+			System.err.println("MQ timeout " + e.getMessage());
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			System.err.println("MQ: Unable to retrieve TLS keys." + e.getMessage());
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("MQ bad algorithm " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			if (channel == null) {
+				System.err.println("Error connecting to MQ. Channel is null");
+				System.exit(1);
+			}
+		}
+
+		// Now create create the AIModelTrainer of the specified kind and hand the queue
+		// handles
 		aiModelTrainer = loadTrainer();
 		// Finally start the model trainer
 		aiModelTrainer.start();
-		
+
 	}
+
 	private static AIModelTrainer loadTrainer() {
 		System.out.println("Loading trainer");
 		AIModelTrainer aiModelTrainer = null;

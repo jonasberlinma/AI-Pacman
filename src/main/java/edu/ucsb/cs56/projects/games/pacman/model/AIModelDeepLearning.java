@@ -89,7 +89,7 @@ public class AIModelDeepLearning extends AIModel {
 	}
 
 	@Override
-	public void loadModel(byte[] serializedModel) {
+	public synchronized void loadModel(byte[] serializedModel) {
 		ByteArrayInputStream is = new ByteArrayInputStream(serializedModel);
 		try {
 			Pair<MultiLayerNetwork, Normalizer> pair = ModelSerializer.restoreMultiLayerNetworkAndNormalizer(is, false);
@@ -122,11 +122,9 @@ public class AIModelDeepLearning extends AIModel {
 		float theScore = 0;
 		DataSet ds = new DataSet(Nd4j.create(indep), Nd4j.create(dep));
 
-		// Have to figure out why this line is needed
-		if (ds == null || ns == null || network == null) {
-			ns.transform(ds);
-			theScore = network.output(ds.getFeatures(), false).getFloat(0, 0);
-		}
+		ns.transform(ds);
+		theScore = network.output(ds.getFeatures(), false).getFloat(0, 0);
+		
 		return theScore;
 	}
 

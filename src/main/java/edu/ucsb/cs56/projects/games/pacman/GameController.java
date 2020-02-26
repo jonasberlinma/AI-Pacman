@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
@@ -56,41 +58,56 @@ public class GameController implements Runnable {
 
 		// First create RabbitMQ connection, channel, and queues
 		//
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost(prop.getProperty("host"));
-		factory.setUsername(prop.getProperty("username"));
-		factory.setPassword(prop.getProperty("password"));
-		try {
-			connection = factory.newConnection();
-			channel = connection.createChannel();
-			channel.queueDeclare(MODEL_QUEUE, false, false, false, null);
-			channel.queueDeclare(GAME_QUEUE, false, false, false, null);
-		} catch (IOException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Rabbit MQ delivery callback for 
-		DeliverCallback processNewModel = (consumerTag, delivery) -> {
-			Class<?> theClass;
-			try {
-				theClass = Class.forName(prop.getProperty("aiModelClassName"));
-				currentModel = (AIModel) theClass.newInstance();
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-				System.err.println("Unable to find or load " + prop.getProperty("aiModelClassName"));
-				e.printStackTrace();
-			} 
-			System.out.println("Got model data of size " + delivery.getBody().length);
-			currentModel.loadModel(delivery.getBody());
-			nTrainedModels++;
-		};
-		
-		try {
-			channel.basicConsume(MODEL_QUEUE, true, processNewModel, consumerTag->{});
-		} catch (IOException e1) {
-			System.err.println("Unable to start model consumer in GameController");
-			e1.printStackTrace();
-		}
+		String mqhost = prop.getProperty("mqhost");
+		if (mqhost != null) {
+			ConnectionFactory factory = new ConnectionFactory();
+			factory.setHost(mqhost);
+			factory.setPort(Integer.parseInt(prop.getProperty("mqport")));
+			factory.setUsername(prop.getProperty("mqusername"));
+			factory.setPassword(prop.getProperty("mqpassword"));
 
+			try {
+				if (Boolean.parseBoolean(prop.getProperty("mqusessl", "false"))) {
+					factory.useSslProtocol();
+				}
+				connection = factory.newConnection();
+				channel = connection.createChannel();
+				channel.queueDeclare(MODEL_QUEUE, false, false, false, null);
+				channel.queueDeclare(GAME_QUEUE, false, false, false, null);
+			} catch (IOException | TimeoutException e) {
+				System.err.println("MQ connect failed");
+				e.printStackTrace();
+			} catch (KeyManagementException e) {
+				System.err.println("MQ key management error");
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				System.err.println("MQ bad encryption algorithm");
+				e.printStackTrace();
+			}
+
+			// Rabbit MQ delivery callback for
+			DeliverCallback processNewModel = (consumerTag, delivery) -> {
+				Class<?> theClass;
+				try {
+					theClass = Class.forName(prop.getProperty("aiModelClassName"));
+					currentModel = (AIModel) theClass.newInstance();
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+					System.err.println("Unable to find or load " + prop.getProperty("aiModelClassName"));
+					e.printStackTrace();
+				}
+				System.out.println("Got model data of size " + delivery.getBody().length);
+				currentModel.loadModel(delivery.getBody());
+				nTrainedModels++;
+			};
+
+			try {
+				channel.basicConsume(MODEL_QUEUE, true, processNewModel, consumerTag -> {
+				});
+			} catch (IOException e1) {
+				System.err.println("Unable to start model consumer in GameController");
+				e1.printStackTrace();
+			}
+		}
 		this.prop = prop;
 		this.nThreads = Integer.parseInt(prop.getProperty("nBackgroundPlayers", "0"));
 		this.noStop = Boolean.parseBoolean(prop.getProperty("noStop", "false"));
@@ -146,8 +163,7 @@ public class GameController implements Runnable {
 							ObjectOutputStream oos = new ObjectOutputStream(baos);
 							oos.writeObject(aiGame.getDataGameResult());
 							oos.flush();
-							channel.basicPublish("", GAME_QUEUE, null,
-									baos.toByteArray());
+							channel.basicPublish("", GAME_QUEUE, null, baos.toByteArray());
 							oos.close();
 							baos.close();
 						}
@@ -205,7 +221,6 @@ public class GameController implements Runnable {
 			e.printStackTrace();
 		}
 	}
-
 
 	public void setNewModel(AIModel newModel) {
 		nTrainedModels++;
