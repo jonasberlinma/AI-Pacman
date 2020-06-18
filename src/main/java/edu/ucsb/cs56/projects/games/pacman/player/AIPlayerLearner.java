@@ -71,7 +71,7 @@ public class AIPlayerLearner extends AIPlayer {
 			switch (key) {
 			case "S":
 				// Have to put this one here since the gameID is not set until the game starts
-				rc = new RewardCalculator(dataEvent.getGameID(), 100, 0.99d);
+				rc = new RewardCalculator(dataEvent.getGameID(), 20, 0.95d);
 				break;
 			default:
 			}
