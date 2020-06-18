@@ -1,4 +1,6 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
+
+import edu.ucsb.cs56.projects.games.pacman.common.DataGameResult;
 
 public class AIModelTrainerNull extends AIModelTrainer {
 
@@ -8,7 +10,7 @@ public class AIModelTrainerNull extends AIModelTrainer {
 		nGames++;
 		
 		if(nGames % 10 == 0){
-			this.setNewModel(new AIModelRandom(System.currentTimeMillis()));
+			this.setNewModel(new AIModelRandom(System.currentTimeMillis()).toString().getBytes());
 			System.out.println("Sending new model");
 		} 
 		System.out.println("Training on " + gameEventLog.events.size() + " events");

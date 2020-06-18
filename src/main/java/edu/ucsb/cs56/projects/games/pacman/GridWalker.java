@@ -119,7 +119,7 @@ public class GridWalker {
 		return allPoints.get(new Point(x, y).nodeNumber);
 	}
 
-	HashSet<PathSection> getPossiblePaths(Point point) {
+	public HashSet<PathSection> getPossiblePaths(Point point) {
 		return fromPathSectionHashtable.get(point);
 	}
 

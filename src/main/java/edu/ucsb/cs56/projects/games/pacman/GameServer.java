@@ -18,13 +18,13 @@ public class GameServer implements Runnable {
 	private Board board;
 	private GameController bgc;
 	private ObjectMapper objectMapper = null;
-	private int port;
+	private int uiport;
 	private boolean verbose = false;
 
-	public GameServer(Board board, GameController bgc, int port, boolean verbose) {
+	public GameServer(Board board, GameController bgc, int uiport, boolean verbose) {
 		this.board = board;
 		this.bgc = bgc;
-		this.port = port;
+		this.uiport = uiport;
 		this.verbose = verbose;
 
 		objectMapper = new ObjectMapper();
@@ -54,8 +54,8 @@ public class GameServer implements Runnable {
 		// -- Read command
 		ServerSocket serverSocket = null;
 		try {
-			serverSocket = new ServerSocket(port);
-			System.out.println("Waiting for connect on port: " + port);
+			serverSocket = new ServerSocket(uiport);
+			System.out.println("Waiting for connect on port: " + uiport);
 			Socket clientSocket = serverSocket.accept();
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -152,7 +152,7 @@ public class GameServer implements Runnable {
 				}
 			}
 		} catch (IOException e1) {
-			System.err.println("Unable to open socket on port: " + port);
+			System.err.println("Unable to open socket on port: " + uiport);
 			e1.printStackTrace();
 			System.exit(1);
 		}

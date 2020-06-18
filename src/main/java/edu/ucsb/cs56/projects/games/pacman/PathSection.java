@@ -27,7 +27,7 @@ public class PathSection {
 		return this.length;
 	}
 
-	Direction getDirection() {
+	public Direction getDirection() {
 		Direction d = null;
 		// This is for the periodic boundary conditions
 		int xDistance = Math.abs(fromPoint.x - toPoint.x);

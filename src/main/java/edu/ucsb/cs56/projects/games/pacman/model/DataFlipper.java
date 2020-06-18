@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 
 public class DataFlipper {
 

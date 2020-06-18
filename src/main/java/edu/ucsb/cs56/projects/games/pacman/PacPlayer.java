@@ -3,7 +3,9 @@ package edu.ucsb.cs56.projects.games.pacman;
 import java.awt.event.KeyEvent;
 import java.util.Vector;
 
-import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataInterface;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent.DataEventType;
 
 /**
  * Player controlled pacman character.

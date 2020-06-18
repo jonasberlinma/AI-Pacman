@@ -66,8 +66,8 @@ public class PacMan {
 			case "-aiPlayerClassName":
 				prop.setProperty("aiPlayerClassName", argi.next());
 				break;
-			case "-aiModelTrainerClassName":
-				prop.setProperty("aiModelTrainerClassName", argi.next());
+			case "-aiModelClassName":
+				prop.setProperty("aiModelClassName", argi.next());
 				break;
 			case "-numGhosts":
 				prop.setProperty("numGhosts", argi.next());
@@ -75,11 +75,26 @@ public class PacMan {
 			case "-noStop":
 				prop.setProperty("noStop", "true");
 				break;
-			case "-port":
-				prop.setProperty("port", argi.next());
+			case "-uiport":
+				prop.setProperty("uiport", argi.next());
 				break;
 			case "-verbose":
 				prop.setProperty("verbose", "true");
+				break;
+			case "-mqusessl":
+				prop.setProperty("mqusessl", "true");
+				break;
+			case "-mqhost":
+				prop.setProperty("mqhost", argi.next());
+				break;
+			case "-mqport":
+				prop.setProperty("mqport", argi.next());
+				break;
+			case "-mqusername":
+				prop.setProperty("mqusername", argi.next());
+				break;
+			case "-mqpassword":
+				prop.setProperty("mqpassword", argi.next());
 				break;
 			default:
 				System.out.println("Invalid command Line argument" + theArg);
@@ -88,16 +103,12 @@ public class PacMan {
 
 		}
 		if (prop.getProperty("autoPlay") == null) {
-			prop.setProperty("aiPlayerClassName", "edu.ucsb.cs56.projects.games.pacman.AIPlayerNull");
-			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
+			prop.setProperty("aiPlayerClassName", "edu.ucsb.cs56.projects.games.pacman.player.AIPlayerNull");
+			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.model.AIModelTrainerNull");
 
 		} else if (prop.getProperty("aiPlayerClassName") == null) {
-			System.err.println("In auto play a player class name has to be specified");
+			System.err.println("In auto play a player class name has to be specified in auto mode");
 			System.exit(1);
-		}
-		if (prop.getProperty("aiModelTrainerClassName") == null) {
-
-			prop.setProperty("aiModelTrainerClassName", "edu.ucsb.cs56.projects.games.pacman.AIModelTrainerNull");
 		}
 		if (prop.getProperty("headLess") == null) {
 			prop.setProperty("headLess", Boolean.toString(false));

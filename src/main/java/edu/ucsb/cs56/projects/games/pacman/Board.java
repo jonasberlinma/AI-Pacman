@@ -8,8 +8,11 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.ucsb.cs56.projects.games.pacman.Character.PlayerType;
-import edu.ucsb.cs56.projects.games.pacman.DataEvent.DataEventType;
 import edu.ucsb.cs56.projects.games.pacman.GridWalker.DirectionDistance;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent;
+import edu.ucsb.cs56.projects.games.pacman.common.DataInterface;
+import edu.ucsb.cs56.projects.games.pacman.common.EventTrackable;
+import edu.ucsb.cs56.projects.games.pacman.common.DataEvent.DataEventType;
 
 /**
  * Playing field for a Pac-Man arcade game remake that keeps track of all
@@ -129,7 +132,7 @@ public class Board implements Runnable, EventTrackable {
 		this.loopDelay = loopDelay;
 	}
 
-	protected DataInterface getDataInterface() {
+	public DataInterface getDataInterface() {
 		return dataInterface;
 	}
 
@@ -264,7 +267,6 @@ public class Board implements Runnable, EventTrackable {
 	 * End the game if remaining lives reaches 0.
 	 */
 	private void gameOver() {
-		System.out.println("GameOver called in Board");
 		gt = GameType.GAME_OVER;
 		DataEvent de = new DataEvent(DataEventType.GAME_OVER, this, this);
 		de.setKeyValuePair("score", "" + score);

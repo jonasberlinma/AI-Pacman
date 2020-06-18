@@ -11,15 +11,19 @@ import edu.ucsb.cs56.projects.games.pacman.GameClient;
 public class ui {
 
 	public static void main(String[] args) {
-		int port = 8081;
+		int uiport = 8081;
+		String uihost = "localhost";
 		boolean verbose = false;
 		Iterator<String> argi = new Vector<String>(Arrays.asList(args)).iterator();
 
 		while (argi.hasNext()) {
 			String theArg = argi.next();
 			switch (theArg) {
-			case "-port":
-				port = Integer.parseInt(argi.next());
+			case "-uihost":
+				uihost = argi.next();
+				break;
+			case "-uiport":
+				uiport = Integer.parseInt(argi.next());
 				break;
 			case "-verbose":
 				verbose = true;
@@ -30,7 +34,7 @@ public class ui {
 			}
 		}
 
-		GameClient gameClient = new GameClient(port, verbose);
+		GameClient gameClient = new GameClient(uihost, uiport, verbose);
 		BoardRenderer boardRenderer = new BoardRenderer(gameClient);
 		System.out.println("Started renderer");
 		SwingUtilities.invokeLater(new Runnable() {

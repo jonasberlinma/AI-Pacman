@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.model;
 
 import java.io.BufferedReader;
 import java.io.File;

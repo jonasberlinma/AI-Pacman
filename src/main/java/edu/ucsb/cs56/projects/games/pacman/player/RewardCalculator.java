@@ -1,8 +1,10 @@
-package edu.ucsb.cs56.projects.games.pacman;
+package edu.ucsb.cs56.projects.games.pacman.player;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+import edu.ucsb.cs56.projects.games.pacman.common.DataObservation;
 
 public class RewardCalculator {
 
@@ -24,7 +26,7 @@ public class RewardCalculator {
 	private ArrayList<Measure> measures = new ArrayList<Measure>();
 	private ArrayList<Measure> rewardHistory = new ArrayList<Measure>();
 
-	RewardCalculator(long gameID, int size, double discountRate) {
+	public RewardCalculator(long gameID, int size, double discountRate) {
 		this.gameID = gameID;
 		this.size = size;
 		this.discountRate = discountRate;
